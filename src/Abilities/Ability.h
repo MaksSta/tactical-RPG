@@ -1,0 +1,22 @@
+/**
+ * Bazowa klasa dla wszystkich umiejętności jaką może wywoływać postać
+*/
+
+#ifndef ABILITIES_ABILITY_H_
+#define ABILITIES_ABILITY_H_
+
+#include <SFML/Graphics.hpp>
+
+#include "../Global.h"
+
+class Ability {
+public:
+    // zwraca zasięg wywołania umejetności podany w wektorze przesunięć względem pola postaci
+    std::vector<sf::Vector2i> get_in_range();
+protected:
+    // zasięg wywołania umejetności podany w wektorze przesunięć względem pola postaci
+    std::vector<sf::Vector2i> in_range;
+private:
+};
+
+#endif /* ABILITIES_ABILITY_H_ */
