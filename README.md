@@ -10,36 +10,35 @@ The goal of first release is to give ability to play sample battle. I've plannin
 - [ ] Add death animation when character HP drop to 0 then remove it from board
 - [ ] Add actions points which are required to do any move or action
 - [ ] Show text how action points left after usage on hovered field in action's preview
-etc.
-### My contribution
- Before publication first commit of code (which you can see atm) I've spent hundreds of hours within the last 15 months. It became great opportunity to master my C++ skills and fill the gap between theoretical knowledge and practical programming skills working on something which never get me bored. Result of that effort is maintainable, clean code for game engine made from scratch. From this stage of project where it's now, it's much easier to add successive features to the gameplay.
-### Cooperation
-This game is quite big project. If you are C++ programmer with at least basic skills, your participation could help release first version of the game in reasonable time. If you never worked on [SFML](https://www.sfml-dev.org/) library, it's similar to SDL/Allegro/Raylib but designed for C++ instead of C, so using it is more enjoyable to work with if you get a OOP paradigm. 
+### Contribution
+This game is quite big project. If you are C++ programmer with at least basic skills, your participation could help release first version of the game in reasonable time. Working on this game became opportunity to master my practical programming skills. The only condition to contribute on this project is to keep codebase maintainable.
 
-All comments in code are written in Polish. I want give opportunity to join to my countrymates in the first place. Eventually everything will be translated to English. So far there is no other documentation so don't hesitate to contact me if you are interested in contribution and got any questions about code. If project reach success, you became part of team.
-
+All comments in code are written in Polish. I want give opportunity to join to my countrymates in the first place. Eventually everything will be translated to English. So far there is no other documentation so don't hesitate to contact me if you are interested in contribution and got any questions about code.
 ### Assets used in game
 Sprites for characters used in project are distributed on [CC0 license](https://creativecommons.org/publicdomain/zero/1.0/) included in their directiories with all informations provided by author.
 Some graphic are drawn by me but they are my doodles which are temporary. I also share them for for everybody with no restrictions if anybody wants would use them for any reasons.
 
-If you are artist (graphical or musical) and you created or want to create assets to the game, I see this form of contribution in project as great too. Obviously your contribution will be mentioned into credits and you became part of team.
+If you are artist (graphical or musical) and you created or want to create assets to the game, I see this form of contribution in project as great too. Obviously you will be mentioned into credits.
 ## Installation
 ### Requirements
 I haven't prepared CMake file yet. To compile code you need to get SFML library on your computer and use for it at least C++14.
-
 ### Linux
 To get SFML (used 2d graphics library) on Debian-based distributions:
+
 ```sudo apt-get install libsfml-dev```
 
 To get source code and compile project run following commands:
-```git clone https://github.com/MaksSta/tactical-RPG.git```
-```cd tactical-RPG```
-```g++ -std=c++14 -g src/*.cpp src/GameEngine/*.cpp src/Characters/*.cpp src/Animations/*.cpp src/Animations/Actions/*.cpp src/Abilities/*.cpp src/UI/*.cpp -o tactical-RPG -lsfml-graphics -lsfml-window -lsfml-system```
 
+```git clone https://github.com/MaksSta/tactical-RPG.git```
+
+```cd tactical-RPG```
+
+```g++ -std=c++14 -g src/*.cpp src/GameEngine/*.cpp src/Characters/*.cpp src/Animations/*.cpp src/Animations/Actions/*.cpp src/Abilities/*.cpp src/UI/*.cpp -o tactical-RPG -lsfml-graphics -lsfml-window -lsfml-system```
 ### Others Operating systems
 Download SFML for your OS from https://www.sfml-dev.org/download/sfml/2.6.1/
 
 To get the source code:
+
 ```git clone https://github.com/MaksSta/tactical-RPG.git```
 
 Find your configuration at https://www.sfml-dev.org/tutorials/2.6/#getting-started

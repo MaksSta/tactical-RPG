@@ -3,7 +3,7 @@
 Program::Program(sf::Vector2i window_size)
 {
 	window.create(	sf::VideoMode(window_size.x, window_size.y),
-					"RPG",
+					"Tactical RPG",
 					sf::Style::Close);
 
 	// ustawienie maksymalnego dopuszczalnego fps
