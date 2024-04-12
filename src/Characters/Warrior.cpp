@@ -10,7 +10,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 					)
 {
 	Button_data button_attack1_data;
-	button_attack1_data.desc = L"Atak wręcz";
+	button_attack1_data.desc = L"Melee attack";
 	button_attack1_data.img_file_path = "data/UI/warrior/attack_melee.png";
 	button_attack1_data.id_name = "attack_melee";
 

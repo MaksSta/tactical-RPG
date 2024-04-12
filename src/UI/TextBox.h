@@ -26,6 +26,7 @@ public:
     TextBox(	sf::Vector2f pos,
 				sf::Vector2f size,
 				Alignment _alignment_horizontal,
+                std::wstring label = L"",
                 std::wstring text = L"");
 
     // zmiana zawartości tekstu na string i wynikające z tego odswieżenie pozycji
@@ -42,6 +43,9 @@ private:
     // posób wyrównania tekstu w poziomie
 	Alignment alignment_horizontal;
     
+    // label tekstu opisujacy co wyświetla to pole tekstowe
+    Textfield label;
+
     // obiekt z tekstem do wyświetlenia
     Textfield textfield;
 

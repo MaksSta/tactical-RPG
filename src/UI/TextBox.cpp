@@ -3,9 +3,11 @@
 TextBox::TextBox(   sf::Vector2f pos,
 				    sf::Vector2f size,
 				    Alignment _alignment_horizontal,
+                    std::wstring text_label,
                     std::wstring text)
 :
     alignment_horizontal{_alignment_horizontal},
+    label{pos - sf::Vector2f{10, 25}, text_label, 16},
     textfield{pos, text}
 {
 	background.setPosition(pos);
@@ -57,5 +59,6 @@ void TextBox::refresh()
 void TextBox::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	target.draw(background);
+    target.draw(label);
     target.draw(textfield);
 }

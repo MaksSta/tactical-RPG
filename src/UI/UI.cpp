@@ -3,9 +3,9 @@
 UI::UI(sf::Vector2f _starts_at) 
 :
 	btnsStartPos{_starts_at + sf::Vector2f{20, 100} },
-	ability_desc{_starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start},
-	ability_dmg{_starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start},
-	textfieldSelectedCharacter{{880, 125}, {680, 80}, TextBox::Alignment::start,L"[Wybierz postać prawym przyciskiem]"}
+	ability_desc{_starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, L"Chosen ability"},
+	ability_dmg{_starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, L"Damage"},
+	textfieldSelectedCharacter{{880, 125}, {680, 80}, TextBox::Alignment::start, L"Current character",L"[Click on any character right mouse button]"}
 {
 }
 

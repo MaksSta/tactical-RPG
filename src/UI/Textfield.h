@@ -15,7 +15,8 @@ public:
      * \param text tekst do wyświetlenia
     */
     Textfield(  sf::Vector2f pos = {0, 0},
-                std::wstring text = L"");
+                std::wstring text = L"",
+                unsigned int font_size = 24);
 private:
     // używana czcionka
     sf::Font font;
