@@ -5,11 +5,7 @@
 ### Gameplay
 My intention is to create a open source game which will require from player logical thinking to win battles by controlling few characters turn after turn (similar to games like HoMM or [Dofus](https://www.dofus.com/)). In final perspective I want to give a player wonderful RPG experience by visiting many dungeons located on map with team of various characters. They will move through dungeon rooms meeting there enemies controlled by AI (similar to game [Darkest Dungeon](https://store.steampowered.com/app/262060/darkest_dungeon/)). 
 ### Release
-The goal of first release is to give ability to play sample battle. I've planning to add markdown file with list all of TODOs needed to realize it. You can expect it in April 2024. I come with idea to update TODO.md when any feature was added to control progress how far from first demo we are, it will look like this:
-- [x] Add possibiliy to execute autoselected attack action by hovering enemy on board
-- [ ] Add death animation when character HP drop to 0 then remove it from board
-- [ ] Add actions points which are required to do any move or action
-- [ ] Show text how action points left after usage on hovered field in action's preview
+The goal of first release is to give ability to play sample battle. I came with idea of markdown file with feature list which are left to achieve this goal - [Before first release TODO.md].
 ### Contribution
 This game is quite big project. If you are C++ programmer with at least basic skills, your participation could help release first version of the game in reasonable time. Working on this game became opportunity to master my practical programming skills. The only condition to contribute on this project is to keep codebase maintainable.
 
