@@ -41,6 +41,11 @@ void Character::setAP(int ap)
 	action_points = ap;
 }
 
+int Character::getMaxAP()
+{
+	return max_action_points;
+}
+
 int Character::getHP()
 {
 	return hp;

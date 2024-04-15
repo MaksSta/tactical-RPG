@@ -41,6 +41,7 @@ public:
 
 	int getAP();
 	void setAP(int);
+	int getMaxAP();
 
 	int getHP();
 	void setHP(int);

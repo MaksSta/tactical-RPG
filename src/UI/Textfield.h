@@ -16,7 +16,8 @@ public:
     */
     Textfield(  sf::Vector2f pos = {0, 0},
                 std::wstring text = L"",
-                unsigned int font_size = 24);
+                unsigned int font_size = 24,
+                sf::Color color = sf::Color::White);
 private:
     // używana czcionka
     sf::Font font;

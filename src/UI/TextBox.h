@@ -27,7 +27,10 @@ public:
 				sf::Vector2f size,
 				Alignment _alignment_horizontal,
                 std::wstring label = L"",
-                std::wstring text = L"");
+                std::wstring text = L"",
+                sf::Color color = sf::Color::White,
+                unsigned int font_size = 24
+            );
 
     // zmiana zawartości tekstu na string i wynikające z tego odswieżenie pozycji
     void setString(std::string text);

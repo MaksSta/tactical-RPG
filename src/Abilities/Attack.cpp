@@ -1,7 +1,8 @@
 #include "Attack.h"
 
-Attack::Attack(int range, int _min_dmg, int _max_dmg)
+Attack::Attack(int _action_points, int range, int _min_dmg, int _max_dmg)
 :
+    action_points{_action_points},
     min_dmg{_min_dmg},
     max_dmg{_max_dmg}
 {
@@ -44,4 +45,9 @@ int Attack::get_dmg_variety()
 int Attack::draw_damage()
 {
 	return min_dmg + (get_dmg_variety() ? std::rand() % get_dmg_variety() : 0);
+}
+
+int Attack::getAP()
+{
+	return action_points;
 }

@@ -15,7 +15,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	button_attack1_data.id_name = "attack_melee";
 
 	attack_full_data.push_back({
-		Attack(1, 3, 4),
+		Attack(2, 1, 3, 4),
 		Character::Activity::attack1,
 		button_attack1_data
 	});

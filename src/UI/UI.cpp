@@ -5,7 +5,8 @@ UI::UI(sf::Vector2f _starts_at)
 	btnsStartPos{_starts_at + sf::Vector2f{20, 100} },
 	ability_desc{_starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, L"Chosen ability"},
 	ability_dmg{_starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, L"Damage"},
-	textfieldSelectedCharacter{{880, 125}, {680, 80}, TextBox::Alignment::start, L"Current character",L"[Click on any character right mouse button]"}
+	textfieldSelectedCharacter{{880, 125}, {680, 80}, TextBox::Alignment::start, L"Current character",L"[Click on any character right mouse button]"},
+	box_action_points{{880, 325}, {120, 80}, TextBox::Alignment::start, L"Actions points", L"", sf::Color::Yellow, 34}
 {
 }
 
@@ -13,6 +14,11 @@ void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability)
 {
 	button.push_back(
 		 std::make_unique<Button>(ability, btnsStartPos + pos, data.img_file_path, data.desc)
+	);
+
+	// tekst z ilością punktów akcji jaką pobiera umiejętność pod przyciskiem
+	text_action_cost.push_back(
+		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{25, 90}, std::to_wstring(ability->getAP()), 28, sf::Color::Yellow)
 	);
 }
 
@@ -83,20 +89,6 @@ void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
 	}
 }
 
-void UI::mouseClickedEvents(sf::Mouse::Button mousebutton, sf::Vector2f m_pos) 
-{
-	for (auto & b: button) {
-		if (b->getGlobalBounds().contains(m_pos)) {
-			// zaznaczenie klikniętego przycisku
-			if (mousebutton == sf::Mouse::Button::Left)
-				selectButton(b.get());
-			// zaznaczenie przycisku jako domyślny wybór
-			if (mousebutton == sf::Mouse::Button::Right)
-				autoselectButton(b.get());
-		}
-	}
-}
-
 void UI::selectButton(Button* _selectedBtn)
 {
 	selectedBtn = _selectedBtn;
@@ -140,6 +132,7 @@ void UI::cancelSimulatingHover()
 void UI::destroyButtons()
 {
 	button.clear();
+	text_action_cost.clear();
 
 	selectedBtn = nullptr;
 	autoselectedBtn = nullptr;
@@ -153,8 +146,13 @@ void UI::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	for (auto & b: button)
 		target.draw(*b);
 
+	for (auto & t: text_action_cost)
+		target.draw(*t);
+
 	// pole z nazwą zaznaczonej postaci
 	target.draw(textfieldSelectedCharacter);
+
+	target.draw(box_action_points);
 
 	target.draw(ability_desc);
 	target.draw(ability_dmg);

@@ -4,12 +4,17 @@ TextBox::TextBox(   sf::Vector2f pos,
 				    sf::Vector2f size,
 				    Alignment _alignment_horizontal,
                     std::wstring text_label,
-                    std::wstring text)
+                    std::wstring text,
+                    sf::Color color,
+                    unsigned int font_size)
 :
     alignment_horizontal{_alignment_horizontal},
     label{pos - sf::Vector2f{10, 25}, text_label, 16},
     textfield{pos, text}
 {
+    textfield.setFillColor(color);
+    textfield.setCharacterSize(font_size);
+
 	background.setPosition(pos);
     background.setSize(size);
 	background.setFillColor(sf::Color{95, 95, 95});

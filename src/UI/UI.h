@@ -44,7 +44,6 @@ public:
      * \param mousebutton która przycisk na myszce został kliknięty
      * \param m_pos pozycja myszy w momemncie kliknięcia
     */
-    void mouseClickedEvents(sf::Mouse::Button mousebutton, sf::Vector2f m_pos);
 
     // wybranie przycisku (wciśnięcie go)
     void selectButton(Button* _selectedBtn);
@@ -81,6 +80,9 @@ private:
     // wszystkie przyciski będące interfejsem użytkownika
     std::vector<std::unique_ptr<Button>> button;
 
+    // koszt akcji do wyświetlenia pod każdym przyciskiem
+    std::vector<std::unique_ptr<Textfield>> text_action_cost;
+
     // pozycja na ekranie na której wyświetlony będzie pierwszy przycisk
     sf::Vector2f btnsStartPos;
 
@@ -97,6 +99,9 @@ private:
 
     // pole z nazwą zaznaczonej postaci
     TextBox textfieldSelectedCharacter;
+
+    // pole tesktowe, które wyświetla ilość punktów akcji
+    TextBox box_action_points;
 
     // pole tesktowe, które wyświetla opis umiejętności
     TextBox ability_desc;

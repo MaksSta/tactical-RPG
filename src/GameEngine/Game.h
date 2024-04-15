@@ -148,7 +148,16 @@ private:
 
 	// podgląd ataku do wykoniania akcją ataku
 	Range range; 
+
+	// informacja czy podgląd akcji do wykonania pochodzi z autoataku
+	bool range_created_from_auto;
 	
+	// ilość akcji jaka zostanie w przypadku wykonania wskazywanej akcji
+	int AP_preview;
+
+	// tekstu który wyświetla podgląd ile punktów zostanie po wykonaniu akcji
+	Textfield text_AP_preview;
+
 	// współrzędne pola na planszy od których zaczyna się aktywny obszar gry
 	sf::Vector2i coordsTopLeft {0, 0};
 	

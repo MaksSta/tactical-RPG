@@ -127,8 +127,13 @@ void Game::run()
 	
 			// akcje kliknięcia myszą dla elementów UI - PPM
 			// możliwe do wykonania w każdej fazie gry
-			if (mouseClicked(sf::Mouse::Right))
-				ui.mouseClickedEvents(sf::Mouse::Right, m_pos_on_window);
+			for (auto & b: ui.button)
+			{
+				if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window))
+					// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
+					if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+						ui.autoselectButton(b.get());
+			}
 
 			switch(gameMode) {
 			/****************************************************************
@@ -145,8 +150,13 @@ void Game::run()
 				{
 					// akcje kliknięcia myszą dla elementów UI - LPM 
 					// możliwe do wykonania tylko w trybie aktywnej tury gracza, gdy nie jest wywoływana inna akcja
-					if (mouseClicked(sf::Mouse::Left))
-						ui.mouseClickedEvents(sf::Mouse::Left, m_pos_on_window);
+					for (auto & b: ui.button)
+					{
+						if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window))
+							// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
+							if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+								ui.selectButton(b.get());
+					}
 
 					// sprawdzenie akcji na planszy wymaga najechania myszką na jakieś pole
 					if (hoveredField != nullptr)
@@ -183,6 +193,7 @@ void Game::run()
 					if (ui.getSelectedBtn() )
 					{
 						createRangePreview(ui.getSelectedBtn()->getAbility()->get_in_range());
+						range_created_from_auto = false;
 
 						inputMode = action_is_selected;
 					}
@@ -245,6 +256,7 @@ void Game::run()
 				if (ui.getHoveredBtn())
 				{
 					createRangePreview(ui.getHoveredBtn()->getAbility()->get_in_range());
+					range_created_from_auto = false;
 				}
 				
 			} break;
@@ -338,6 +350,16 @@ void Game::update(float delta)
 
 	// update kamery
 	camera.update(delta);
+
+	if (selectedCharacter)
+	{
+		// update wyświetlanych punktów akcji w okienku UI
+		std::stringstream ss;
+		ss << selectedCharacter->getAP() << "/" << selectedCharacter->getMaxAP();
+		// wyświetlenie obrażeń zadawanych przez tą umiejętność
+		ui.box_action_points.setString(ss.str());
+	}
+
 }
 
 void Game::checkMoveAndActionsAuto()
@@ -359,6 +381,12 @@ void Game::checkMoveAndActionsAuto()
 	
 	// pole startowe drogi = pole zaznaczonej postaci
 	Field* fieldA = get_active_field_from_absolute_coords(selectedCharacter->getCoords());
+
+	// ustawienie ilości punktów akcji w podglądzie na początkową wartość od, której będzie odejmowane każde kolejne działanie
+	AP_preview = selectedCharacter->getAP();
+
+	// odjęcie punktów akcji w podglądzie za każdy obecny ruch do wykonania
+	AP_preview -= road.get().size();
 
 	// sprawdzenie czy są na najechanym polu są też akcje do wywołania
 	checkActionsByHover();
@@ -386,6 +414,7 @@ void Game::checkActionsByHover()
 		return;
 		
 	Attack attack = *(ui.getAutoselectedBtn()->getAbility());
+
 	auto possible_range = attack.get_in_range();
 
 	// pole z którego wywoływana zostaje akcja
@@ -422,7 +451,9 @@ void Game::checkActionsByHover()
 				&&	hoveredField->getCoords() == coords_in_range
 				&&	character.get() != selectedCharacter)
 				{
-					action_field = get_active_field_from_absolute_coords(coords_in_range);
+					// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
+					if (AP_preview >= attack.getAP())
+						action_field = get_active_field_from_absolute_coords(coords_in_range);
 					
 					// dalsze sprawdzanie nie jest potrzebne, bo tylko na jednym polu naraz można wywołać akcję
 					break;
@@ -431,17 +462,33 @@ void Game::checkActionsByHover()
 
 	std::vector<Field*> action_fields;
 
-	if (action_field) {
+	if (action_field)
+	{
 		action_fields.push_back(action_field);
 
 		// podświetlenie przycisku akcji, która może być teraz wywołana
 		ui.simulateHover(ui.getAutoselectedBtn());
+
+		// odjęcie punktów akcji w podglądzie ile zostanie po ataku
+		AP_preview -= attack.getAP();
 	} else
 		ui.cancelSimulatingHover();
 
 	// utworzenie podglądu zasięgu
 	range = Range(	action_fields,
 					get_active_field_from_absolute_coords(field_caster->getCoords() ) );
+
+	range_created_from_auto = true;
+
+	// update wyświetlanych punktów akcji na środku aktywnego pola planszy
+	std::stringstream ss;
+	ss << AP_preview << "/" << selectedCharacter->getMaxAP();
+	text_AP_preview.setString(ss.str());
+	text_AP_preview.setPosition(	hoveredField->getPosition()
+									+ sf::Vector2f{	(tile_size - text_AP_preview.getGlobalBounds().width) / 2, 
+													(tile_size - text_AP_preview.getGlobalBounds().height) / 2 - 3} 
+								);
+	text_AP_preview.setFillColor(sf::Color::Yellow);
 }
 
 
@@ -476,6 +523,9 @@ void Game::acceptMovePlayer()
 			)
 		);
 
+	// odjęcie punktów akcji, po 1 za każde pokonane pole
+	selectedCharacter->setAP(selectedCharacter->getAP() - road.get().size());
+
 	// wyczyszczenie podglądu drogi
 	road.clear();
 }
@@ -493,6 +543,7 @@ void Game::acceptAttack(Attack& attack)
 	}
 
 	// dodanie animacji ataku wykonywanego przez postać która atakuje
+	// TODO zmienić na activity pobrane z ataku
 	anim_manager.addAnimationToQueue (
 		anim_manager.createAnimation(
 			selectedCharacter,
@@ -500,6 +551,9 @@ void Game::acceptAttack(Attack& attack)
 			range.getDirectionToThisField(r) 
 		)
 	);
+
+	// odjęcie punktów akcji za atak
+	selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
 
 	// dodanie animacji otrzymania obrażeń zaatakowanej postaci
 	anim_manager.addAnimationToQueue (
@@ -632,9 +686,15 @@ void Game::draw_board()
 		hide_hovering = true;
 	}
 
+	if (!road.empty()  || (!range.empty() && range_created_from_auto))
+	{
+		window->draw(text_AP_preview);
+	}
+
 	// podświetelenie pola wskazywanego kursorem
 	if (hoveredField && !hide_hovering)
 		window->draw(hoveredRect);
+
 }
 
 void Game::draw_static_elements()
