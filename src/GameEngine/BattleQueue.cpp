@@ -19,6 +19,7 @@ void BattleQueue::switchToNextCharacter()
 {
     currentCharacter++;
 
+    // po przekroczeniu zakresu wraca na początkową postać
     if (currentCharacter == queue.end())
         currentCharacter = queue.begin();
 }
