@@ -49,6 +49,13 @@ Game::Game(	sf::RenderWindow & _window,
 	charactersOnBoard.push_back(std::make_unique<Warrior>(sf::Vector2i{4, 4}));
 	charactersOnBoard.push_back(std::make_unique<Sorceress>(sf::Vector2i{6, 6}));
 
+	// dodanie postaci do kolejki bitwy
+	for (auto & character : charactersOnBoard)
+		battle_queue.addToQueue(character.get());
+
+	// ustawienie tury na pierwszą postać z kolejki
+	battle_queue.setOnFirstCharacter();
+
 	// dodanie animacji bezczynności (idle) do każdej postaci
 	for (auto & character : charactersOnBoard)
 	{
@@ -235,20 +242,7 @@ void Game::run()
 					for (auto & character : charactersOnBoard)
 						if (mouseClicked(sf::Mouse::Right, character->getGlobalBounds(), m_pos_on_map))
 						{
-							inputMode = InputMode::character_is_selected;
-							
-							selectedCharacter = character.get();
-							ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
-
-							ui.cancelSimulatingHover();
-							ui.destroyButtons();
-
-							for (float i = 0; i < selectedCharacter->get_attack_data().size(); i++)
-								ui.addNewButton({i * 120, 0},
-												selectedCharacter->get_attack_data()[i].button_data,
-												&selectedCharacter->get_attack_data()[i].attack );
-
-							ui.autoselectButton(ui.button[0].get());
+							selectCharacter(character.get());
 						}
 				}
 
@@ -307,6 +301,24 @@ void Game::run()
 
 		window->display();
 	}
+}
+
+void Game::selectCharacter(CharacterOnBoard* character)
+{
+	inputMode = InputMode::character_is_selected;
+	
+	selectedCharacter = character;
+	ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
+
+	ui.cancelSimulatingHover();
+	ui.destroyButtons();
+
+	for (float i = 0; i < selectedCharacter->get_attack_data().size(); i++)
+		ui.addNewButton({i * 120, 0},
+						selectedCharacter->get_attack_data()[i].button_data,
+						&selectedCharacter->get_attack_data()[i].attack );
+
+	ui.autoselectButton(ui.button[0].get());
 }
 
 void Game::update(float delta)

@@ -19,6 +19,7 @@
 #include "Camera.h"
 #include "Road.h"
 #include "Range.h"
+#include "BattleQueue.h"
 #include "../UI/UI.h"
 #include "../UI/TextBox.h"
 #include "../Abilities/Attack.h"
@@ -59,6 +60,9 @@ public:
 	void run();
 private:
 	void update(float deltaTime);
+
+	// przełączenie tury na wybraną postać
+	void selectCharacter(CharacterOnBoard* character);
 
 	/**
 	 * dotyczy podglądu akcji tworzącego się dynamicznie przez wskazywanie myszką pól na planszy
@@ -157,6 +161,9 @@ private:
 
 	// tekstu który wyświetla podgląd ile punktów zostanie po wykonaniu akcji
 	Textfield text_AP_preview;
+
+	// kolejka postaci kolejno rozgrywających ruchy
+	BattleQueue battle_queue;
 
 	// współrzędne pola na planszy od których zaczyna się aktywny obszar gry
 	sf::Vector2i coordsTopLeft {0, 0};
