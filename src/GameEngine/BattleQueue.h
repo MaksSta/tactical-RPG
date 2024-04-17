@@ -12,10 +12,11 @@ public:
     CharacterOnBoard* getCurrentCharacter();
 
     void setOnFirstCharacter();
+
+    void switchToNextCharacter();
 private:
     std::deque<CharacterOnBoard*> queue;
     std::deque<CharacterOnBoard*>::iterator currentCharacter;
-    // std::queue<CharacterOnBoard*>::
 };
 
 #endif /* GAME_ENGINE_BATTLE_QUEUE */

@@ -55,6 +55,7 @@ Game::Game(	sf::RenderWindow & _window,
 
 	// ustawienie tury na pierwszą postać z kolejki
 	battle_queue.setOnFirstCharacter();
+	selectCharacter(battle_queue.getCurrentCharacter());
 
 	// dodanie animacji bezczynności (idle) do każdej postaci
 	for (auto & character : charactersOnBoard)
@@ -155,6 +156,13 @@ void Game::run()
 				/****************************************************************/
 				case InputMode::character_is_selected:
 				{
+					// automatyczne spasowanie gdy zostało postaci 0 punktów akcji
+					if (selectedCharacter->getAP() == 0)
+					{
+						battle_queue.switchToNextCharacter();
+						selectCharacter(battle_queue.getCurrentCharacter());
+					}
+
 					// akcje kliknięcia myszą dla elementów UI - LPM 
 					// możliwe do wykonania tylko w trybie aktywnej tury gracza, gdy nie jest wywoływana inna akcja
 					for (auto & b: ui.button)
@@ -235,17 +243,7 @@ void Game::run()
 					}
 				} break;
 				}
-
-				// zaznaczanie postaci poprzez kliknięcie PPM
-				if (hoveredField)
-				{
-					for (auto & character : charactersOnBoard)
-						if (mouseClicked(sf::Mouse::Right, character->getGlobalBounds(), m_pos_on_map))
-						{
-							selectCharacter(character.get());
-						}
-				}
-
+				
 				// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
 				if (ui.getHoveredBtn())
 				{
@@ -303,24 +301,6 @@ void Game::run()
 	}
 }
 
-void Game::selectCharacter(CharacterOnBoard* character)
-{
-	inputMode = InputMode::character_is_selected;
-	
-	selectedCharacter = character;
-	ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
-
-	ui.cancelSimulatingHover();
-	ui.destroyButtons();
-
-	for (float i = 0; i < selectedCharacter->get_attack_data().size(); i++)
-		ui.addNewButton({i * 120, 0},
-						selectedCharacter->get_attack_data()[i].button_data,
-						&selectedCharacter->get_attack_data()[i].attack );
-
-	ui.autoselectButton(ui.button[0].get());
-}
-
 void Game::update(float delta)
 {
 	// update kolejki animacji
@@ -372,6 +352,28 @@ void Game::update(float delta)
 		ui.box_action_points.setString(ss.str());
 	}
 
+}
+
+void Game::selectCharacter(CharacterOnBoard* character)
+{
+	inputMode = InputMode::character_is_selected;
+	
+	selectedCharacter = character;
+
+	// zresetowanie ilości punktów akcji na maksymalną wartość
+	selectedCharacter->setAP(selectedCharacter->getMaxAP());
+
+	ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
+
+	ui.cancelSimulatingHover();
+	ui.destroyButtons();
+
+	for (float i = 0; i < selectedCharacter->get_attack_data().size(); i++)
+		ui.addNewButton({i * 120, 0},
+						selectedCharacter->get_attack_data()[i].button_data,
+						&selectedCharacter->get_attack_data()[i].attack );
+
+	ui.autoselectButton(ui.button[0].get());
 }
 
 void Game::checkMoveAndActionsAuto()

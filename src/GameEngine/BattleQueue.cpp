@@ -14,3 +14,11 @@ void BattleQueue::setOnFirstCharacter()
 {
     currentCharacter = queue.begin();
 }
+
+void BattleQueue::switchToNextCharacter()
+{
+    currentCharacter++;
+
+    if (currentCharacter == queue.end())
+        currentCharacter = queue.begin();
+}
