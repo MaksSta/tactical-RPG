@@ -1,16 +1,37 @@
 #include "Button.h"
 
-Button::Button( Attack* _ability,
+Button::Button( ActivationType _activationType,
+                Attack* _ability,
                 sf::Vector2f pos,
                 std::string img_file_path,
                 std::wstring _desc)
 :
-    ability{_ability}
+    activationType{_activationType},
+    ability{_ability},
+    action{Action::attack}
 {
     setPosition(pos);
     texture.loadFromFile(img_file_path);
     setTexture(texture);
     desc = _desc;
+
+}
+
+Button::Button( ActivationType _activationType,
+                Action _action,
+                sf::Vector2f pos,
+                std::string img_file_path,
+                std::wstring _desc)
+:
+    activationType{_activationType},
+    action{_action}
+{
+    
+    setPosition(pos);
+    texture.loadFromFile(img_file_path);
+    setTexture(texture);
+    desc = _desc;
+
 }
 
 void Button::Update(float deltaTime)
@@ -34,6 +55,11 @@ void Button::Update(float deltaTime)
 Attack* Button::getAbility()
 {
     return ability;
+}
+
+Button::Action Button::getAction()
+{
+    return action;
 }
 
 std::wstring Button::getDesc()

@@ -13,13 +13,21 @@ UI::UI(sf::Vector2f _starts_at)
 void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability)
 {
 	button.push_back(
-		 std::make_unique<Button>(ability, btnsStartPos + pos, data.img_file_path, data.desc)
+		 std::make_unique<Button>(Button::ActivationType::selectable, ability, btnsStartPos + pos, data.img_file_path, data.desc)
 	);
 
 	// tekst z ilością punktów akcji jaką pobiera umiejętność pod przyciskiem
 	text_action_cost.push_back(
-		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{25, 90}, std::to_wstring(ability->getAP()), 28, sf::Color::Yellow)
+		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{29, 83}, std::to_wstring(ability->getAP()), 28, sf::Color::Yellow)
 	);
+}
+
+void UI::addNewButton(sf::Vector2f pos, Button_data& data, Button::Action _action)
+{
+	button.push_back(
+		std::make_unique<Button>(Button::ActivationType::clickable, _action, btnsStartPos + pos, data.img_file_path, data.desc)
+	);
+
 }
 
 void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
@@ -51,7 +59,7 @@ void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
 		b->Update(deltaTime);
 
 	// ustalenie do którego przycisku w tym momencie należy wyświetlić opis akcji jaką wykonuje
-	Button* anyButtonActive = nullptr;
+	anyButtonActive = nullptr;
 
 	if (hoveredBtn)
 		anyButtonActive = hoveredBtn;
@@ -65,10 +73,13 @@ void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
 		// wyświetlenie opisu wskazywanej myszką bądź wybranej umiejętności
 		ability_desc.setString(anyButtonActive->getDesc());
 
-		std::stringstream ss;
-		ss << anyButtonActive->getAbility()->get_min_dmg() << " - " << anyButtonActive->getAbility()->get_max_dmg();
-		// wyświetlenie obrażeń zadawanych przez tą umiejętność
-		ability_dmg.setString(ss.str());
+		if (anyButtonActive->getAction() == Button::Action::attack)
+		{
+			std::stringstream ss;
+			ss << anyButtonActive->getAbility()->get_min_dmg() << " - " << anyButtonActive->getAbility()->get_max_dmg();
+			// wyświetlenie obrażeń zadawanych przez tą umiejętność
+			ability_dmg.setString(ss.str());
+		}
 	}
 	else
 	{
@@ -89,9 +100,14 @@ void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
 	}
 }
 
-void UI::selectButton(Button* _selectedBtn)
+Button::Action UI::selectButton(Button* _selectedBtn)
 {
-	selectedBtn = _selectedBtn;
+	if (_selectedBtn->activationType == Button::ActivationType::selectable)
+	{
+		selectedBtn = _selectedBtn;
+	}
+
+	return _selectedBtn->action;
 }
 
 void UI::autoselectButton(Button* _autoselectedBtn)
@@ -155,5 +171,11 @@ void UI::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	target.draw(box_action_points);
 
 	target.draw(ability_desc);
-	target.draw(ability_dmg);
+
+	if (anyButtonActive)
+	{
+		// pole z widełkami obrażeń
+		if (anyButtonActive->getAction() == Button::Action::attack)
+			target.draw(ability_dmg);
+	}
 }

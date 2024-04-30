@@ -83,6 +83,11 @@ std::vector<Attack_full_data>& CharacterOnBoard::get_attack_data()
 	return attack_full_data;
 }
 
+Button_data & CharacterOnBoard::get_finish_turn_button()
+{
+	return finish_turn_button;
+}
+
 void CharacterOnBoard::init()
 {
 

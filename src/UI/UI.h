@@ -24,13 +24,21 @@ public:
     */
     UI(sf::Vector2f starts_at);
 
-    void addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability);
     /**
-     * tworzy nowy przycisk za pomocą make_unique i dodaje do wektora
+     * tworzy nowy przycisk wywołujący atak
      * \param pos pozycja względna od początku interfejsu użytkownika
      * \param data dane dotyczące przycisku
      * \param ability wskaźnik do umiejętności wywoływanej tym przyciskiem
     */
+    void addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability);
+
+    /**
+     * tworzy nowy przycisk wywołujący specjalne zdarzenie
+     * \param pos pozycja względna od początku interfejsu użytkownika
+     * \param data dane dotyczące przycisku
+     * \param _action specjalne zdarzenie, które jednoznacznie determinuje co robi przycisk po wciśnięciu
+    */
+    void addNewButton(sf::Vector2f pos, Button_data& data, Button::Action _action);
 
      /**
      * aktualizacja stanów wszystkich przycisków
@@ -39,14 +47,8 @@ public:
     */
     void updateButtons(sf::Vector2f m_pos, float deltaTime);
 
-    /**
-     * procedura odświęzająca stany przycisków na podstawie informacji o myszce przy kliknięciu
-     * \param mousebutton która przycisk na myszce został kliknięty
-     * \param m_pos pozycja myszy w momemncie kliknięcia
-    */
-
     // wybranie przycisku (wciśnięcie go)
-    void selectButton(Button* _selectedBtn);
+    Button::Action selectButton(Button* _selectedBtn);
 
     // zmiana domyślnie wykonaywanej akcji na tę pod przyciskiem
     void autoselectButton(Button* _selectedBtn);
@@ -85,6 +87,9 @@ private:
 
     // pozycja na ekranie na której wyświetlony będzie pierwszy przycisk
     sf::Vector2f btnsStartPos;
+
+    // przycisk traktowany jest jako aktywny (bądź jego brak)
+    Button* anyButtonActive;
 
     // przycisk pod którym obecnie znajduje się pod myszką
     Button* hoveredBtn {nullptr};

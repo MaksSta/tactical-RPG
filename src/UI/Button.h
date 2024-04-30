@@ -1,6 +1,7 @@
 /** 
  * przycisk o załadowanej grafice obsługiwany przez UI
- * zawiera wskaźnik do uruchamianej umiejętności
+ * zawiera informację o rodzaju wywoływanej akcji
+ * jeżeli jest to atak, zawiera wskaźnik do uruchamianej umiejętności
 */
 
 #ifndef UI_BUTTON_H_
@@ -10,8 +11,21 @@
 
 #include "../Abilities/Attack.h"
 
+
 class Button : public sf::Sprite {
 public:
+    // rodzaj akcji wywoływanej przyciskiem
+    enum Action {
+        attack,
+        endturn,
+    };
+
+    // rodzaj przycisku pod wzgłedem sposobu wywołania, a konkretniej akcji po kliknięciu
+    enum ActivationType {
+        selectable,
+        clickable,
+    };
+
     // stan jaki może przybierać przycisk, decyduje o jego wyglądzie
     enum btnState {
         inactive,
@@ -27,7 +41,14 @@ public:
      * \param img_file_path ścieżka do grafiki dla tego przycisku
      * \param _desc opis przycisku, który wyświetla się po najechaniu myszką
     */
-    Button( Attack* _ability,
+    Button( ActivationType activationType,
+            Attack* _ability,
+            sf::Vector2f pos,
+            std::string img_file_path,
+            std::wstring _desc);
+
+    Button( ActivationType activationType,
+            Action _Action,
             sf::Vector2f pos,
             std::string img_file_path,
             std::wstring _desc);
@@ -38,11 +59,20 @@ public:
     // TODO powinno zamiast Attack* zwracać typ podstawowy (Ability*)
     Attack* getAbility();
 
+    // zwraca rodzaj akcji jaką powoduje wciśnięcie przycisku
+    Action getAction();
+
     // zwraca opis przypisany do przycisku (opis wywoływanej akcji)
     std::wstring getDesc();
 
     friend class UI;
 private:
+    // rodzaj akcji jaką powoduje wciśnięcie przycisku
+    Action action;
+
+    // rodzaj interakcji jaką powoduje wciśnięcie przycisku
+    ActivationType activationType;
+
     // stan w jakim znajduje się przycisk
     btnState state {inactive};
     

@@ -94,6 +94,9 @@ private:
 	// utworzonenie podglądu range względem zaznaczonej postaci na podstawie podanych przesunięć względem jej
 	void createRangePreview(std::vector<sf::Vector2i> in_range);
 
+	// zakończenie tury, przejście do kolejnej postaci w kolejce bitwy
+	void finishTurn();
+
 	// sprawdzenie czy na wskazywanym polu znajduje się inna postać
 	bool isEnemyOnHoveredField();
 

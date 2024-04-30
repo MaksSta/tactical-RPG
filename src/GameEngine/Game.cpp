@@ -159,20 +159,34 @@ void Game::run()
 					// automatyczne spasowanie gdy zostało postaci 0 punktów akcji
 					if (selectedCharacter->getAP() == 0)
 					{
-						battle_queue.switchToNextCharacter();
-						selectCharacter(battle_queue.getCurrentCharacter());
+						finishTurn();
 					}
 
 					// akcje kliknięcia myszą dla elementów UI - LPM 
 					// możliwe do wykonania tylko w trybie aktywnej tury gracza, gdy nie jest wywoływana inna akcja
 					for (auto & b: ui.button)
 					{
-						if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window))
-							// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
-							if (selectedCharacter->getAP() >= b->getAbility()->getAP())
-								ui.selectButton(b.get());
+						if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window) && !MouseLClickedLastFrame)
+						{
+							if (b->getAction() == Button::attack)
+							{
+								// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
+								if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+								{
+									ui.selectButton(b.get());
+								}
+							}
+							else
+							{
+								auto action_on_click =  ui.selectButton(b.get());
+								// rozpoznano akcję zakończenia tury
+								if (action_on_click == Button::endturn)
+								{
+									finishTurn();
+								}	
+							}
+						}
 					}
-
 					// sprawdzenie akcji na planszy wymaga najechania myszką na jakieś pole
 					if (hoveredField != nullptr)
 					{
@@ -245,7 +259,7 @@ void Game::run()
 				}
 				
 				// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
-				if (ui.getHoveredBtn())
+				if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack )
 				{
 					createRangePreview(ui.getHoveredBtn()->getAbility()->get_in_range());
 					range_created_from_auto = false;
@@ -368,11 +382,18 @@ void Game::selectCharacter(CharacterOnBoard* character)
 	ui.cancelSimulatingHover();
 	ui.destroyButtons();
 
+	// dodanie przycisków z umiejętnościami (1. wiersz)
 	for (float i = 0; i < selectedCharacter->get_attack_data().size(); i++)
 		ui.addNewButton({i * 120, 0},
 						selectedCharacter->get_attack_data()[i].button_data,
 						&selectedCharacter->get_attack_data()[i].attack );
 
+	// dodanie przysku zakończenia tury (2. wiersz, na końcu z prawej)
+	ui.addNewButton({480 + 48, 122},
+					selectedCharacter->get_finish_turn_button(),
+					Button::Action::endturn );
+
+	// zaznaczenie ataku pierwszego jako akcja domyslna
 	ui.autoselectButton(ui.button[0].get());
 }
 
@@ -598,6 +619,12 @@ void Game::createRangePreview(std::vector<sf::Vector2i> in_range)
 	}
 
 	range = Range(vec, get_active_field_from_absolute_coords(selectedCharacter->getCoords()));
+}
+
+void Game::finishTurn()
+{
+	battle_queue.switchToNextCharacter();
+	selectCharacter(battle_queue.getCurrentCharacter());
 }
 
 bool Game::isEnemyOnHoveredField()

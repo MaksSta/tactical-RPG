@@ -8,7 +8,7 @@
 - [ ] Add directly called attack ability run by clicking on action's button on UI (area of effect attack for Warrior will be first one)
 - [x] Add new class for characters queue which will determine which turn is next
 - [x] Disable directly switching on clicked character, at the begging select first character from queue
-- [ ] Add finish turn button which switches to the next character
+- [x] Add finish turn button which switches to the next character
 - [x] Finish turn automatically after using all available action points
 - [ ] Add simple enemy character
 - [ ] Unable attacking friendly characters

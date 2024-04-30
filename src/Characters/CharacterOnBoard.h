@@ -93,13 +93,20 @@ public:
 	// zwraca pełne informacje o wszystkich atakach
 	std::vector<Attack_full_data>& get_attack_data();
 
+	// zwraca dane potrzebne do utworzenia przycisku zakończenia tury
+	Button_data & get_finish_turn_button();
+
 	void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 	void move(sf::Vector2f offset);
 	sf::FloatRect getGlobalBounds();
 	sf::Vector2f getPosition();
 	void setPosition(sf::Vector2f pos);
 	void setTexture(sf::Texture&);
+
 protected:
+	// przycisk zakończenia tury
+	Button_data finish_turn_button;
+
 	// sprite z obrazkiem postaci
 	sf::Sprite sprite;
 	
