@@ -366,6 +366,8 @@ void Game::update(float delta)
 		ui.box_action_points.setString(ss.str());
 	}
 
+	updateAPpreviewOnBoard();
+
 }
 
 void Game::selectCharacter(CharacterOnBoard* character)
@@ -515,17 +517,23 @@ void Game::checkActionsByHover()
 
 	range_created_from_auto = true;
 
-	// update wyświetlanych punktów akcji na środku aktywnego pola planszy
-	std::stringstream ss;
-	ss << AP_preview << "/" << selectedCharacter->getMaxAP();
-	text_AP_preview.setString(ss.str());
-	text_AP_preview.setPosition(	hoveredField->getPosition()
-									+ sf::Vector2f{	(tile_size - text_AP_preview.getGlobalBounds().width) / 2, 
-													(tile_size - text_AP_preview.getGlobalBounds().height) / 2 - 3} 
-								);
-	text_AP_preview.setFillColor(sf::Color::Yellow);
 }
 
+void Game::updateAPpreviewOnBoard()
+{
+	if (hoveredField && selectedCharacter)
+	{
+		// update wyświetlanych punktów akcji na środku aktywnego pola planszy
+		std::stringstream ss;
+		ss << AP_preview << "/" << selectedCharacter->getMaxAP();
+		text_AP_preview.setString(ss.str());
+		text_AP_preview.setPosition(	hoveredField->getPosition()
+										+ sf::Vector2f{	(tile_size - text_AP_preview.getGlobalBounds().width) / 2, 
+														(tile_size - text_AP_preview.getGlobalBounds().height) / 2 - 3} 
+									);
+		text_AP_preview.setFillColor(sf::Color::Yellow);
+	}
+}
 
 void Game::acceptMoveAndAction()
 {
@@ -719,12 +727,10 @@ void Game::draw_board()
 	// narysowanie drogi przesunięcia postaci na pólach do przejścia
 	if (!road.empty()) {
 		window->draw(road);
-		hide_hovering = true;
 	}
 
 	if (!range.empty()) {
 		window->draw(range);
-		hide_hovering = true;
 	}
 
 	if (!road.empty()  || (!range.empty() && range_created_from_auto))
@@ -733,7 +739,7 @@ void Game::draw_board()
 	}
 
 	// podświetelenie pola wskazywanego kursorem
-	if (hoveredField && !hide_hovering)
+	if (hoveredField)
 		window->draw(hoveredRect);
 
 }

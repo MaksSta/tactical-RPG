@@ -82,6 +82,9 @@ private:
 	*/
 	void checkActionsByHover();
 
+	// uaktualnienie tekstu nna planszy podglądem ilości pozostałych akcji po wykonianiu obecnej
+	void updateAPpreviewOnBoard();
+
 	// akceptuje wywołania ruchu i/lub akcji
 	void acceptMoveAndAction();
 
