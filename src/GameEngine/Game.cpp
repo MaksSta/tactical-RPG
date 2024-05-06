@@ -365,9 +365,6 @@ void Game::update(float delta)
 		// wyświetlenie obrażeń zadawanych przez tą umiejętność
 		ui.box_action_points.setString(ss.str());
 	}
-
-	updateAPpreviewOnBoard();
-
 }
 
 void Game::selectCharacter(CharacterOnBoard* character)
@@ -419,11 +416,8 @@ void Game::checkMoveAndActionsAuto()
 	// pole startowe drogi = pole zaznaczonej postaci
 	Field* fieldA = get_active_field_from_absolute_coords(selectedCharacter->getCoords());
 
-	// ustawienie ilości punktów akcji w podglądzie na początkową wartość od, której będzie odejmowane każde kolejne działanie
+	// ustawienie ilości punktów akcji w podglądzie na początkową wartość, od której będzie odejmowane każde kolejne działanie
 	AP_preview = selectedCharacter->getAP();
-
-	// odjęcie punktów akcji w podglądzie za każdy obecny ruch do wykonania
-	AP_preview -= road.get().size();
 
 	// sprawdzenie czy są na najechanym polu są też akcje do wywołania
 	checkActionsByHover();
@@ -443,10 +437,19 @@ void Game::checkMoveAndActionsAuto()
 			road = pathfinder.astar_search(fieldA, hoveredField, max_movement);
 		}
 	}
+
+	// odjęcie punktów akcji w podglądzie za każdy obecny ruch do wykonania
+	AP_preview -= road.get().size();
+
+	updateAPpreviewOnBoard();
 }
 
 void Game::checkActionsByHover()
 {
+	// utworzenie kopii podglądu akcji na potrzeby sprawdzenia punktów akcji po odjęciu ewentualnego kosztu drogi do przejścia
+	auto AP_preview_local = AP_preview;
+	AP_preview_local -= road.get().size();
+
 	if (!ui.getAutoselectedBtn())
 		return;
 		
@@ -489,7 +492,7 @@ void Game::checkActionsByHover()
 				&&	character.get() != selectedCharacter)
 				{
 					// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
-					if (AP_preview >= attack.getAP())
+					if (AP_preview_local >= attack.getAP())
 						action_field = get_active_field_from_absolute_coords(coords_in_range);
 					
 					// dalsze sprawdzanie nie jest potrzebne, bo tylko na jednym polu naraz można wywołać akcję
@@ -706,7 +709,7 @@ void Game::draw_board()
 			sf::Vector2i pos =
 				window->mapCoordsToPixel(f.getPosition());
 
-			// ograniczenie wyświetlenia tylko do kafelków który pokrywaką się z ekranem kamery
+			// ograniczenie wyświetlenia tylko do kafelków który pokrywają się z ekranem kamery
 			if ( pos.x + tile_size > screen_size.x * camera.getViewport().left &&
 				pos.y + tile_size > screen_size.y * camera.getViewport().top && 
 				pos.x < screen_size.x * (camera.getViewport().left + camera.getViewport().width) &&
