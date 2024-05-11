@@ -139,9 +139,16 @@ void Game::run()
 			{
 				if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window))
 				{
-					ui.autoselectButton(b.get());
-					// zapisanie informacji z ostatnio wybranym atakiem atakiem domyślnym u tej postaci
-					lastDefaultAttack[selectedCharacter] = b.get()->getAbility();
+					// pobranie umiejętności pod przyciskiem
+					auto ability = b.get()->getAbility();
+					if (ability != nullptr
+						&& ability->getCallType() == Attack::CallType::targetable )
+					{
+						ui.autoselectButton(b.get());
+
+						// zapisanie informacji z ostatnio wybranym atakiem atakiem domyślnym u tej postaci
+						lastDefaultAttack[selectedCharacter] = b.get()->getAbility();
+					}
 				}
 			}
 
@@ -229,6 +236,7 @@ void Game::run()
 						// kursor znajduje się poza planszą - wyłączenie podglądu akcji do wywołania
 						road.clear();
 						range.clear();
+						ui.cancelSimulatingHover();
 					}
 
 					// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
@@ -258,8 +266,8 @@ void Game::run()
 					if (	mouseClicked(sf::Mouse::Left)
 						&&	!MouseLClickedLastFrame )
 					{
-						// sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje							
-						if (hoveredField && getEnemyOnHoveredField())
+						// sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje i czy to pole jest w zasięgu ataku
+						if (hoveredField && getEnemyOnHoveredField() && isFieldInRange(hoveredField))
 						{
 							Attack attack = *(ui.getSelectedBtn()->getAbility());
 
@@ -270,6 +278,7 @@ void Game::run()
 						{
 							range.clear();
 						}
+
 						// zdezaktyowowanie klikniętego przycisku
 						ui.unselectButtons();
 
@@ -662,10 +671,19 @@ void Game::finishTurn()
 	selectCharacter(battle_queue.getCurrentCharacter());
 }
 
+bool Game::isFieldInRange(Field* field)
+{
+	for( auto & r : range.get() )
+		if (r->getCoords() == field->getCoords())
+			return true;
+
+	return false;
+}
+
 CharacterOnBoard* Game::getCharacterOnField(Field* field)
 {
 	for (auto & character : charactersOnBoard)
-		if (field->getCoords() == character->getCoords() )
+		if ( field->getCoords() == character->getCoords() )
 			return character.get();
 	return nullptr;
 }

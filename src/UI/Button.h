@@ -81,7 +81,7 @@ private:
     
     // wskaźnik do umiejętności jaką wywoła wciśniecie przycisku
     // TODO powinien to być typ podstawowy (Ability*)
-    Attack* ability;
+    Attack* ability {nullptr};
 
     // opis umiejętności wykonywanej przyciskiem
     std::wstring desc;

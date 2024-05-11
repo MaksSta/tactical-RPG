@@ -103,6 +103,9 @@ private:
 	// zakończenie tury, przejście do kolejnej postaci w kolejce bitwy
 	void finishTurn();
 
+	// sprawdzenie czy podane pole znajduje się w zasięgu obecnie wybranego do wykonania ataku
+	bool isFieldInRange(Field* field);
+
 	// sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
 	CharacterOnBoard* getCharacterOnField(Field* field);
 

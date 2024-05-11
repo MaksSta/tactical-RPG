@@ -18,7 +18,7 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
 	button_attack1_data.id_name = "fireball";
 
 	attack_full_data.push_back({
-		Attack(Character::Activity::attack1, Attack::CallType::targetable, 3, 3, 3, 5),
+		Attack(Character::Activity::attack1, Attack::CallType::targetable, 3, 3, 3, 6),
 		Character::Activity::attack1,
 		button_attack1_data
 	});
