@@ -3,14 +3,14 @@
 - [ ] Add death animation when character HP drop to 0 then remove it from board
 - [x] Add actions points as required to do any move or action
 - [x] Show text how many action points left after usage on hovered field in action's preview
-- [ ] Add second basic attack for Warrior or Sorceress to demonstrate switching autoselected attack
+- [x] Add second basic attack for Warrior or Sorceress to demonstrate switching autoselected attack
 - [ ] Enable only basic attack actions to be autoselected (add new distinction between attack types)
-- [ ] Add directly called attack ability run by clicking on action's button on UI (area of effect attack for Warrior will be first one)
+- [x] Add directly called attack ability run by clicking on action's button on UI (area of effect attack for Warrior will be first one)
 - [x] Add new class for characters queue which will determine which turn is next
 - [x] Disable directly switching on clicked character, at the begging select first character from queue
 - [x] Add finish turn button which switches to the next character
 - [x] Finish turn automatically after using all available action points
 - [ ] Add simple enemy character
 - [ ] Unable attacking friendly characters
-- [ ] Add sample attack ability to enemy (project attack withiout button attached)
+- [ ] Add sample attack ability to enemy (project attack without button attached)
 - [ ] Add primitive AI for enemies (attacking closest enemy character)

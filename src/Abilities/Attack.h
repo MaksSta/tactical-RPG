@@ -15,7 +15,13 @@ public:
         ranged
     };
 
-    Attack(int _action_points, int range, int _min_dmg, int _max_dmg);
+    // rodzaj wywołania
+    enum CallType {
+        targetable,
+        instant
+    };
+
+    Attack(Character::Activity _activity, CallType _callType, int _action_points, int range, int _min_dmg, int _max_dmg, bool radiation = false);
 
     // zwraca rodzaj ataku
     Type get_type();
@@ -28,7 +34,13 @@ public:
     int draw_damage();
 
     int getAP();
+
+    Character::Activity getActivity();
+    CallType getCallType();
 private:
+    Character::Activity activity;
+    CallType callType;
+
     // koszt wywołania ataku
     int action_points;
 

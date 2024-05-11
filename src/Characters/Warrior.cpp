@@ -18,9 +18,20 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	button_attack1_data.id_name = "attack_melee";
 
 	attack_full_data.push_back({
-		Attack(2, 1, 3, 4),
+		Attack(Character::Activity::attack1, Attack::CallType::targetable, 2, 1, 3, 4),
 		Character::Activity::attack1,
 		button_attack1_data
+	});
+
+	Button_data button_attack3_data;
+	button_attack3_data.desc = L"Power attack";
+	button_attack3_data.img_file_path = "data/UI/warrior/attack3.png";
+	button_attack3_data.id_name = "attack_melee2";
+
+	attack_full_data.push_back({
+		Attack(Character::Activity::attack3, Attack::CallType::targetable, 5, 2, 5, 10),
+		Character::Activity::attack3,
+		button_attack3_data,
 	});
 
 	/** 
@@ -30,9 +41,15 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	 * - nie będzie mógł zostać wybierany jako autoatak
 	*/
 	Button_data button_attack2_data;
-	button_attack2_data.desc = L"Atak gruntowy";
+	button_attack2_data.desc = L"Ground attack [aoe]";
 	button_attack2_data.img_file_path = "data/UI/warrior/attack2.png";
 	button_attack2_data.id_name = "attack_ground";
+
+	attack_full_data.push_back({
+		Attack(Character::Activity::attack2, Attack::CallType::instant, 3, 2, 2, 3, true),
+		Character::Activity::attack2,
+		button_attack2_data,
+	});
 
 	const int w = 48;
 	const int h = 48;
@@ -62,20 +79,20 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	loadAnimation(Character::attack1, down, 	"data/Warrior/Down/Png/WarriorDownAttack01.png",	frames_attack1, fps_attack1,	w,	h);
 
 	const int frames_attack2 = 6;
-	const float fps_attack2 = frames_attack2 * 2.5;
+	const float fps_attack2 = frames_attack2 * 2;
 
-	loadAnimation(Character::attack2, left, 	"data/Warrior/Left/Png/WarriorLeftAttack01.png",	frames_attack2, fps_attack2,	w,	h);
-	loadAnimation(Character::attack2, right, 	"data/Warrior/Right/Png/WarriorRightAttack01.png",	frames_attack2, fps_attack2,	w,	h);
-	loadAnimation(Character::attack2, up, 		"data/Warrior/Up/Png/WarriorUpAttack01.png",		frames_attack2, fps_attack2,	w,	h);
-	loadAnimation(Character::attack2, down, 	"data/Warrior/Down/Png/WarriorDownAttack01.png",	frames_attack2, fps_attack2,	w,	h);
+	loadAnimation(Character::attack2, left, 	"data/Warrior/Left/Png/WarriorLeftAttack02.png",	frames_attack2, fps_attack2,	w,	h);
+	loadAnimation(Character::attack2, right, 	"data/Warrior/Right/Png/WarriorRightAttack02.png",	frames_attack2, fps_attack2,	w,	h);
+	loadAnimation(Character::attack2, up, 		"data/Warrior/Up/Png/WarriorUpAttack02.png",		frames_attack2, fps_attack2,	w,	h);
+	loadAnimation(Character::attack2, down, 	"data/Warrior/Down/Png/WarriorDownAttack02.png",	frames_attack2, fps_attack2,	w,	h);
 
 	const int frames_attack3 = 5;
-	const float fps_attack3 = frames_attack3 * 2.5;
+	const float fps_attack3 = frames_attack3 * 2;
 
-	loadAnimation(Character::attack3, left, 	"data/Warrior/Left/Png/WarriorLeftAttack01.png",	frames_attack3, fps_attack3,	w,	h);
-	loadAnimation(Character::attack3, right, 	"data/Warrior/Right/Png/WarriorRightAttack01.png",	frames_attack3, fps_attack3,	w,	h);
-	loadAnimation(Character::attack3, up, 		"data/Warrior/Up/Png/WarriorUpAttack01.png",		frames_attack3, fps_attack3,	w,	h);
-	loadAnimation(Character::attack3, down, 	"data/Warrior/Down/Png/WarriorDownAttack01.png",	frames_attack3, fps_attack3,	w,	h);
+	loadAnimation(Character::attack3, left, 	"data/Warrior/Left/Png/WarriorLeftAttack03.png",	frames_attack3, fps_attack3,	w,	h);
+	loadAnimation(Character::attack3, right, 	"data/Warrior/Right/Png/WarriorRightAttack03.png",	frames_attack3, fps_attack3,	w,	h);
+	loadAnimation(Character::attack3, up, 		"data/Warrior/Up/Png/WarriorUpAttack03.png",		frames_attack3, fps_attack3,	w,	h);
+	loadAnimation(Character::attack3, down, 	"data/Warrior/Down/Png/WarriorDownAttack03.png",	frames_attack3, fps_attack3,	w,	h);
 
 	const int frames_hurt = 4;
 	const float fps_hurt = frames_hurt * 2.5;

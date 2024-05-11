@@ -12,8 +12,16 @@ UI::UI(sf::Vector2f _starts_at)
 
 void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability)
 {
+	auto callType = ability->getCallType();
+	Button::ActivationType buttonType;
+
+	if (callType == Attack::CallType::targetable)
+		buttonType = Button::ActivationType::selectable;
+	else if (callType == Attack::CallType::instant)
+		buttonType = Button::ActivationType::clickable;
+
 	button.push_back(
-		 std::make_unique<Button>(Button::ActivationType::selectable, ability, btnsStartPos + pos, data.img_file_path, data.desc)
+		 std::make_unique<Button>(buttonType, ability, btnsStartPos + pos, data.img_file_path, data.desc)
 	);
 
 	// tekst z ilością punktów akcji jaką pobiera umiejętność pod przyciskiem
@@ -87,8 +95,8 @@ void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
 		ability_dmg.setString("");
 	}
 
-	//  wyświetla dookoła domyślnie uruchamianego przycisku
-	if (autoselectedBtn) 
+	//  ramka dookoła domyślnie uruchamianego przycisku
+	if (autoselectedBtn)
 	{
 		// utworzenie ramki (technicznie jest to tło pod spodem)
 		const short border_size = 4;
@@ -100,14 +108,14 @@ void UI::updateButtons(sf::Vector2f m_pos, float deltaTime)
 	}
 }
 
-Button::Action UI::selectButton(Button* _selectedBtn)
+void UI::selectButton(Button* _selectedBtn)
 {
-	if (_selectedBtn->activationType == Button::ActivationType::selectable)
+	if (_selectedBtn->activationType != Button::ActivationType::selectable)
 	{
-		selectedBtn = _selectedBtn;
+		// TODO dodać wyjatęk
 	}
 
-	return _selectedBtn->action;
+	selectedBtn = _selectedBtn;
 }
 
 void UI::autoselectButton(Button* _autoselectedBtn)

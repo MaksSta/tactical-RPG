@@ -48,7 +48,7 @@ public:
     void updateButtons(sf::Vector2f m_pos, float deltaTime);
 
     // wybranie przycisku (wciśnięcie go)
-    Button::Action selectButton(Button* _selectedBtn);
+    void selectButton(Button* _selectedBtn);
 
     // zmiana domyślnie wykonaywanej akcji na tę pod przyciskiem
     void autoselectButton(Button* _selectedBtn);
@@ -88,7 +88,7 @@ private:
     // pozycja na ekranie na której wyświetlony będzie pierwszy przycisk
     sf::Vector2f btnsStartPos;
 
-    // przycisk traktowany jest jako aktywny (bądź jego brak)
+    // przycisk traktowany jako aktywny np. najeżdzany myszą lub klinięty (bądź jego brak)
     Button* anyButtonActive;
 
     // przycisk pod którym obecnie znajduje się pod myszką

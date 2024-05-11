@@ -62,6 +62,9 @@ public:
     // zwraca rodzaj akcji jaką powoduje wciśnięcie przycisku
     Action getAction();
 
+    // zwraca rodzaj akcji jaką powoduje wciśnięcie przycisku
+    ActivationType getActivationType();
+
     // zwraca opis przypisany do przycisku (opis wywoływanej akcji)
     std::wstring getDesc();
 

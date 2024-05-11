@@ -134,13 +134,15 @@ void Game::run()
 				window->close();
 	
 			// akcje kliknięcia myszą dla elementów UI - PPM
-			// możliwe do wykonania w każdej fazie gry
+			// [możliwe do kliknięcia w każdej fazie gry]
 			for (auto & b: ui.button)
 			{
 				if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window))
-					// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
-					if (selectedCharacter->getAP() >= b->getAbility()->getAP())
-						ui.autoselectButton(b.get());
+				{
+					ui.autoselectButton(b.get());
+					// zapisanie informacji z ostatnio wybranym atakiem atakiem domyślnym u tej postaci
+					lastDefaultAttack[selectedCharacter] = b.get()->getAbility();
+				}
 			}
 
 			switch(gameMode) {
@@ -162,28 +164,39 @@ void Game::run()
 						finishTurn();
 					}
 
-					// akcje kliknięcia myszą dla elementów UI - LPM 
-					// możliwe do wykonania tylko w trybie aktywnej tury gracza, gdy nie jest wywoływana inna akcja
+					// akcje kliknięcia myszą dla elementów UI - LPM
 					for (auto & b: ui.button)
 					{
 						if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window) && !MouseLClickedLastFrame)
 						{
-							if (b->getAction() == Button::attack)
+							if (b->getActivationType() == Button::ActivationType::selectable )
 							{
-								// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
-								if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+								if (b->getAction() == Button::Action::attack)
 								{
-									ui.selectButton(b.get());
+									// jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
+									if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+									{
+										ui.selectButton(b.get());
+									}
 								}
 							}
-							else
+							else if (b->getActivationType() == Button::ActivationType::clickable)
 							{
-								auto action_on_click =  ui.selectButton(b.get());
-								// rozpoznano akcję zakończenia tury
-								if (action_on_click == Button::endturn)
+								if (b->getAction() == Button::Action::attack)
+								{
+									// jeżeli liczba akcji jest wystarczająca, wywołuje natychmiastowo akcję
+									if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+									{
+										attackAOE(*b->getAbility());
+
+										// zablokowanie gry aż do skończenia animacji
+										lockGameMode();
+									}
+								}
+								else if (b->getAction() == Button::Action::endturn)
 								{
 									finishTurn();
-								}	
+								}
 							}
 						}
 					}
@@ -218,6 +231,13 @@ void Game::run()
 						range.clear();
 					}
 
+					// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
+					if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack )
+					{
+						createRangePreview(ui.getHoveredBtn()->getAbility()->get_in_range());
+						range_created_from_auto = false;
+					}
+
 					// kliknięcie myszką w przycisk wywołania akcji
 					if (ui.getSelectedBtn() )
 					{
@@ -239,10 +259,11 @@ void Game::run()
 						&&	!MouseLClickedLastFrame )
 					{
 						// sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje							
-						if (hoveredField && isEnemyOnHoveredField())
+						if (hoveredField && getEnemyOnHoveredField())
 						{
 							Attack attack = *(ui.getSelectedBtn()->getAbility());
-							acceptAttack(attack);
+
+							acceptAttack( attack, getEnemyOnHoveredField(), range.getDirectionToThisField(hoveredField) );
 						} 
 						// nie ma wskazano prawidłowego celu - anulowanie wywoływania
 						else
@@ -257,14 +278,6 @@ void Game::run()
 					}
 				} break;
 				}
-				
-				// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
-				if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack )
-				{
-					createRangePreview(ui.getHoveredBtn()->getAbility()->get_in_range());
-					range_created_from_auto = false;
-				}
-				
 			} break;
 			}
 
@@ -392,8 +405,21 @@ void Game::selectCharacter(CharacterOnBoard* character)
 					selectedCharacter->get_finish_turn_button(),
 					Button::Action::endturn );
 
-	// zaznaczenie ataku pierwszego jako akcja domyslna
-	ui.autoselectButton(ui.button[0].get());
+	// zaznaczenie domyślnie wykonywanej akcji na taką samą co ostatnio u tej postaci
+	if (lastDefaultAttack[selectedCharacter])
+	{
+		for(auto & b : ui.button)
+			if (b->getAbility() == lastDefaultAttack[selectedCharacter])
+			{
+				ui.autoselectButton(b.get());
+				break;
+			}
+	} 
+	else
+	{
+		// jeżeli nie było zmiany domyślnego ataku, to jest nim pierwszego atak
+		ui.autoselectButton(ui.button[0].get());
+	}
 }
 
 void Game::checkMoveAndActionsAuto()
@@ -551,7 +577,7 @@ void Game::acceptMoveAndAction()
 		Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 
 		// wywołanie ataku
-		acceptAttack(attack);
+		acceptAttack( attack, getEnemyOnHoveredField(), range.getDirectionToThisField(hoveredField) );
 	}
 }
 
@@ -576,25 +602,14 @@ void Game::acceptMovePlayer()
 	road.clear();
 }
 
-void Game::acceptAttack(Attack& attack)
+void Game::acceptAttack(Attack& attack, CharacterOnBoard* target, Direction attack_direction)
 {
-	auto r = hoveredField;
-
-	CharacterOnBoard* attackedCharacter;
-
-	// znalezienie postaci na atakowanym polu
-	for( auto & character : charactersOnBoard) {
-		if (character->getCoords() == r->getCoords())
-			attackedCharacter = character.get();
-	}
-
 	// dodanie animacji ataku wykonywanego przez postać która atakuje
-	// TODO zmienić na activity pobrane z ataku
 	anim_manager.addAnimationToQueue (
 		anim_manager.createAnimation(
 			selectedCharacter,
-			Character::Activity::attack1,
-			range.getDirectionToThisField(r) 
+			attack.getActivity(),
+			attack_direction
 		)
 	);
 
@@ -604,7 +619,7 @@ void Game::acceptAttack(Attack& attack)
 	// dodanie animacji otrzymania obrażeń zaatakowanej postaci
 	anim_manager.addAnimationToQueue (
 		anim_manager.createAnimationHurt(
-			attackedCharacter,
+			target,
 			attack.draw_damage()
 		)
 	);
@@ -632,20 +647,32 @@ void Game::createRangePreview(std::vector<sf::Vector2i> in_range)
 	range = Range(vec, get_active_field_from_absolute_coords(selectedCharacter->getCoords()));
 }
 
+void Game::attackAOE(Attack& attack)
+{
+	for( auto & r : range.get())
+	{
+		if (getCharacterOnField(r))
+			acceptAttack(attack, getCharacterOnField(r), selectedCharacter->getDirection());
+	}
+}
+
 void Game::finishTurn()
 {
 	battle_queue.switchToNextCharacter();
 	selectCharacter(battle_queue.getCurrentCharacter());
 }
 
-bool Game::isEnemyOnHoveredField()
+CharacterOnBoard* Game::getCharacterOnField(Field* field)
 {
-	for (auto & r : range.get())
-		for (auto &character : charactersOnBoard)
-			if (	hoveredField->getCoords() == character->getCoords()
-				&&	r == hoveredField )
-				return true;
-	return false;
+	for (auto & character : charactersOnBoard)
+		if (field->getCoords() == character->getCoords() )
+			return character.get();
+	return nullptr;
+}
+
+CharacterOnBoard* Game::getEnemyOnHoveredField()
+{
+	return getCharacterOnField(hoveredField);
 }
 
 Field* Game::get_active_field_from_absolute_coords(sf::Vector2i coords)
@@ -705,7 +732,7 @@ void Game::draw_board()
 		{
 			auto f = *level.board[x][y];
 
-			// funnkcja SFML zamieniająca współrzędne kamery na ekranowe
+			// funkcja SFML zamieniająca współrzędne kamery na ekranowe
 			sf::Vector2i pos =
 				window->mapCoordsToPixel(f.getPosition());
 

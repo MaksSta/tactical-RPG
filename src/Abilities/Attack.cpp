@@ -1,7 +1,9 @@
 #include "Attack.h"
 
-Attack::Attack(int _action_points, int range, int _min_dmg, int _max_dmg)
+Attack::Attack(Character::Activity _activity, CallType _callType, int _action_points, int range, int _min_dmg, int _max_dmg, bool radiation)
 :
+    activity{_activity},
+    callType{_callType},
     action_points{_action_points},
     min_dmg{_min_dmg},
     max_dmg{_max_dmg}
@@ -14,8 +16,16 @@ Attack::Attack(int _action_points, int range, int _min_dmg, int _max_dmg)
     for (int x = -range; x <= range; x++)
         for (int y = -range; y <= range; y++)
         {
-            // pominięcie pola na którym jest atakujący oraz pól po skosie
-            if (x == 0 && y == 0 || x && y)
+            // pominięcie pola na którym jest atakujący
+            if (x == 0 && y == 0 )
+                continue;
+
+            // pominięcie wszystkich pól innych niż poziomej i pionowej linii od atakującego
+            if (!radiation && (x && y))
+                continue;
+
+            // dla ustawinego radiation, pomija tylko te pola których suma przesunięć od postaci jest większa niż zasięg ataku
+            if (radiation && (abs(x) + abs(y) > range ))
                 continue;
 
             in_range.push_back({x,y});
@@ -50,4 +60,14 @@ int Attack::draw_damage()
 int Attack::getAP()
 {
 	return action_points;
+}
+
+Character::Activity Attack::getActivity()
+{
+    return activity;
+}
+
+Attack::CallType Attack::getCallType()
+{
+    return callType;
 }

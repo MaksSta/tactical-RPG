@@ -7,6 +7,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "../Characters/Character.h"
 #include "../Global.h"
 
 class Ability {

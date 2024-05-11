@@ -62,6 +62,11 @@ Button::Action Button::getAction()
     return action;
 }
 
+Button::ActivationType Button::getActivationType()
+{
+    return activationType;
+}
+
 std::wstring Button::getDesc()
 {
     return desc;

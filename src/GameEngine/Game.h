@@ -91,17 +91,23 @@ private:
 	// ustawia postać na nowym polu, wywołuje animację ruchu
 	void acceptMovePlayer();
 
-	// wywołanie akcji podanego ataku w miejscu na podstawie podglądu range
-	void acceptAttack(Attack& attack);
+	// wywołanie akcji podanego ataku na podanej postaci
+	void acceptAttack(Attack& attack, CharacterOnBoard* target, Direction attack_direction);
 
 	// utworzonenie podglądu range względem zaznaczonej postaci na podstawie podanych przesunięć względem jej
 	void createRangePreview(std::vector<sf::Vector2i> in_range);
 
+	// wywołanie ataku obszarowego (na wszystkich postaciach w obecnym obiekcie range)
+	void attackAOE(Attack& attack);
+
 	// zakończenie tury, przejście do kolejnej postaci w kolejce bitwy
 	void finishTurn();
 
-	// sprawdzenie czy na wskazywanym polu znajduje się inna postać
-	bool isEnemyOnHoveredField();
+	// sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
+	CharacterOnBoard* getCharacterOnField(Field* field);
+
+	// sprawdzenie czy na wskazywanym polu znajduje się inna postać, jeśli tak zwraca wskaźnik do niej
+	CharacterOnBoard* getEnemyOnHoveredField();
 
 	// uzyskanie pola podając współrzędne kafelka z całej mapy
 	Field* get_active_field_from_absolute_coords(sf::Vector2i);	
@@ -131,7 +137,7 @@ private:
 	// czy wykryto zmianę ostatnio wskazywanego pola na planszy
 	bool hovered_field_changed();
 
-	// tryb aktywności w jakims znajduje się gra
+	// tryb aktywności w jakim znajduje się gra
 	GameMode gameMode;
 
 	// dodatkowy trybu aktywności, który decyduje o tym jakie czytać wydarzenia z myszy/klawiatury
@@ -161,7 +167,10 @@ private:
 
 	// informacja czy podgląd akcji do wykonania pochodzi z autoataku
 	bool range_created_from_auto;
-	
+
+	// ostatnio wybierany domyślny atak dla danej postaci
+	std::map<CharacterOnBoard*, Attack*> lastDefaultAttack;
+
 	// ilość akcji jaka zostanie w przypadku wykonania wskazywanej akcji
 	int AP_preview;
 
