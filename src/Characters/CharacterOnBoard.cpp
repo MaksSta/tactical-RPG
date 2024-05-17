@@ -1,12 +1,13 @@
 #include "CharacterOnBoard.h"
 
 CharacterOnBoard::CharacterOnBoard(	std::string _name,
+									Team _team,
 									short _max_hp,
 									sf::Vector2i start_coords,
 									sf::Vector2f _padding, 
 									float _scale) 
 : 
-	Character	(_name, _max_hp),
+	Character	(_name, _team, _max_hp),
 	coords		{start_coords},
 	padding		{_padding},
 	hpBar		{getPosition(), hp, max_hp}
@@ -78,9 +79,14 @@ void CharacterOnBoard::takeDamage(int dmg)
 	hpBar.takeDamage(final_dmg);
 }
 
-std::vector<Attack_full_data>& CharacterOnBoard::get_attack_data()
+std::vector<Attack>& CharacterOnBoard::getAttacks()
 {
-	return attack_full_data;
+	return attack;
+}
+
+Button_data& CharacterOnBoard::getButtonData(Activity activity)
+{
+	return button_data_for_attack[activity];
 }
 
 Button_data & CharacterOnBoard::get_finish_turn_button()

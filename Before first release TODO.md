@@ -10,7 +10,7 @@
 - [x] Disable directly switching on clicked character, at the begging select first character from queue
 - [x] Add finish turn button which switches to the next character
 - [x] Finish turn automatically after using all available action points
-- [ ] Add simple enemy character
+- [x] Add simple enemy character
 - [ ] Unable attacking friendly characters
-- [ ] Add sample attack ability to enemy (project attack without button attached)
+- [x] Add sample attack ability to enemy (project attack without button attached)
 - [ ] Add primitive AI for enemies (attacking closest enemy character)

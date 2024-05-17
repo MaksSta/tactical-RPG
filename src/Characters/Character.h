@@ -26,18 +26,26 @@ public:
 		hurt,
 	};
 
+	enum Team {
+		player,
+		enemy
+	};
+
 	/**
 	 * Utworzenie wstępnej klasy postaci
 	 * \param _name nazwa postaci do wyświetlenia
+	 * \param _team przez kogo sterowana jest postać
 	 * \param _max_hp maksymalna i zarazem początkowa ilość punktów życia
 	*/
-    Character(std::string _name, int _max_hp);
+    Character(std::string _name, Team _team, int _max_hp);
 
-	Activity get_activity();
+	Activity getActivity();
 	void setActivity(Activity);
 
 	Direction getDirection();
 	void setDirection(Direction);
+
+	Team getTeam();
 
 	int getAP();
 	void setAP(int);
@@ -48,6 +56,8 @@ public:
 
 	std::string getName();
 protected:
+	Team team;
+
 	Activity currentActivity {idle};
 	Direction direction {down};
 

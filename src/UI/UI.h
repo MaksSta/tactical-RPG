@@ -30,7 +30,7 @@ public:
      * \param data dane dotyczące przycisku
      * \param ability wskaźnik do umiejętności wywoływanej tym przyciskiem
     */
-    void addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability);
+    void addNewButton(sf::Vector2f pos, Button_data& data, Attack& ability);
 
     /**
      * tworzy nowy przycisk wywołujący specjalne zdarzenie

@@ -26,14 +26,17 @@
 #include "../Animations/Manager.h"
 #include "../Characters/Warrior.h"
 #include "../Characters/Sorceress.h"
+#include "../Characters/GoblinSlinger.h"
 #include "../Global.h"
 
 class Game {
 public:
 	// tryb aktywności w jakim znajduje się gra
 	enum GameMode {
-		locked_player_turn,
 		player_turn,
+		locked_player_turn,
+		enemy_turn,
+		locked_enemy_turn,
 	};
 
 	// dodatkowy trybu aktywności, który szczegółowo decyduje o sposobie wczytywania danych wejściowych
@@ -61,8 +64,14 @@ public:
 private:
 	void update(float deltaTime);
 
-	// przełączenie tury na wybraną postać
+	// przełączenie tury na wybraną postać (sterowną przez gracza)
 	void selectCharacter(CharacterOnBoard* character);
+
+	// przełączenie tury na wybraną postać (sterowną przez komputer)
+	void selectEnemyCharacter(CharacterOnBoard* character);
+
+	// pobranie zajętych pól na planszy (za wyjątkiem pola na którym jest selectedCharacter)
+	std::vector<Field*> getBlockedFields();
 
 	/**
 	 * dotyczy podglądu akcji tworzącego się dynamicznie przez wskazywanie myszką pól na planszy
@@ -88,14 +97,17 @@ private:
 	// akceptuje wywołania ruchu i/lub akcji
 	void acceptMoveAndAction();
 
+	// przesunięcie postaci o podaną odleglość pól na plaszy (używać tylko dla przesunięć o 1 pole)
+	void moveCharacter(CharacterOnBoard* character, sf::Vector2i offset);
+
 	// ustawia postać na nowym polu, wywołuje animację ruchu
 	void acceptMovePlayer();
 
 	// wywołanie akcji podanego ataku na podanej postaci
 	void acceptAttack(Attack& attack, CharacterOnBoard* target, Direction attack_direction);
 
-	// utworzonenie podglądu range względem zaznaczonej postaci na podstawie podanych przesunięć względem jej
-	void createRangePreview(std::vector<sf::Vector2i> in_range);
+	// utworzenie obiektu range na podstawie podanych przesunięć (względem selectedCharacter)
+	Range createRange(std::vector<sf::Vector2i> in_range);
 
 	// wywołanie ataku obszarowego (na wszystkich postaciach w obecnym obiekcie range)
 	void attackAOE(Attack& attack);
@@ -104,7 +116,7 @@ private:
 	void finishTurn();
 
 	// sprawdzenie czy podane pole znajduje się w zasięgu obecnie wybranego do wykonania ataku
-	bool isFieldInRange(Field* field);
+	bool isFieldInRange(Field* field, Range& range);
 
 	// sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
 	CharacterOnBoard* getCharacterOnField(Field* field);
@@ -166,7 +178,7 @@ private:
 	Road road;
 
 	// podgląd ataku do wykoniania akcją ataku
-	Range range; 
+	Range range_player;
 
 	// informacja czy podgląd akcji do wykonania pochodzi z autoataku
 	bool range_created_from_auto;

@@ -3,6 +3,7 @@
 Sorceress::Sorceress(sf::Vector2i start_coords)
 :
 	CharacterOnBoard(	"Sorceress",
+						Team::player,
 						12,
 						start_coords,
 						{-2, -2},
@@ -17,11 +18,9 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
 	button_attack1_data.img_file_path = "data/UI/sorceress/fireball.png";
 	button_attack1_data.id_name = "fireball";
 
-	attack_full_data.push_back({
-		Attack(Character::Activity::attack1, Attack::CallType::targetable, 3, 3, 3, 6),
-		Character::Activity::attack1,
-		button_attack1_data
-	});
+	button_data_for_attack[Character::Activity::attack1] = button_attack1_data;
+
+	attack.push_back({Character::Activity::attack1, Attack::CallType::targetable, 3, 4, 3, 6});
 
 	const int w = 48;
 	const int h = 48;

@@ -3,6 +3,7 @@
 Warrior::Warrior(sf::Vector2i start_coords) 
 :
 	CharacterOnBoard(	"Warrior",
+						Team::player,
 						15,
 						start_coords,
 						{-2, -2},
@@ -17,23 +18,18 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	button_attack1_data.img_file_path = "data/UI/warrior/attack_melee.png";
 	button_attack1_data.id_name = "attack_melee";
 
-	attack_full_data.push_back({
-		Attack(Character::Activity::attack1, Attack::CallType::targetable, 2, 1, 3, 4),
-		Character::Activity::attack1,
-		button_attack1_data
-	});
+	button_data_for_attack[Character::Activity::attack1] = button_attack1_data;
+
+	attack.push_back({Character::Activity::attack1, Attack::CallType::targetable, 2, 1, 3, 4});
 
 	Button_data button_attack3_data;
 	button_attack3_data.desc = L"Power attack";
 	button_attack3_data.img_file_path = "data/UI/warrior/attack3.png";
 	button_attack3_data.id_name = "attack_melee2";
 
-	attack_full_data.push_back({
-		Attack(Character::Activity::attack3, Attack::CallType::targetable, 5, 2, 5, 10),
-		Character::Activity::attack3,
-		button_attack3_data,
-	});
+	button_data_for_attack[Character::Activity::attack3] = button_attack3_data;
 
+	attack.push_back({Character::Activity::attack3, Attack::CallType::targetable, 5, 2, 5, 10});
 	/** 
 	 * TODO dodanie drugiego ataku u Warriora, wymaga nowych właściwości:
 	 * - zasięg obrażeń będzie obszarowy
@@ -45,11 +41,8 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	button_attack2_data.img_file_path = "data/UI/warrior/attack2.png";
 	button_attack2_data.id_name = "attack_ground";
 
-	attack_full_data.push_back({
-		Attack(Character::Activity::attack2, Attack::CallType::instant, 3, 2, 2, 3, true),
-		Character::Activity::attack2,
-		button_attack2_data,
-	});
+	button_data_for_attack[Character::Activity::attack2] = button_attack2_data;
+	attack.push_back({Character::Activity::attack2, Attack::CallType::instant, 3, 2, 2, 3, true});
 
 	const int w = 48;
 	const int h = 48;

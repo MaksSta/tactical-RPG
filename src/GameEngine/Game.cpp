@@ -46,8 +46,11 @@ Game::Game(	sf::RenderWindow & _window,
 
 
 	// utworzenie postaci
-	charactersOnBoard.push_back(std::make_unique<Warrior>(sf::Vector2i{4, 4}));
-	charactersOnBoard.push_back(std::make_unique<Sorceress>(sf::Vector2i{6, 6}));
+	charactersOnBoard.push_back(std::make_unique<Warrior>(sf::Vector2i{1, 1}));
+	charactersOnBoard.push_back(std::make_unique<Sorceress>(sf::Vector2i{6, 1}));
+
+	charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{2, 6}));
+	charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{5, 6}));
 
 	// dodanie postaci do kolejki bitwy
 	for (auto & character : charactersOnBoard)
@@ -222,7 +225,7 @@ void Game::run()
 						 */
 						if (	mouseClicked(sf::Mouse::Left, hoveredField->getGlobalBounds(), m_pos_on_map)
 							&&	!MouseLClickedLastFrame
-							&& (!road.empty() || !range.empty()) )
+							&& (!road.empty() || !range_player.empty()) )
 						{
 							// zatwierdzenie akcji do wywołania
 							acceptMoveAndAction();
@@ -235,21 +238,21 @@ void Game::run()
 					{
 						// kursor znajduje się poza planszą - wyłączenie podglądu akcji do wywołania
 						road.clear();
-						range.clear();
+						range_player.clear();
 						ui.cancelSimulatingHover();
 					}
 
 					// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
 					if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack )
 					{
-						createRangePreview(ui.getHoveredBtn()->getAbility()->get_in_range());
+						range_player = createRange(ui.getHoveredBtn()->getAbility()->get_in_range());
 						range_created_from_auto = false;
 					}
 
 					// kliknięcie myszką w przycisk wywołania akcji
 					if (ui.getSelectedBtn() )
 					{
-						createRangePreview(ui.getSelectedBtn()->getAbility()->get_in_range());
+						range_player = createRange(ui.getSelectedBtn()->getAbility()->get_in_range());
 						range_created_from_auto = false;
 
 						inputMode = action_is_selected;
@@ -267,16 +270,19 @@ void Game::run()
 						&&	!MouseLClickedLastFrame )
 					{
 						// sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje i czy to pole jest w zasięgu ataku
-						if (hoveredField && getEnemyOnHoveredField() && isFieldInRange(hoveredField))
+						if (hoveredField && getEnemyOnHoveredField() && isFieldInRange(hoveredField, range_player))
 						{
 							Attack attack = *(ui.getSelectedBtn()->getAbility());
 
-							acceptAttack( attack, getEnemyOnHoveredField(), range.getDirectionToThisField(hoveredField) );
+							acceptAttack( attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField) );
+							
+							// zablokowanie gry aż do skończenia animacji
+							lockGameMode();
 						} 
 						// nie ma wskazano prawidłowego celu - anulowanie wywoływania
 						else
 						{
-							range.clear();
+							range_player.clear();
 						}
 
 						// zdezaktyowowanie klikniętego przycisku
@@ -287,6 +293,115 @@ void Game::run()
 					}
 				} break;
 				}
+			} break;
+			/****************************************************************
+			 * Tryb gry: 		TURA PRZECIWNIKA
+			/****************************************************************/
+			case enemy_turn:
+			{
+				// skończenie tury i nie sprawdzanie dalszych działań gdy punkty akcji wynoszą 0
+				if (selectedCharacter->getAP() == 0)
+				{
+					finishTurn();
+					break;
+				}
+
+				bool attack_confirmed = false;
+
+				// iteracja kolejnych atakach
+				for (auto & attack : selectedCharacter->getAttacks())
+				{
+					if (selectedCharacter->getAP() >= attack.getAP())
+					{
+						// sprawdź czy przeciwnik jest w zasięgu
+						Range enemyRange = createRange(attack.get_in_range());
+
+						std::vector<CharacterOnBoard*> targets;
+
+						for (auto & c : charactersOnBoard)
+						{
+							// dodanie do listy celów wszystkich postaci z wrogiej drużyny znajdujących się w zasięgu wywołania ataku
+							if (isFieldInRange(get_active_field_from_absolute_coords(c->getCoords()), enemyRange)
+								&& (c->getTeam() != selectedCharacter->getTeam()) )
+							{
+								targets.push_back(c.get());
+							}
+						}
+
+						// znalezienie spośród celów postaci o najniższej ilości hp
+						CharacterOnBoard* target_with_lowest_hp {nullptr};
+						int lowest_hp = 9999;
+						for (auto & t : targets)
+							if (t->getHP() < lowest_hp)
+							{
+								target_with_lowest_hp = t;
+								lowest_hp = t->getHP();
+							}
+
+						// zaakceptowanie ataku dla celu o najniższym hp (o ile istnieje)
+						if (target_with_lowest_hp != nullptr)
+						{
+							acceptAttack( attack, target_with_lowest_hp, enemyRange.getDirectionToThisField(get_active_field_from_absolute_coords(target_with_lowest_hp->getCoords())) );
+
+							// zablokowanie gry aż do skończenia animacji
+							lockGameMode();
+
+							attack_confirmed = true;
+							break;
+						}
+					}
+				}
+
+				// zaprzestanie dalszego sprawdzania wydarzeń jeśli wykonano już atak
+				if (attack_confirmed)
+					break;
+
+				// dopóki zostały punkty akcji, wykonuje losowy ruch na jedno z możliwych pól
+				if (selectedCharacter->getAP() > 0)
+				{
+					// wykonanie losowego ruchu
+					int rnd =  rand() % 4;
+
+					sf::Vector2i movement;
+					switch (rnd){
+						case 0:
+							movement = {-1, 0};
+						break;
+						case 1:
+							movement = {1, 0};
+						break;
+						case 2:
+							movement = {0, -1};
+						break;
+						case 3:
+							movement = {0, 1};
+						break;
+					}
+
+					// sprawdzenie czy ruch po wykonaniu nie prowadzi do zajętego pola lub pola poza planszą
+					Field* field_after_move = get_active_field_from_absolute_coords(selectedCharacter->getCoords() + movement);
+
+					bool invalid_move = false;
+
+					// blokowanie ruchu wychodzącego poza atywną część planszy
+					if (field_after_move == nullptr)
+						invalid_move = true;
+
+					for ( auto & bf : getBlockedFields() )
+					{
+						if (bf == field_after_move)
+							invalid_move = true;
+					}
+
+					if (!invalid_move)
+					{
+						moveCharacter(selectedCharacter, movement);
+
+						// zablokowanie gry aż do skończenia animacji
+						lockGameMode();
+					}
+				}
+
 			} break;
 			}
 
@@ -391,6 +506,7 @@ void Game::update(float delta)
 
 void Game::selectCharacter(CharacterOnBoard* character)
 {
+	gameMode = player_turn;
 	inputMode = InputMode::character_is_selected;
 	
 	selectedCharacter = character;
@@ -404,12 +520,16 @@ void Game::selectCharacter(CharacterOnBoard* character)
 	ui.destroyButtons();
 
 	// dodanie przycisków z umiejętnościami (1. wiersz)
-	for (float i = 0; i < selectedCharacter->get_attack_data().size(); i++)
-		ui.addNewButton({i * 120, 0},
-						selectedCharacter->get_attack_data()[i].button_data,
-						&selectedCharacter->get_attack_data()[i].attack );
+	float n = 0;
+	for (auto & attack : selectedCharacter->getAttacks())
+	{
+		ui.addNewButton({120 * n, 0},
+						selectedCharacter->getButtonData(attack.getActivity()),
+						attack );
+		n++;
+	}
 
-	// dodanie przysku zakończenia tury (2. wiersz, na końcu z prawej)
+	// dodanie przycisku zakończenia tury (2. wiersz, na końcu z prawej)
 	ui.addNewButton({480 + 48, 122},
 					selectedCharacter->get_finish_turn_button(),
 					Button::Action::endturn );
@@ -426,27 +546,46 @@ void Game::selectCharacter(CharacterOnBoard* character)
 	} 
 	else
 	{
-		// jeżeli nie było zmiany domyślnego ataku, to jest nim pierwszego atak
+		// jeżeli nie było zmiany domyślnego ataku, to jest nim pierwszy przycisk
 		ui.autoselectButton(ui.button[0].get());
 	}
 }
 
-void Game::checkMoveAndActionsAuto()
+void Game::selectEnemyCharacter(CharacterOnBoard* character)
 {
-	// lista pól, przez które nie można przechodzić
+	gameMode = enemy_turn;
+
+	selectedCharacter = character;
+
+	// zresetowanie ilości punktów akcji na maksymalną wartość
+	selectedCharacter->setAP(selectedCharacter->getMaxAP());
+
+	ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
+
+	ui.cancelSimulatingHover();
+	ui.destroyButtons();
+}
+
+std::vector<Field*> Game::getBlockedFields()
+{
 	std::vector<Field*> blockedFields;
 
-	// znalezienie pól gdzie stoi już inna postać
+	// znalezienie wszystkich pól gdzie stoi już inna postać
 	for (auto &character : charactersOnBoard)
 	{
 		auto af = get_active_field_from_absolute_coords(character->getCoords());
-		// pozycja początkowa postaci nie może być jako zablokowane pole
+		// pozycja początkowa postaci nie jest uznawana jako zablokowane pole (do zastosowań w pathfindingu)
 		if (character.get() != selectedCharacter)	
 			blockedFields.push_back(af);
 	}
 
+	return blockedFields;
+}
+
+void Game::checkMoveAndActionsAuto()
+{
 	// utworzenie obiektu do znalezienia najkrótszej drogi podając informację o aktywnej części planszy
-	Pathfinder pathfinder(activeField, blockedFields);
+	Pathfinder pathfinder(activeField, getBlockedFields());
 	
 	// pole startowe drogi = pole zaznaczonej postaci
 	Field* fieldA = get_active_field_from_absolute_coords(selectedCharacter->getCoords());
@@ -458,7 +597,7 @@ void Game::checkMoveAndActionsAuto()
 	checkActionsByHover();
 
 	// w przypadku gdy nie ma w tej chwili podglądu żadnej akcji wyczyść podgląd drogi i utwórz od nowa
-	if (range.empty()) 
+	if (range_player.empty())
 	{
 		// czyszczenie road za każdym razem gdy zmieniło się wskaztwane myszką pole
 		road.clear();
@@ -550,7 +689,7 @@ void Game::checkActionsByHover()
 		ui.cancelSimulatingHover();
 
 	// utworzenie podglądu zasięgu
-	range = Range(	action_fields,
+	range_player = Range(	action_fields,
 					get_active_field_from_absolute_coords(field_caster->getCoords() ) );
 
 	range_created_from_auto = true;
@@ -580,14 +719,32 @@ void Game::acceptMoveAndAction()
 		// wywołanie ruchu
 		acceptMovePlayer();
 	}
-	if (!range.empty())
+	if (!range_player.empty())
 	{
 		// pobiera informację o autoataku z przycisku z domyślnie wywoływanym atakiem
 		Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 
 		// wywołanie ataku
-		acceptAttack( attack, getEnemyOnHoveredField(), range.getDirectionToThisField(hoveredField) );
+		acceptAttack( attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField) );
 	}
+}
+
+void Game::moveCharacter(CharacterOnBoard* character, sf::Vector2i offset)
+{
+	// zmiana położenia postaci od razu na pozycję po przesunięciu w kontekście logiki gry
+	character->setCoords(selectedCharacter->getCoords() + offset);
+
+	// dodanie animacji
+	anim_manager.addAnimationToQueue (
+		anim_manager.createAnimationMove(
+			character,
+			Animations::Actions::Move{{ static_cast<float>(offset.x * tile_size),
+										static_cast<float>(offset.y * tile_size)},
+										240.0f}
+		)
+	);
+
+	character->setAP(selectedCharacter->getAP() - 1);
 }
 
 void Game::acceptMovePlayer()
@@ -634,10 +791,10 @@ void Game::acceptAttack(Attack& attack, CharacterOnBoard* target, Direction atta
 	);
 
 	// usunięcie podglądu wywołania akcji
-	range.clear();	
+	range_player.clear();
 }
 
-void Game::createRangePreview(std::vector<sf::Vector2i> in_range)
+Range Game::createRange(std::vector<sf::Vector2i> in_range)
 {
 	std::vector<Field*> vec;
 
@@ -653,12 +810,14 @@ void Game::createRangePreview(std::vector<sf::Vector2i> in_range)
 			vec.push_back(af);
 	}
 
-	range = Range(vec, get_active_field_from_absolute_coords(selectedCharacter->getCoords()));
+	Range range(vec, get_active_field_from_absolute_coords(selectedCharacter->getCoords()));
+
+	return range;
 }
 
 void Game::attackAOE(Attack& attack)
 {
-	for( auto & r : range.get())
+	for( auto & r : range_player.get())
 	{
 		if (getCharacterOnField(r))
 			acceptAttack(attack, getCharacterOnField(r), selectedCharacter->getDirection());
@@ -668,10 +827,16 @@ void Game::attackAOE(Attack& attack)
 void Game::finishTurn()
 {
 	battle_queue.switchToNextCharacter();
-	selectCharacter(battle_queue.getCurrentCharacter());
+
+	auto currentCharacter = battle_queue.getCurrentCharacter();
+
+	if (currentCharacter->getTeam() == Character::Team::player)
+		selectCharacter(currentCharacter);
+	else if (currentCharacter->getTeam() == Character::Team::enemy)
+		selectEnemyCharacter(currentCharacter);
 }
 
-bool Game::isFieldInRange(Field* field)
+bool Game::isFieldInRange(Field* field, Range& range)
 {
 	for( auto & r : range.get() )
 		if (r->getCoords() == field->getCoords())
@@ -707,12 +872,19 @@ Field* Game::get_active_field_from_absolute_coords(sf::Vector2i coords)
 
 void Game::lockGameMode() 
 {
-	gameMode = locked_player_turn;
+	if (gameMode == player_turn)
+		gameMode = locked_player_turn;
+	else if (gameMode == enemy_turn)
+		gameMode = locked_enemy_turn;
 }
 
 void Game::unlockGameMode() 
 {
-	gameMode = player_turn;
+	if (gameMode == locked_player_turn)
+		gameMode = player_turn;
+	else if (gameMode == locked_enemy_turn)
+		gameMode = enemy_turn;
+
 	justUnlocked = true;
 
 	// żeby można było od razu wykryć akcję na wskazywanym polu (bez konieczności jego zmiany)
@@ -777,11 +949,11 @@ void Game::draw_board()
 		window->draw(road);
 	}
 
-	if (!range.empty()) {
-		window->draw(range);
+	if (!range_player.empty()) {
+		window->draw(range_player);
 	}
 
-	if (!road.empty()  || (!range.empty() && range_created_from_auto))
+	if (!road.empty() || (!range_player.empty() && range_created_from_auto))
 	{
 		window->draw(text_AP_preview);
 	}

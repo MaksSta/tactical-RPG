@@ -24,29 +24,19 @@ struct Sprites_data {
 	float fps;
 };
 
-// zestaw wszystkich dancych o pojedyńczym ataku
-struct Attack_full_data {
-	// informacje dotyczące samego ataku
-	Attack attack;
-
-	// aktywność, która informuje o zestawie animacji do tego ataku
-	Character::Activity activity;
-
-	// dane dotyczące przycisku wywołującego atak
-	Button_data button_data;
-};
-
 class CharacterOnBoard : public sf::Drawable, public Character {
 public:
 	/** 
 	 * Utworzonie postaci, którą po zainicjowaniu wyświetlać się będzie na ekranie
 	 * \param _name nazwa postaci do wyświetlenia
+	 * \param _team przez kogo sterowana jest postać
 	 * \param _max_hp maksymalna i zarazem początkowa ilość punktów życia
 	 * \param start_coords pocztąwkowa pozycja na planszy
 	 * \param _padding opcjonalny padding wyświetlanej postaci
 	 * \param _scale opcjonalne skalowanie wielkości wyświetlanej postaci
 	*/
 	CharacterOnBoard(	std::string _name,
+						Team _team,
 						short _max_hp,
 						sf::Vector2i start_coords, 
 						sf::Vector2f _padding = {0, 0},
@@ -91,7 +81,9 @@ public:
 	void takeDamage(int dmg);
 
 	// zwraca pełne informacje o wszystkich atakach
-	std::vector<Attack_full_data>& get_attack_data();
+	std::vector<Attack>& getAttacks();
+
+	Button_data& getButtonData(Activity activity);
 
 	// zwraca dane potrzebne do utworzenia przycisku zakończenia tury
 	Button_data & get_finish_turn_button();
@@ -113,8 +105,8 @@ protected:
 	// pasek hp wyświetlany nad postacią
 	HpBar hpBar;
 
-	// wektor pełnych informacji do każdego ataku
-	std::vector<Attack_full_data> attack_full_data;
+	// wektor wszystkich ataków postaci
+	std::vector<Attack> attack;
 
 	// współrzędne postaci na ekranie
 	sf::Vector2f position;
@@ -128,6 +120,8 @@ protected:
 	// odwzorowanie {aktywność, kierunek} na przypisany zestaw spritów
 	std::map<std::pair<Activity, Direction>, Sprites_data> sprites_data;
 
+	// odwzorowanie ataku (podanego jako aktywność) na przycisk do niego
+	std::map<Activity, Button_data> button_data_for_attack;
 };
 
 #endif /* CHARACTERS_CHARACTERONBOARD_H_ */

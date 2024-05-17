@@ -1,8 +1,9 @@
 #include "Character.h"
 
-Character::Character(std::string _name, int _max_hp)
+Character::Character(std::string _name, Team _team, int _max_hp)
 :
     name{_name},
+	team{_team},
 	max_hp{_max_hp},
 	hp{_max_hp}
 {
@@ -11,7 +12,12 @@ Character::Character(std::string _name, int _max_hp)
 	action_points = max_action_points;
 }
 
-Character::Activity Character::get_activity()
+Character::Team Character::getTeam()
+{
+	return team;
+}
+
+Character::Activity Character::getActivity()
 {
 	return currentActivity;
 }

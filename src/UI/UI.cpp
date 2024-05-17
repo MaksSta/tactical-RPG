@@ -10,9 +10,9 @@ UI::UI(sf::Vector2f _starts_at)
 {
 }
 
-void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability)
+void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack& ability)
 {
-	auto callType = ability->getCallType();
+	auto callType = ability.getCallType();
 	Button::ActivationType buttonType;
 
 	if (callType == Attack::CallType::targetable)
@@ -21,12 +21,12 @@ void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack* ability)
 		buttonType = Button::ActivationType::clickable;
 
 	button.push_back(
-		 std::make_unique<Button>(buttonType, ability, btnsStartPos + pos, data.img_file_path, data.desc)
+		 std::make_unique<Button>(buttonType, &ability, btnsStartPos + pos, data.img_file_path, data.desc)
 	);
 
 	// tekst z ilością punktów akcji jaką pobiera umiejętność pod przyciskiem
 	text_action_cost.push_back(
-		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{29, 83}, std::to_wstring(ability->getAP()), 28, sf::Color::Yellow)
+		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{29, 83}, std::to_wstring(ability.getAP()), 28, sf::Color::Yellow)
 	);
 }
 

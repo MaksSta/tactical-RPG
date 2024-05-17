@@ -41,7 +41,7 @@ private:
     int& max_hp;
 
     // animowany efekt otrzymywania obrażeń na pasku życia w czasie
-    float damage_effect;
+    float damage_effect {0.0f};
 
     // efekt zamrożenia obrażeń na pasku na czas podany w sekundach
     float damage_effect_freeze;

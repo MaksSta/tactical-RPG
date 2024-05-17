@@ -142,7 +142,7 @@ void Manager::updateIdleAnimations(float delta)
 {
 	// update wszystkich animacji bezczynności
 	for( auto & ani : idle_animations) {
-		if (ani->animatedObj->get_activity() == Character::Activity::idle)
+		if (ani->animatedObj->getActivity() == Character::Activity::idle)
 			update_animation_and_check_if_finished(*ani, delta);
 	}
 }
