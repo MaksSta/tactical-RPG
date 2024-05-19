@@ -104,7 +104,7 @@ private:
 	void acceptMovePlayer();
 
 	// wywołanie akcji podanego ataku na podanej postaci
-	void acceptAttack(Attack& attack, CharacterOnBoard* target, Direction attack_direction);
+	void acceptAttack(Attack& attack, std::vector<CharacterOnBoard*> target, Direction attack_direction);
 
 	// utworzenie obiektu range na podstawie podanych przesunięć (względem selectedCharacter)
 	Range createRange(std::vector<sf::Vector2i> in_range);
