@@ -1,11 +1,21 @@
 /** 
  * Klasa zarządzająca animacjami
  * Odpowiada za:
- * - obługę równolegle wykonywanych animacji 
- * - obsługę kolejki animacji wykonanych jedna po drugiej:
- *   - inicjalizację nowo zdjętej animacji z kolejki (co dodatkowo może wywoływać różne zdarzenia)
+ * - wygenerowanie wszelkich animacji animacji na podstawie wytycznych
+ * - obługę równolegle wykonywanych animacji bezczyności
+ * - obsługę kolejki zbiorów animacji pobieranych jeden po drugim
+ * - równlogłe wykonanie wszystkich animacji z obecnie wywoływanego zbioru:
+ *   - inicjalizacja nowo zdjętej animacji z kolejki
+ *     (co dodatkowo może wywoływać różne zdarzenia np. animacja Hurt zabiera punkty HP)
  *   - animowanie jej, aż do spełenienia jej warunku końcowego
  *   - usunięcie po jego spełnieniu
+ * 
+ *  Graficzne przedstawienie przykładowego obsłużenia czterech zbiórów animacji ABCD
+ *  ponumerowano wszystkie animacje w jednym zbiorze, znaki === oznaczają czas trwania animacji
+ * 
+ *  [A1===][B1==]  [C1=====]   [D1==]
+ *         [B2====][C2===]
+ *                 [C3========]
 */
 
 #ifndef ANIMATIONS_MANAGER_H_
@@ -28,9 +38,6 @@ namespace Animations
 {
     class Manager {
     public:
-        // jedyny i domyślny konstruktor, nie robi zupełnie nic
-        Manager();
-
         /**
          * tworzy dowolną animację
          * @param animatedObj wskaźnik do postaci na której wykonywana będzie animacja
@@ -67,7 +74,13 @@ namespace Animations
         */ 
         Animation* createAnimationHurt( CharacterOnBoard* animatedObj, int damage);
 
-        // dodanie animacji do kolejki
+        // utworzenie nowego zbioru na równolegle wykonujące się animacje
+        std::vector<Animation*>& addNewSet();
+
+        // dodanie animacji do wskazanego zbioru równolegle wykonywanych animacji
+        void addAnimationToSet(std::vector<Animation*>& set, Animation* animation);
+
+        // dodanie animacji do kolejki (automatycznie tworząc dla niej nowy zbiór)
         void addAnimationToQueue(Animation* animation);
 
         // dodanie animacji do wektora równolegle wywoływanych animacji bezczynności
@@ -85,11 +98,11 @@ namespace Animations
         // zwraca informację czy zostały jakieś animacje w kolejce (blokują one tryb gry)
         bool anyAnimationLocking();
     private:
-        // główna ścieżka animacji wykonywanych kolejno po sobie (blokują tryb gry)
-        std::queue<Animation*> main_queue;
+        // kolejka zbiorów animacji czekających do wywołania
+        std::queue<std::vector<Animation*>> sets_queue;
 
-        // wskaźnik do obecnie obsługiwanej animacji z kolejki
-        Animation* currentAnimation {nullptr};
+        // węzeł z równolegle wykonywanymi animacjami
+        std::vector<Animation*> current_set;
 
         // równolegle wykonywane animacje bezczynności (nie blokują trybu gry)
         std::vector<Animation*> idle_animations;

@@ -2,8 +2,6 @@
 
 using namespace Animations;
 
-Manager::Manager() {}
-
 Animation* Manager::createAnimation(	CharacterOnBoard* animatedObj,
 										Character::Activity activity,
 										Direction direction)
@@ -32,9 +30,27 @@ Animation* Manager::createAnimationHurt(	CharacterOnBoard* animatedObj,
 }
 
 
+std::vector<Animation*>& Manager::addNewSet()
+{
+	// utworzenie nowej, pustej ścieżki animacji
+	std::vector<Animation*> new_set;
+	sets_queue.push(new_set);
+
+	return sets_queue.back();
+}
+
+void Manager::addAnimationToSet(std::vector<Animation*>& set, Animation* animation)
+{
+	set.push_back(animation);
+}
+
 void Manager::addAnimationToQueue(Animation* animation)
 {
-	main_queue.push(animation);
+	// utworzenie nowego pustego zbioru na animacje
+	std::vector<Animation*>& set = addNewSet();
+
+	// wrzucenie tam animacji
+	addAnimationToSet(set, animation);
 }
 
 void Manager::addIdleAnimation(Animation* animation)
@@ -87,55 +103,61 @@ bool Manager::update_animation_and_check_if_finished(	Animation& animation,
 
 void Manager::updateAnimationsStack(float delta)
 {
-	// wskaźnik na ostatnio odtwarzaną animację 
-	// do porówywania czy animacja zmieniła się od ostatniego wywołania funkcji
-	Animation* previousAnimation;
+	// jeżeli obecny zbiór animacji jest pusty, pobranie kolejnego z kolejki o ile jakieś zostały
+	if ( current_set.empty() && !sets_queue.empty() )
+	{
+		// zdjęcie oczekującego zbioru animacji z kolejki
+		current_set = sets_queue.front();
+		sets_queue.pop();
 
-	// w przypadku braku jakichkolwiek animacji w kolejce nie wykonuje nic
-	if (main_queue.empty())
-		return;
-
-	// w przypadku braku aktywnej animacji wrzucenie pierwszej ze stosu (o ile jakaś została)
-	if (!currentAnimation) {
-		if (!main_queue.empty()) {
-			currentAnimation = main_queue.front();
-			// przy opdaleniu nowej animacji jest ona wpierw inicjowana
-			if (currentAnimation != previousAnimation) {
-				// wychwycenie wyjątku w przypadku próby uruchomienia animacji która nie istnieje
-				try {
-					currentAnimation->init();
-				}
-				catch (errors::no_anim_for_activity) {
-					// w przeciwnym razie program zawiesiłby się
-					std::cout << "Error! Animation for runned action does't exist.\n";
-					std::exit(1);
-				}
-				// ustawienie animacji na początkową klatkę jeżeli taką informację animacja
-				if (currentAnimation->isResettingFrame) {
-					current_frame[currentAnimation->animatedObj] = 0;
-				}
+		// i uruchomienie wszystkich animacji w nim
+		for ( auto & animation : current_set)
+		{
+			// wychwycenie wyjątku w przypadku próby uruchomienia animacji która nie jest zdefiniowana
+			try
+			{
+				animation->init();
 			}
-		} 
-	}
+			catch (errors::no_anim_for_activity)
+			{
+				// w przeciwnym razie program zawiesiłby się
+				std::cout << "Error! Animation for runned action does't exist.\n";
+				std::exit(1);
+			}
 
-	if (currentAnimation) {
-		// update bieżącej animacji
-		// w przypadku spełnienia warunku końcowego zakończonenie animacji
-		if (update_animation_and_check_if_finished(*currentAnimation, delta)) {
-			
-			// reset stanu aktywności postaci 
-			currentAnimation->destroy();
-
-			// powrót do domyślnego spritu
-			currentAnimation->animatedObj->reset_texture();
-
-			delete currentAnimation;
-			
-			currentAnimation = nullptr;
-			main_queue.pop();
+			// ustawienie animacji na początkową klatkę (tylko dla animacji z ustawionym isResettingFrame)
+			if (animation->isResettingFrame)
+			{
+				current_frame[animation->animatedObj] = 0;
+			}
 		}
 	}
-	previousAnimation = currentAnimation;
+
+	std::vector<std::vector<Animation*>::iterator> toErase;
+
+	// wywołanie wszystkich kolejnych animacji z danego zbioru równocześnie
+	for ( std::vector<Animation*>::iterator animation_it = current_set.begin(); animation_it != current_set.end(); animation_it++)
+	{
+		if (update_animation_and_check_if_finished(**animation_it, delta))
+		{
+			// zapisanie tej animacji do usunięcia (usunięcie teraz zepsułoby węzeł wskazujący na kolejną animację)
+			toErase.push_back(animation_it);
+
+			// reset stanu aktywności postaci 
+			(*animation_it)->destroy();
+
+			// powrót do domyślnego spritu
+			(*animation_it)->animatedObj->reset_texture();
+
+			// usunięcie animacji (utworzonej w jednej z funkcji createAnimation)
+			delete (*animation_it);
+		}
+	}
+
+	// usunięcie zakończonych animacji
+	for (auto & it : toErase)
+		current_set.erase(it);
+
 }
 
 void Manager::updateIdleAnimations(float delta) 
@@ -149,7 +171,7 @@ void Manager::updateIdleAnimations(float delta)
 
 bool Manager::anyAnimationLocking()
 {
-	if (main_queue.empty())
+	if (sets_queue.empty() && current_set.empty())
 		return false;
     return true;
 }

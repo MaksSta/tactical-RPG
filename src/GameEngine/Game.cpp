@@ -274,7 +274,7 @@ void Game::run()
 						{
 							Attack attack = *(ui.getSelectedBtn()->getAbility());
 
-							acceptAttack( attack, {getEnemyOnHoveredField()}, range_player.getDirectionToThisField(hoveredField) );
+							acceptAttack( attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField) );
 							
 							// zablokowanie gry aż do skończenia animacji
 							lockGameMode();
@@ -341,7 +341,7 @@ void Game::run()
 						// zaakceptowanie ataku dla celu o najniższym hp (o ile istnieje)
 						if (target_with_lowest_hp != nullptr)
 						{
-							acceptAttack( attack, {target_with_lowest_hp}, enemyRange.getDirectionToThisField(get_active_field_from_absolute_coords(target_with_lowest_hp->getCoords())) );
+							acceptAttack( attack, target_with_lowest_hp, enemyRange.getDirectionToThisField(get_active_field_from_absolute_coords(target_with_lowest_hp->getCoords())) );
 
 							// zablokowanie gry aż do skończenia animacji
 							lockGameMode();
@@ -725,7 +725,7 @@ void Game::acceptMoveAndAction()
 		Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 
 		// wywołanie ataku
-		acceptAttack( attack, {getEnemyOnHoveredField()}, range_player.getDirectionToThisField(hoveredField) );
+		acceptAttack( attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField) );
 	}
 }
 
@@ -735,6 +735,7 @@ void Game::moveCharacter(CharacterOnBoard* character, sf::Vector2i offset)
 	character->setCoords(selectedCharacter->getCoords() + offset);
 
 	// dodanie animacji
+
 	anim_manager.addAnimationToQueue (
 		anim_manager.createAnimationMove(
 			character,
@@ -768,7 +769,7 @@ void Game::acceptMovePlayer()
 	road.clear();
 }
 
-void Game::acceptAttack(Attack& attack, std::vector<CharacterOnBoard*> targets, Direction attack_direction)
+void Game::acceptAttack(Attack& attack, CharacterOnBoard* target, Direction attack_direction)
 {
 	// dodanie animacji ataku wykonywanego przez postać która atakuje
 	anim_manager.addAnimationToQueue (
@@ -783,9 +784,37 @@ void Game::acceptAttack(Attack& attack, std::vector<CharacterOnBoard*> targets, 
 	selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
 
 	// dodanie animacji otrzymania obrażeń zaatakowanej postaci
+	anim_manager.addAnimationToQueue(
+		anim_manager.createAnimationHurt(
+			target,
+			attack.draw_damage()
+		)
+	);
+
+	// usunięcie podglądu wywołania akcji
+	range_player.clear();
+}
+
+void Game::acceptMultiAttack(Attack& attack, std::vector<CharacterOnBoard*> targets, Direction attack_direction)
+{
+	// dodanie animacji ataku wykonywanego przez postać która atakuje
+	anim_manager.addAnimationToQueue (
+		anim_manager.createAnimation(
+			selectedCharacter,
+			attack.getActivity(),
+			attack_direction
+		)
+	);
+
+	// odjęcie punktów akcji za atak
+	selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
+
+	// dodanie animacji otrzymania obrażeń zaatakowanych postaci równocześnie
+	std::vector<Animations::Animation*>& set = anim_manager.addNewSet();
 	for( auto & t : targets)
-		anim_manager.addAnimationToQueue(
-			anim_manager.createAnimationHurt(
+		anim_manager.addAnimationToSet(
+			set,
+				anim_manager.createAnimationHurt(
 				t,
 				attack.draw_damage()
 			)
@@ -827,7 +856,7 @@ void Game::attackAOE(Attack& attack)
 			targets.push_back(getCharacterOnField(r));
 	}
 
-	acceptAttack(attack, targets, selectedCharacter->getDirection());
+	acceptMultiAttack(attack, targets, selectedCharacter->getDirection());
 }
 
 void Game::finishTurn()
