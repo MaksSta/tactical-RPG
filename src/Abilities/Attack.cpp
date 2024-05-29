@@ -1,6 +1,6 @@
 #include "Attack.h"
 
-Attack::Attack(Character::Activity _activity, CallType _callType, int _action_points, int range, int _min_dmg, int _max_dmg, bool radiation)
+Attack::Attack(Character::Activity _activity, CallType _callType, int _action_points, int range_min, int range_max, int _min_dmg, int _max_dmg, bool radiation)
 :
     activity{_activity},
     callType{_callType},
@@ -8,24 +8,28 @@ Attack::Attack(Character::Activity _activity, CallType _callType, int _action_po
     min_dmg{_min_dmg},
     max_dmg{_max_dmg}
 {
-    if (range == 1)
+    if (range_max == 1)
         type = Type::melee;
-    else if (range > 1)
+    else if (range_max > 1)
         type = Type::ranged;
 
-    for (int x = -range; x <= range; x++)
-        for (int y = -range; y <= range; y++)
+    for (int x = -range_max; x <= range_max; x++)
+        for (int y = -range_max; y <= range_max; y++)
         {
             // pominięcie pola na którym jest atakujący
-            if (x == 0 && y == 0 )
+            if ( x == 0 && y == 0 )
+                continue;
+
+            // pominięcie pól z mniejszym zasięgiem niż zasięg minimalny
+            if ( abs(x) + abs(y) < range_min )
                 continue;
 
             // pominięcie wszystkich pól innych niż poziomej i pionowej linii od atakującego
-            if (!radiation && (x && y))
+            if ( !radiation && (x && y) )
                 continue;
 
-            // dla ustawinego radiation, pomija tylko te pola których suma przesunięć od postaci jest większa niż zasięg ataku
-            if (radiation && (abs(x) + abs(y) > range ))
+            // dla ustawinego radiation, pomija pola których suma przesunięć od postaci jest większa niż zasięg ataku
+            if ( radiation && (abs(x) + abs(y) > range_max) )
                 continue;
 
             in_range.push_back({x,y});

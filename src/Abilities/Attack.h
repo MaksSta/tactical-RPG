@@ -1,5 +1,5 @@
 /**
- * Klasa zawierająca wszystkie potrzebne informacje o ataku jaki może wywołać postać
+ * Wszystkie potrzebne informacje o ataku jaki może wywołać postać
 */
 
 #ifndef ABILITIES_ATTACK_H_
@@ -21,7 +21,7 @@ public:
         instant
     };
 
-    Attack(Character::Activity _activity, CallType _callType, int _action_points, int range, int _min_dmg, int _max_dmg, bool radiation = false);
+    Attack(Character::Activity _activity, CallType _callType, int _action_points, int range_min, int range_max, int _min_dmg, int _max_dmg, bool radiation = false);
 
     // zwraca rodzaj ataku
     Type get_type();

@@ -11,7 +11,7 @@ GoblinSlinger::GoblinSlinger(sf::Vector2i start_coords)
 					)
 {
 	attack.push_back({
-		Attack(Character::Activity::attack1, Attack::CallType::targetable, 3, 4, 2, 4),
+		Attack(Character::Activity::attack1, Attack::CallType::targetable, 3, 2, 4, 2, 4),
 	});
 
 	const int w = 48;
