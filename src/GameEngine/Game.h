@@ -127,6 +127,9 @@ private:
 	// sprawdzenie czy na wskazywanym polu znajduje się inna postać, jeśli tak zwraca wskaźnik do niej
 	CharacterOnBoard* getEnemyOnHoveredField();
 
+	// zwraca tylko żyjące postacie
+	std::vector<CharacterOnBoard*> getAliveCharacters();
+
 	// uzyskanie pola podając współrzędne kafelka z całej mapy
 	Field* get_active_field_from_absolute_coords(sf::Vector2i);	
 

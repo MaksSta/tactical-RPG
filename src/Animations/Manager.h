@@ -26,11 +26,14 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <memory>
 
 #include "../Characters/Character.h"
 
 #include "MoveBy.h"
 #include "Hurt.h"
+#include "Death.h"
+#include "Disappear.h"
 
 #include "Actions/Move.h"
 
@@ -67,12 +70,26 @@ namespace Animations
                                         Animations::Actions::Move move);
 
         /** 
-         * tworzy animcję otrzymywania obrażeń, która redukuje punkty życia postaci
+         * tworzy animację otrzymywania obrażeń, która redukuje punkty życia postaci
          * @param animatedObj wskaźnik do postaci na której wykonywana będzie animacja
          * @param damage to ilość punktów obrażeń, jaką otrzyma postać podczas animacji
          * @return zwraca wskaźnik do nowo utworzonej animacji
         */ 
         Animation* createAnimationHurt( CharacterOnBoard* animatedObj, int damage);
+
+        /**
+         * tworzy animację umierania, która przestawia status postaci na umierający
+         * @param animatedObj wskaźnik do postaci na której wykonywana będzie animacja
+         * @return zwraca wskaźnik do nowo utworzonej animacji
+        */
+        Animation* createAnimationDeath( CharacterOnBoard* animatedObj);
+
+        /**
+         * tworzy animację zniknięcia postaci, która wyłącza natychmiast pasek z hp
+         * @param animatedObj wskaźnik do postaci na której wykonywana będzie animacja
+         * @return zwraca wskaźnik do nowo utworzonej animacji
+        */
+        Animation* createAnimationDisappear( CharacterOnBoard* animatedObj);
 
         // utworzenie nowego zbioru na równolegle wykonujące się animacje
         std::vector<Animation*>& addNewSet();
@@ -90,7 +107,7 @@ namespace Animations
         void updateAnimationsStack(float delta);
 
         // update wszystkich animacji bezczynności
-        void updateIdleAnimations(float delta);
+        void updateIdleAnimations(std::vector<CharacterOnBoard*> characters, float delta);
 
         // update wybranej animacj i zwrócenie wyniku o tym czy się zakończyła
         bool update_animation_and_check_if_finished(Animation& animation, float delta);

@@ -313,18 +313,18 @@ void Game::run()
 				{
 					if (selectedCharacter->getAP() >= attack.getAP())
 					{
-						// sprawdź czy przeciwnik jest w zasięgu
 						Range enemyRange = createRange(attack.get_in_range());
 
 						std::vector<CharacterOnBoard*> targets;
 
-						for (auto & c : charactersOnBoard)
+						// sprawdź czy postać gracza jest w zasięgu
+						for (auto & c : getAliveCharacters())
 						{
 							// dodanie do listy celów wszystkich postaci z wrogiej drużyny znajdujących się w zasięgu wywołania ataku
 							if (isFieldInRange(get_active_field_from_absolute_coords(c->getCoords()), enemyRange)
-								&& (c->getTeam() != selectedCharacter->getTeam()) )
+								&& (c->getTeam() != selectedCharacter->getTeam()))
 							{
-								targets.push_back(c.get());
+								targets.push_back(c);
 							}
 						}
 
@@ -454,11 +454,31 @@ void Game::run()
 
 void Game::update(float delta)
 {
+	// uśmiercenie postaci, dla których liczba hp spadła do zera
+	for (auto & character : getAliveCharacters())
+		if (character->getHP() == 0 && !character->will_die_soon)
+		{
+			// zaznaczenie że postać zaraz umrze, by nie sprawdzać tego ponownie
+			character->will_die_soon = true;
+
+			// dodanie animacji śmierci i następnie zniknięcia
+			anim_manager.addAnimationToQueue(
+				anim_manager.createAnimationDeath(
+					character
+				)
+			);
+			anim_manager.addAnimationToQueue(
+				anim_manager.createAnimationDisappear(
+					character
+				)
+			);
+		}
+
 	// update kolejki animacji
 	anim_manager.updateAnimationsStack(delta);
 
 	// update animacji bezczynych postaci
-	anim_manager.updateIdleAnimations(delta);
+	anim_manager.updateIdleAnimations(getAliveCharacters(), delta);
 
 	// update wszystich postaci
 	for (auto &character : charactersOnBoard)
@@ -571,11 +591,11 @@ std::vector<Field*> Game::getBlockedFields()
 	std::vector<Field*> blockedFields;
 
 	// znalezienie wszystkich pól gdzie stoi już inna postać
-	for (auto &character : charactersOnBoard)
+	for (auto & character : getAliveCharacters())
 	{
 		auto af = get_active_field_from_absolute_coords(character->getCoords());
 		// pozycja początkowa postaci nie jest uznawana jako zablokowane pole (do zastosowań w pathfindingu)
-		if (character.get() != selectedCharacter)	
+		if (character != selectedCharacter)
 			blockedFields.push_back(af);
 	}
 
@@ -659,11 +679,11 @@ void Game::checkActionsByHover()
 		// uzyskanie współrzędnych kolejnych pól w zasięgu wywołania akcji
 		auto coords_in_range = field_caster->getCoords() + r;
 
-		for (auto &character : charactersOnBoard)
+		for (auto & character : getAliveCharacters())
 			// sprawdzenie czy na wskazywanym polu znajduje się inna postać
 			if (	hoveredField->getCoords() == character->getCoords()
 				&&	hoveredField->getCoords() == coords_in_range
-				&&	character.get() != selectedCharacter)
+				&&	character != selectedCharacter)
 				{
 					// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
 					if (AP_preview_local >= attack.getAP())
@@ -891,6 +911,16 @@ CharacterOnBoard* Game::getCharacterOnField(Field* field)
 CharacterOnBoard* Game::getEnemyOnHoveredField()
 {
 	return getCharacterOnField(hoveredField);
+}
+
+std::vector<CharacterOnBoard*> Game::getAliveCharacters()
+{
+	std::vector<CharacterOnBoard*> aliveCharacters;
+	for (auto & c : charactersOnBoard)
+		if (c->isAlive())
+			aliveCharacters.push_back(c.get());
+
+	return aliveCharacters;
 }
 
 Field* Game::get_active_field_from_absolute_coords(sf::Vector2i coords)

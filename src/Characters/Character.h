@@ -24,6 +24,7 @@ public:
 		attack2,
 		attack3,
 		hurt,
+		death,
 	};
 
 	enum Team {
@@ -39,11 +40,15 @@ public:
 	*/
     Character(std::string _name, Team _team, int _max_hp);
 
+	void die();
+
 	Activity getActivity();
 	void setActivity(Activity);
 
 	Direction getDirection();
 	void setDirection(Direction);
+
+	bool isAlive();
 
 	Team getTeam();
 
@@ -55,7 +60,12 @@ public:
 	void setHP(int);
 
 	std::string getName();
+
+	// informacja o tym, że postać zaraz umrze (animacja śmierci czeka już w kolejce)
+	bool will_die_soon {false};
 protected:
+	bool alive {true};
+
 	Team team;
 
 	Activity currentActivity {idle};

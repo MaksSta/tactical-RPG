@@ -49,6 +49,14 @@ GoblinSlinger::GoblinSlinger(sf::Vector2i start_coords)
 	loadAnimation(Character::hurt, up, 		"data/GoblinSlinger/Up/Png/GoblinSlingerUpHurt.png",			frames_hurt, fps_hurt,	w,	h);
 	loadAnimation(Character::hurt, down, 	"data/GoblinSlinger/Down/Png/GoblinSlingerDownHurt.png",		frames_hurt, fps_hurt,	w,	h);
 
+	const int frames_death = 9;
+	const float fps_death = frames_death * 3;
+
+	loadAnimation(Character::death, left, 	"data/GoblinSlinger/Left/Png/GoblinSlingerLeftDeath.png",		frames_death, fps_death,	w,	h);
+	loadAnimation(Character::death, right, 	"data/GoblinSlinger/Right/Png/GoblinSlingerRightDeath.png",		frames_death, fps_death,	w,	h);
+	loadAnimation(Character::death, up, 		"data/GoblinSlinger/Up/Png/GoblinSlingerUpDeath.png",		frames_death, fps_death,	w,	h);
+	loadAnimation(Character::death, down, 	"data/GoblinSlinger/Down/Png/GoblinSlingerDownDeath.png",		frames_death, fps_death,	w,	h);
+
 	// zainicjowanie postaci na ekranie z domyślnymi ustawieniami
 	init();
 }

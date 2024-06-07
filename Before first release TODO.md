@@ -1,6 +1,6 @@
 - [x] Add possibiliy to execute selected attack from abilities on UI
 - [x] Add possibiliy to execute autoselected attack action by hovering enemy on board
-- [ ] Add death animation when character HP drop to 0 then remove it from board
+- [x] Add death animation when character HP drop to 0 then remove it from board
 - [x] Add actions points as required to do any move or action
 - [x] Show text how many action points left after usage on hovered field in action's preview
 - [x] Add second basic attack for Warrior or Sorceress to demonstrate switching autoselected attack

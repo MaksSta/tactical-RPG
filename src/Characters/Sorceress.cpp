@@ -57,6 +57,14 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
 	loadAnimation(Activity::hurt, up,		"data/Sorceress/Up/Png/SorceressUpHurt.png",			frames_hurt, fps_hurt, w, h);
 	loadAnimation(Activity::hurt, down,		"data/Sorceress/Down/Png/SorceressDownHurt.png",		frames_hurt, fps_hurt, w, h);
 
+	const int frames_death = 10;
+	const float fps_death = frames_death * 2.5;
+
+	loadAnimation(Activity::death, left,		"data/Sorceress/Left/Png/SorceressLeftDeath.png",		frames_death, fps_death, w, h);
+	loadAnimation(Activity::death, right,	"data/Sorceress/Right/Png/SorceressRightDeath.png",		frames_death, fps_death, w, h);
+	loadAnimation(Activity::death, up,		"data/Sorceress/Up/Png/SorceressUpDeath.png",			frames_death, fps_death, w, h);
+	loadAnimation(Activity::death, down,		"data/Sorceress/Down/Png/SorceressDownDeath.png",		frames_death, fps_death, w, h);
+
 	// zainicjowanie postaci na ekranie z domyślnymi ustawieniami
 	init();
 }

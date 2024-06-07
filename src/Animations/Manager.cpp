@@ -29,6 +29,15 @@ Animation* Manager::createAnimationHurt(	CharacterOnBoard* animatedObj,
 	return new Animations::Hurt(animatedObj, damage);
 }
 
+Animation* Manager::createAnimationDeath(	CharacterOnBoard* animatedObj)
+{
+	return new Animations::Death(animatedObj);
+}
+
+Animation* Manager::createAnimationDisappear(	CharacterOnBoard* animatedObj)
+{
+	return new Animations::Disappear(animatedObj, animatedObj->getActivity(), animatedObj->getDirection());
+}
 
 std::vector<Animation*>& Manager::addNewSet()
 {
@@ -66,15 +75,21 @@ bool Manager::update_animation_and_check_if_finished(	Animation& animation,
 	auto object = animation.animatedObj;
 	auto & sprites_data = object->get_current_sprites_data();
 
-	// zwiększenie numeru klatki dla animowanego obiektu
-	current_frame[object] += delta * sprites_data.fps;
+	// zwiększenie numeru klatki dla animowanego obiektu (dla klas animujących teksturę, tj. pochodnych OnTexture)
+	if (dynamic_cast<OnTexture*>(&animation))
+		current_frame[object] += delta * sprites_data.fps;
 
-	// do zanotowania jeżeli animacja wróciła do początkowej klatki
+	// info, że animacja wykonała się do ostatniej klatki
 	bool loop_reseted = false;	
 
 	// utrzymanie wartości licznika animacji w jej zakresie
-	while (current_frame[object] >= sprites_data.textures.size() ) {
-		current_frame[object] -= sprites_data.textures.size();
+	while (current_frame[object] >= sprites_data.textures.size() )
+	{
+		if (animation.finish_condition == Animations::FinishCondition::to_last_frame)
+			current_frame[object] = sprites_data.textures.size() - 1;
+		else
+			current_frame[object] -= sprites_data.textures.size();
+
 		loop_reseted = true;
 	}
 
@@ -85,16 +100,28 @@ bool Manager::update_animation_and_check_if_finished(	Animation& animation,
 
 	// sprawdzanie czy spełniony został warunek kończący animację
 	switch (animation.finish_condition) {
-		case no_repeat:
+		case FinishCondition::no_repeat:
+		{
+			if (loop_reseted)
+			{
+				object->reset_texture();
+				return true;
+			}
+		}
+		break;
+		case FinishCondition::to_last_frame:
 		{
 			if (loop_reseted)
 				return true;
 		}
 		break;
-		case special:
+		case FinishCondition::special:
 		{
 			if (animation.special_finish_condition_obtained())
+			{
+				object->reset_texture();
 				return true;
+			}
 		}
 		break;
 	}
@@ -143,12 +170,6 @@ void Manager::updateAnimationsStack(float delta)
 			// zapisanie tej animacji do usunięcia (usunięcie teraz zepsułoby węzeł wskazujący na kolejną animację)
 			toErase.push_back(animation_it);
 
-			// reset stanu aktywności postaci 
-			(*animation_it)->destroy();
-
-			// powrót do domyślnego spritu
-			(*animation_it)->animatedObj->reset_texture();
-
 			// usunięcie animacji (utworzonej w jednej z funkcji createAnimation)
 			delete (*animation_it);
 		}
@@ -157,11 +178,28 @@ void Manager::updateAnimationsStack(float delta)
 	// usunięcie zakończonych animacji
 	for (auto & it : toErase)
 		current_set.erase(it);
-
 }
 
-void Manager::updateIdleAnimations(float delta) 
+void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters, float delta)
 {
+	// zmiana statusu na idle wszystkim postaciom, dla których nie odgrywa się żadna animacja w tej chwili
+	for ( auto & character : characters)
+	{
+		bool any_animation_on_it = false;
+		for ( auto & animation : current_set)
+		{
+			// sprawdzenie czy jest obecnie jakaś animacja na tej postaci
+			if (animation->animatedObj == character)
+			{
+				any_animation_on_it = true;
+				break;
+			}
+		}
+
+		if (!any_animation_on_it)
+			character->setActivity(Character::Activity::idle);
+	}
+
 	// update wszystkich animacji bezczynności
 	for( auto & ani : idle_animations) {
 		if (ani->animatedObj->getActivity() == Character::Activity::idle)

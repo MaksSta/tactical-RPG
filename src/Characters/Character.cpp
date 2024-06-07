@@ -12,6 +12,17 @@ Character::Character(std::string _name, Team _team, int _max_hp)
 	action_points = max_action_points;
 }
 
+void Character::die()
+{
+	setActivity(Character::Activity::death);
+	alive = false;
+}
+
+bool Character::isAlive()
+{
+	return alive;
+}
+
 Character::Team Character::getTeam()
 {
 	return team;

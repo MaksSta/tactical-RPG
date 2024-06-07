@@ -30,12 +30,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	button_data_for_attack[Character::Activity::attack3] = button_attack3_data;
 
 	attack.push_back({Character::Activity::attack3, Attack::CallType::targetable, 5, 1, 2, 5, 10});
-	/** 
-	 * TODO dodanie drugiego ataku u Warriora, wymaga nowych właściwości:
-	 * - zasięg obrażeń będzie obszarowy
-	 * - wywołanie będzie odbywać się na siebie
-	 * - nie będzie mógł zostać wybierany jako autoatak
-	*/
+
 	Button_data button_attack2_data;
 	button_attack2_data.desc = L"Ground attack [aoe]";
 	button_attack2_data.img_file_path = "data/UI/warrior/attack2.png";
@@ -94,6 +89,14 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	loadAnimation(Character::hurt, right, 	"data/Warrior/Right/Png/WarriorRightHurt.png",		frames_hurt, fps_hurt,	w,	h);
 	loadAnimation(Character::hurt, up, 		"data/Warrior/Up/Png/WarriorUpHurt.png",			frames_hurt, fps_hurt,	w,	h);
 	loadAnimation(Character::hurt, down, 	"data/Warrior/Down/Png/WarriorDownHurt.png",		frames_hurt, fps_hurt,	w,	h);
+
+	const int frames_death = 5;
+	const float fps_death = frames_death * 2;
+
+	loadAnimation(Character::death, left, 	"data/Warrior/Left/Png/WarriorLeftDeath.png",		frames_death, fps_death,	w,	h);
+	loadAnimation(Character::death, right, 	"data/Warrior/Right/Png/WarriorRightDeath.png",		frames_death, fps_death,	w,	h);
+	loadAnimation(Character::death, up, 		"data/Warrior/Up/Png/WarriorUpDeath.png",		frames_death, fps_death,	w,	h);
+	loadAnimation(Character::death, down, 	"data/Warrior/Down/Png/WarriorDownDeath.png",		frames_death, fps_death,	w,	h);
 
 	// zainicjowanie postaci na ekranie z domyślnymi ustawieniami
 	init();

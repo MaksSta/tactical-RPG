@@ -114,7 +114,8 @@ void CharacterOnBoard::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	target.draw(sprite);
 
 	// pasek hp nad postacią
-	target.draw(hpBar);
+	if (displayHpBar)
+		target.draw(hpBar);
 }
 
 
@@ -137,6 +138,16 @@ sf::Vector2f CharacterOnBoard::getPosition()
 void CharacterOnBoard::setPosition(sf::Vector2f pos) 
 {
 	position = pos;
+}
+
+void CharacterOnBoard::setTransparency(unsigned char transparency)
+{
+	sprite.setColor({255, 255, 255, transparency});
+}
+
+void CharacterOnBoard::disableHpBar()
+{
+    displayHpBar = false;
 }
 
 void CharacterOnBoard::setTexture(sf::Texture& texture)

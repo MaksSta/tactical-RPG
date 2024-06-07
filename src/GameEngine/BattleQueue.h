@@ -22,6 +22,9 @@ public:
 
     // przełączenie na następną podstać w kolejce bitwy
     void switchToNextCharacter();
+
+    // usunięcie postaci z kolejki bitwy
+    void remove(CharacterOnBoard* character);
 private:
     std::deque<CharacterOnBoard*> queue;
     std::deque<CharacterOnBoard*>::iterator currentCharacter;

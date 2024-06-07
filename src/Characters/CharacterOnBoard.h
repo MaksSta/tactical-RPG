@@ -74,7 +74,7 @@ public:
 	// pobiera sprity dla obecnej aktywności i kierunku postaci
 	Sprites_data& get_current_sprites_data();
 
-	// przestawienie sprite na pierwszą klatkę z get_current_sprites_data();
+	// przestawienie sprite na pierwszą klatkę dla obecnego kierunku i aktywności
 	void reset_texture();
 
 	// zmniejsza wartość hp postaci i dodaje animcję na pasku życia
@@ -88,13 +88,18 @@ public:
 	// zwraca dane potrzebne do utworzenia przycisku zakończenia tury
 	Button_data & get_finish_turn_button();
 
+	// przestawia przezroczystość postaci wraz z paskiem hp
+	void setTransparency(unsigned char transparency);
+
+	// wygasza pokazywanie paska z hp
+	void disableHpBar();
+
 	void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 	void move(sf::Vector2f offset);
 	sf::FloatRect getGlobalBounds();
 	sf::Vector2f getPosition();
 	void setPosition(sf::Vector2f pos);
 	void setTexture(sf::Texture&);
-
 protected:
 	// przycisk zakończenia tury
 	Button_data finish_turn_button;
@@ -122,6 +127,8 @@ protected:
 
 	// odwzorowanie ataku (podanego jako aktywność) na przycisk do niego
 	std::map<Activity, Button_data> button_data_for_attack;
+
+	bool displayHpBar {true};
 };
 
 #endif /* CHARACTERS_CHARACTERONBOARD_H_ */
