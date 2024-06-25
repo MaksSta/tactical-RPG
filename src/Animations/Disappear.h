@@ -26,7 +26,7 @@ namespace Animations
         // warunek końcowy animacji - przezroczystość osiągnęła 255
         bool special_finish_condition_obtained() const;
     protected:
-        unsigned char transparency {0};
+        float transparency {0};
 
         // aktywność jaką otrzyna postać przy wywołaniu animacji
         Character::Activity activity;
