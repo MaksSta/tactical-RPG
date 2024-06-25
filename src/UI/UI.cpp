@@ -3,10 +3,10 @@
 UI::UI(sf::Vector2f _starts_at) 
 :
 	btnsStartPos{_starts_at + sf::Vector2f{20, 100} },
-	ability_desc{_starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, L"Chosen ability"},
-	ability_dmg{_starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, L"Damage"},
-	textfieldSelectedCharacter{{880, 125}, {680, 80}, TextBox::Alignment::start, L"Current character",L"[Click on any character right mouse button]"},
-	box_action_points{{880, 325}, {120, 80}, TextBox::Alignment::start, L"Actions points", L"", sf::Color::Yellow, 34}
+	ability_desc{_starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, "Chosen ability"},
+	ability_dmg{_starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, "Damage"},
+	textfieldSelectedCharacter{{880, 125}, {680, 80}, TextBox::Alignment::start, "Current character","[Click on any character right mouse button]"},
+	box_action_points{{880, 325}, {120, 80}, TextBox::Alignment::start, "Actions points", "", sf::Color::Yellow, 34}
 {
 }
 
@@ -26,7 +26,7 @@ void UI::addNewButton(sf::Vector2f pos, Button_data& data, Attack& ability)
 
 	// tekst z ilością punktów akcji jaką pobiera umiejętność pod przyciskiem
 	text_action_cost.push_back(
-		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{29, 83}, std::to_wstring(ability.getAP()), 28, sf::Color::Yellow)
+		std::make_unique<Textfield>(btnsStartPos + pos + sf::Vector2f{29, 83}, std::to_string(ability.getAP()), 28, sf::Color::Yellow)
 	);
 }
 

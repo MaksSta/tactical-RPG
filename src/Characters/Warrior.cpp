@@ -10,11 +10,11 @@ Warrior::Warrior(sf::Vector2i start_coords)
 						2
 					)
 {
-	finish_turn_button.desc = L"Finish turn";
+	finish_turn_button.desc = "Finish turn";
 	finish_turn_button.img_file_path = "data/UI/finish_turn.png";
 
 	Button_data button_attack1_data;
-	button_attack1_data.desc = L"Melee attack";
+	button_attack1_data.desc = "Melee attack";
 	button_attack1_data.img_file_path = "data/UI/warrior/attack_melee.png";
 	button_attack1_data.id_name = "attack_melee";
 
@@ -23,7 +23,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	attack.push_back({Character::Activity::attack1, Attack::CallType::targetable, 2, 1, 1, 3, 4});
 
 	Button_data button_attack3_data;
-	button_attack3_data.desc = L"Power attack";
+	button_attack3_data.desc = "Power attack";
 	button_attack3_data.img_file_path = "data/UI/warrior/attack3.png";
 	button_attack3_data.id_name = "attack_melee2";
 
@@ -32,7 +32,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 	attack.push_back({Character::Activity::attack3, Attack::CallType::targetable, 5, 1, 2, 5, 10});
 
 	Button_data button_attack2_data;
-	button_attack2_data.desc = L"Ground attack [aoe]";
+	button_attack2_data.desc = "Ground attack [aoe]";
 	button_attack2_data.img_file_path = "data/UI/warrior/attack2.png";
 	button_attack2_data.id_name = "attack_ground";
 

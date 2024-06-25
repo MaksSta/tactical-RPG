@@ -3,8 +3,8 @@
 TextBox::TextBox(   sf::Vector2f pos,
 				    sf::Vector2f size,
 				    Alignment _alignment_horizontal,
-                    std::wstring text_label,
-                    std::wstring text,
+                    std::string text_label,
+                    std::string text,
                     sf::Color color,
                     unsigned int font_size)
 :
@@ -23,12 +23,6 @@ TextBox::TextBox(   sf::Vector2f pos,
 }
 
 void TextBox::setString(std::string text)
-{
-    textfield.setString(text);
-    refresh();
-}
-
-void TextBox::setString(std::wstring text)
 {
     textfield.setString(text);
     refresh();

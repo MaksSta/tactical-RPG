@@ -4,7 +4,7 @@ Button::Button( ActivationType _activationType,
                 Attack* _ability,
                 sf::Vector2f pos,
                 std::string img_file_path,
-                std::wstring _desc)
+                std::string _desc)
 :
     activationType{_activationType},
     ability{_ability},
@@ -21,7 +21,7 @@ Button::Button( ActivationType _activationType,
                 Action _action,
                 sf::Vector2f pos,
                 std::string img_file_path,
-                std::wstring _desc)
+                std::string _desc)
 :
     activationType{_activationType},
     action{_action}
@@ -67,7 +67,7 @@ Button::ActivationType Button::getActivationType()
     return activationType;
 }
 
-std::wstring Button::getDesc()
+std::string Button::getDesc()
 {
     return desc;
 }

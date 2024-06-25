@@ -45,13 +45,13 @@ public:
             Attack* _ability,
             sf::Vector2f pos,
             std::string img_file_path,
-            std::wstring _desc);
+            std::string _desc);
 
     Button( ActivationType activationType,
             Action _Action,
             sf::Vector2f pos,
             std::string img_file_path,
-            std::wstring _desc);
+            std::string _desc);
 
     void Update(float deltaTime);
 
@@ -66,7 +66,7 @@ public:
     ActivationType getActivationType();
 
     // zwraca opis przypisany do przycisku (opis wywoływanej akcji)
-    std::wstring getDesc();
+    std::string getDesc();
 
     friend class UI;
 private:
@@ -84,7 +84,7 @@ private:
     Attack* ability {nullptr};
 
     // opis umiejętności wykonywanej przyciskiem
-    std::wstring desc;
+    std::string desc;
 
     // tekstura służaca jako grafika pod przycisk do załadowania z pliku
     sf::Texture texture;

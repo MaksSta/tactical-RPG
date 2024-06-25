@@ -15,7 +15,7 @@ public:
      * \param text tekst do wyświetlenia
     */
     Textfield(  sf::Vector2f pos = {0, 0},
-                std::wstring text = L"",
+                std::string text = "",
                 unsigned int font_size = 24,
                 sf::Color color = sf::Color::White);
 private:

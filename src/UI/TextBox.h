@@ -26,17 +26,14 @@ public:
     TextBox(	sf::Vector2f pos,
 				sf::Vector2f size,
 				Alignment _alignment_horizontal,
-                std::wstring label = L"",
-                std::wstring text = L"",
+                std::string label = "",
+                std::string text = "",
                 sf::Color color = sf::Color::White,
                 unsigned int font_size = 24
             );
 
     // zmiana zawartości tekstu na string i wynikające z tego odswieżenie pozycji
     void setString(std::string text);
-
-    // zmiana zawartości tekstu na wstring i wynikające z tego odswieżenie pozycji
-	void setString(std::wstring text);
 
     // wyliczenie pozycji tekstu i ustawienie go w odpowiednim miejscu
     void refresh();

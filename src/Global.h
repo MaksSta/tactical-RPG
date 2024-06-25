@@ -8,7 +8,7 @@ const unsigned short tile_size = 100;
 
 struct Button_data {
 	std::string img_file_path;
-	std::wstring desc;
+	std::string desc;
 	
 	std::string id_name;	///< obecnie nieużywane
 };
