@@ -11,6 +11,6 @@
 - [x] Add finish turn button which switches to the next character
 - [x] Finish turn automatically after using all available action points
 - [x] Add simple enemy character
-- [ ] Unable attacking friendly characters
+- [x] Unable attacking friendly characters
 - [x] Add sample attack ability to enemy (project attack without button attached)
 - [ ] Add primitive AI for enemies (attacking closest enemy character)

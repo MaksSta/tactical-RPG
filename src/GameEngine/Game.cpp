@@ -272,7 +272,9 @@ void Game::run()
 						&&	!MouseLClickedLastFrame )
 					{
 						// sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje i czy to pole jest w zasięgu ataku
-						if (hoveredField && getEnemyOnHoveredField() && isFieldInRange(hoveredField, range_player))
+						if (hoveredField && getEnemyOnHoveredField() 
+							&& isFieldInRange(hoveredField, range_player)
+							&& getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
 						{
 							Attack attack = *(ui.getSelectedBtn()->getAbility());
 
@@ -682,10 +684,10 @@ void Game::checkActionsByHover()
 		auto coords_in_range = field_caster->getCoords() + r;
 
 		for (auto & character : getAliveCharacters())
-			// sprawdzenie czy na wskazywanym polu znajduje się inna postać
+			// sprawdzenie czy na wskazywanym polu znajduje się wroga postać
 			if (	hoveredField->getCoords() == character->getCoords()
 				&&	hoveredField->getCoords() == coords_in_range
-				&&	character != selectedCharacter)
+				&&	getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
 				{
 					// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
 					if (AP_preview_local >= attack.getAP())
@@ -710,7 +712,7 @@ void Game::checkActionsByHover()
 	} else
 		ui.cancelSimulatingHover();
 
-	// utworzenie podglądu zasięgu
+	// utworzenie podglądu zasięgu ataku
 	range_player = Range(	action_fields,
 					get_active_field_from_absolute_coords(field_caster->getCoords() ) );
 
