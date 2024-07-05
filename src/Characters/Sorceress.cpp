@@ -14,7 +14,7 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
 	finish_turn_button.img_file_path = "data/UI/finish_turn.png";
 
 	Button_data button_attack1_data;
-	button_attack1_data.desc = "Firebal";
+	button_attack1_data.desc = "Fireball";
 	button_attack1_data.img_file_path = "data/UI/sorceress/fireball.png";
 	button_attack1_data.id_name = "fireball";
 
