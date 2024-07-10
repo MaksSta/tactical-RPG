@@ -17,6 +17,9 @@ Disappear::Disappear(   CharacterOnBoard* _animatedObj,
 void Disappear::animate(float delta)
 {
     transparency += delta * 225.f;
+    if (transparency > 255)
+        transparency = 255;
+
     animatedObj->setTransparency(255 - transparency);
 }
 
