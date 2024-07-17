@@ -478,11 +478,8 @@ void Game::update(float delta)
 			);
 		}
 
-	// update kolejki animacji
-	anim_manager.updateAnimationsStack(delta);
-
-	// update animacji bezczynych postaci
 	anim_manager.updateIdleAnimations(getAliveCharacters(), delta);
+	anim_manager.updateAnimationsStack(delta);
 
 	// update wszystich postaci
 	for (auto &character : charactersOnBoard)
