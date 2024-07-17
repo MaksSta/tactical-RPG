@@ -160,24 +160,29 @@ void Manager::updateAnimationsStack(float delta)
 		}
 	}
 
-	std::vector<std::vector<Animation*>::iterator> toErase;
+	std::vector<Animation*> animationsToErase;
 
 	// wywołanie wszystkich kolejnych animacji z danego zbioru równocześnie
-	for ( std::vector<Animation*>::iterator animation_it = current_set.begin(); animation_it != current_set.end(); animation_it++)
+	for ( auto & an : current_set )
 	{
-		if (update_animation_and_check_if_finished(**animation_it, delta))
+		if (update_animation_and_check_if_finished(*an, delta))
 		{
-			// zapisanie tej animacji do usunięcia (usunięcie teraz zepsułoby węzeł wskazujący na kolejną animację)
-			toErase.push_back(animation_it);
-
-			// usunięcie animacji (utworzonej w jednej z funkcji createAnimation)
-			delete (*animation_it);
+			// dodanie zakończonej animacji do usunięcia za chwilę
+			animationsToErase.push_back(an);
 		}
 	}
 
-	// usunięcie zakończonych animacji
-	for (auto & it : toErase)
-		current_set.erase(it);
+	// usunięcie zakończonych animacji ze zbioru i z pamięci
+	for (auto & an : animationsToErase)
+		for( std::vector<Animation*>::iterator it = current_set.begin(); it != current_set.end(); it++)
+		{
+			if (*it == an)
+			{
+				current_set.erase(it);
+				delete an;
+				break;
+			}
+		}
 }
 
 void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters, float delta)
