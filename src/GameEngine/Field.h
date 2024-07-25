@@ -17,17 +17,13 @@ public:
 		floor_BR_wall,
 		tiles_count
 	};
-    // Field();
 
     Field(sf::Vector2i _coords, TileType _type);	
 
 	sf::Vector2i getCoords();
    	void setCoords(sf::Vector2i new_coords);
 protected:
-    // współrzędne na planszy
 	sf::Vector2i coords;
-
-	// rodzaj kafelka do narysowania
     TileType type;
 };
 

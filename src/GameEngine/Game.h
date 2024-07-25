@@ -13,7 +13,8 @@
 #include <memory>
 #include <array>
 
-#include "Level.h"
+#include "ActiveBoard.h"
+#include "FullBoard.h"
 #include "Pathfinder.h"
 #include "Field.h"
 #include "Camera.h"
@@ -121,6 +122,9 @@ private:
 	// sprawdzenie czy podane pole znajduje się w zasięgu obecnie wybranego do wykonania ataku
 	bool isFieldInRange(Field* field, Range& range);
 
+	sf::Vector2i getLocalCoords(CharacterOnBoard*);
+	sf::Vector2i getLocalCoords(Field*);
+
 	// sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
 	CharacterOnBoard* getCharacterOnField(Field* field);
 
@@ -164,12 +168,7 @@ private:
 	// dodatkowy trybu aktywności, który decyduje o tym jakie czytać wydarzenia z myszy/klawiatury
 	InputMode inputMode {none};
 
-	/** 
-	 * obiekt planszy, w którym zostaną utworzone pola tworące planszę
-	 * wywołanie konstruktora powoduje pobranie tilesetu
-	 * w argumentach ścieżka pliku tekstur i liczba tekstur do załadowania
-	*/ 
-	Level level{"data/tileset.png", 9};
+	FullBoard fullBoard{"example_level.txt"};
 
 	// zbiór wszystkich postaci tworzony inteligentymi wskaźnikami
 	std::vector<std::unique_ptr<CharacterOnBoard>> charactersOnBoard;
@@ -204,8 +203,7 @@ private:
 	// współrzędne pola na planszy od których zaczyna się aktywny obszar gry
 	sf::Vector2i coordsTopLeft {0, 0};
 	
-	// pola na aktywnym obszarze gry, czyli widocznym kadrze planszy
-	Field* activeField[8][8];
+	ActiveBoard activeBoard;
 
 	// interejs użytkownika, zaczynający się w miejscu od podanych współrzędnych
 	UI ui{{880, 475}};

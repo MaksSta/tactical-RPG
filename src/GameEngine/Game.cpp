@@ -4,7 +4,7 @@ Game::Game(	sf::RenderWindow & _window,
 			sf::Vector2u _screen_size,
 		   	sf::Vector2f board_starts_at,
 			sf::Vector2f board_screen_size)
-:
+try:
 	window{&_window},
 	screen_size{_screen_size},
 	camera{
@@ -28,22 +28,11 @@ Game::Game(	sf::RenderWindow & _window,
 	borderForGameScreen.setPosition({board_starts_at.x * screen_size.x - border_size,
 									 board_starts_at.y * screen_size.y - border_size});
 
-	// załadowanie planszy do gry z pliku
-	if (!level.loadMapFromFile("example_level.txt"))
-	{
-		std::cerr << "Error while loading map";
-		return;
-	}
-	
 	// ustawienie wielkości całej mapy
-	camera.set_map_size(sf::Vector2f(	tile_size * level.width,
-								 		tile_size * level.height));
+	camera.set_map_size(sf::Vector2f(	tile_size * fullBoard.getWidth(),
+										tile_size * fullBoard.getHeight()));
 
-	// ustawienie aktywnych pól planszy
-	for (int x = 0; x < 8; x++)
-		for (int y = 0; y < 8; y++)
-			activeField[x][y] = level.board[coordsTopLeft.x + x][coordsTopLeft.y + y].get();
-
+	activeBoard.loadActiveFields(coordsTopLeft, fullBoard);
 
 	// utworzenie postaci
 	charactersOnBoard.push_back(std::make_unique<Warrior>(sf::Vector2i{1, 1}));
@@ -77,6 +66,11 @@ Game::Game(	sf::RenderWindow & _window,
 	indicator_selected_character.setFillColor(sf::Color{0, 135, 0});
 	indicator_selected_character.setRotation(180);
 }
+catch(errors::cannot_open_file & err_file)
+{
+	std::cout << "Error! Cannot open file: " << err_file.filename << std::endl;
+	std::exit(1);
+}
 
 void Game::run()
 {
@@ -108,7 +102,7 @@ void Game::run()
 		for (int x = 0; x < 8; x++)
 			for (int y = 0; y < 8; y++)
 			{
-				auto f = activeField[x][y];
+				auto f = activeBoard.field[x][y];
 				if (f->getGlobalBounds().contains(m_pos_on_map)) 
 					hoveredField = f;
 			}
@@ -325,7 +319,7 @@ void Game::run()
 						for (auto & c : getAliveCharacters())
 						{
 							// dodanie do listy celów wszystkich postaci z wrogiej drużyny znajdujących się w zasięgu wywołania ataku
-							if (isFieldInRange(get_active_field_from_absolute_coords(c->getCoords()), enemyRange)
+							if (isFieldInRange(activeBoard.getFieldByLocalCoords(getLocalCoords(c)), enemyRange)
 								&& (c->getTeam() != selectedCharacter->getTeam()))
 							{
 								targets.push_back(c);
@@ -345,7 +339,8 @@ void Game::run()
 						// zaakceptowanie ataku dla celu o najniższym hp (o ile istnieje)
 						if (target_with_lowest_hp != nullptr)
 						{
-							acceptAttack( attack, target_with_lowest_hp, enemyRange.getDirectionToThisField(get_active_field_from_absolute_coords(target_with_lowest_hp->getCoords())) );
+							acceptAttack(attack, target_with_lowest_hp,
+										enemyRange.getDirectionToThisField(activeBoard.getFieldByLocalCoords(getLocalCoords(target_with_lowest_hp))));
 
 							// zablokowanie gry aż do skończenia animacji
 							lockGameMode();
@@ -383,7 +378,7 @@ void Game::run()
 					}
 
 					// sprawdzenie czy ruch po wykonaniu nie prowadzi do zajętego pola lub pola poza planszą
-					Field* field_after_move = get_active_field_from_absolute_coords(selectedCharacter->getCoords() + movement);
+					Field* field_after_move = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter) + movement);
 
 					bool invalid_move = false;
 
@@ -594,7 +589,7 @@ std::vector<Field*> Game::getBlockedFields()
 	// znalezienie wszystkich pól gdzie stoi już inna postać
 	for (auto & character : getAliveCharacters())
 	{
-		auto af = get_active_field_from_absolute_coords(character->getCoords());
+		auto af = activeBoard.getFieldByLocalCoords(getLocalCoords(character));
 		// pozycja początkowa postaci nie jest uznawana jako zablokowane pole (do zastosowań w pathfindingu)
 		if (character != selectedCharacter)
 			blockedFields.push_back(af);
@@ -606,10 +601,10 @@ std::vector<Field*> Game::getBlockedFields()
 void Game::checkMoveAndActionsAuto()
 {
 	// utworzenie obiektu do znalezienia najkrótszej drogi podając informację o aktywnej części planszy
-	Pathfinder pathfinder(activeField, getBlockedFields());
+	Pathfinder pathfinder(activeBoard.field, getBlockedFields());
 	
 	// pole startowe drogi = pole zaznaczonej postaci
-	Field* fieldA = get_active_field_from_absolute_coords(selectedCharacter->getCoords());
+	Field* fieldA = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter));
 
 	// ustawienie ilości punktów akcji w podglądzie na początkową wartość, od której będzie odejmowane każde kolejne działanie
 	AP_preview = selectedCharacter->getAP();
@@ -660,14 +655,14 @@ void Game::checkActionsByHover()
 	{
 		if (road.empty())
 			// w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obcenego pola
-			field_caster = get_active_field_from_absolute_coords(selectedCharacter->getCoords());
+			field_caster = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter));
 		else
 			field_caster  = road.getLastElement();
 	}
 	// dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola, akcja ruchu zostaje usunięta
 	else if (attack.get_type() == Attack::Type::ranged)
 	{
-		field_caster = get_active_field_from_absolute_coords(selectedCharacter->getCoords());
+		field_caster = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter));
 		road.clear();
 	}
 	
@@ -678,18 +673,19 @@ void Game::checkActionsByHover()
 	for(auto & r : possible_range) 
 	{
 		// uzyskanie współrzędnych kolejnych pól w zasięgu wywołania akcji
-		auto coords_in_range = field_caster->getCoords() + r;
+		auto coords_in_range = getLocalCoords(field_caster) + r;
 
 		for (auto & character : getAliveCharacters())
 			// sprawdzenie czy na wskazywanym polu znajduje się wroga postać
-			if (	hoveredField->getCoords() == character->getCoords()
-				&&	hoveredField->getCoords() == coords_in_range
+			if (	getLocalCoords(hoveredField) == getLocalCoords(character)
+				&&	getLocalCoords(hoveredField) == coords_in_range
 				&&	getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
 				{
 					// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
 					if (AP_preview_local >= attack.getAP())
-						action_field = get_active_field_from_absolute_coords(coords_in_range);
-					
+
+						action_field = activeBoard.getFieldByLocalCoords(coords_in_range);
+
 					// dalsze sprawdzanie nie jest potrzebne, bo tylko na jednym polu naraz można wywołać akcję
 					break;
 				}
@@ -710,11 +706,9 @@ void Game::checkActionsByHover()
 		ui.cancelSimulatingHover();
 
 	// utworzenie podglądu zasięgu ataku
-	range_player = Range(	action_fields,
-					get_active_field_from_absolute_coords(field_caster->getCoords() ) );
+	range_player = Range(action_fields, field_caster);
 
 	range_created_from_auto = true;
-
 }
 
 void Game::updateAPpreviewOnBoard()
@@ -852,16 +846,16 @@ Range Game::createRange(std::vector<sf::Vector2i> in_range)
 	// znalezienie pól będacych w zasięgu
 	for (auto & r : in_range )
 	{
-		int xx = selectedCharacter->getCoords().x + r.x;
-		int yy = selectedCharacter->getCoords().y + r.y;
+		int xx = getLocalCoords(selectedCharacter).x + r.x;
+		int yy = getLocalCoords(selectedCharacter).y + r.y;
 
 		// sprawdzenie czy pole istenieje na liście aktywnych pól planszy (jest na widocznym ekranie)
-		auto af = get_active_field_from_absolute_coords({xx,yy});
+		auto af = activeBoard.getFieldByLocalCoords({xx, yy});
 		if (af != nullptr )
 			vec.push_back(af);
 	}
 
-	Range range(vec, get_active_field_from_absolute_coords(selectedCharacter->getCoords()));
+	Range range(vec, activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter)));
 
 	return range;
 }
@@ -901,11 +895,22 @@ bool Game::isFieldInRange(Field* field, Range& range)
 	return false;
 }
 
+sf::Vector2i Game::getLocalCoords(CharacterOnBoard* character)
+{
+	return character->getCoords() - coordsTopLeft;
+}
+
+sf::Vector2i Game::getLocalCoords(Field* field)
+{
+	return field->getCoords() - coordsTopLeft;
+}
+
 CharacterOnBoard* Game::getCharacterOnField(Field* field)
 {
 	for (auto & character : charactersOnBoard)
-		if ( field->getCoords() == character->getCoords() )
+		if ( getLocalCoords(field) == getLocalCoords(character.get()) )
 			return character.get();
+
 	return nullptr;
 }
 
@@ -922,18 +927,6 @@ std::vector<CharacterOnBoard*> Game::getAliveCharacters()
 			aliveCharacters.push_back(c.get());
 
 	return aliveCharacters;
-}
-
-Field* Game::get_active_field_from_absolute_coords(sf::Vector2i coords)
-{
-	if (	coords.x-coordsTopLeft.x < 0
-		||	coords.x-coordsTopLeft.x >= 8
-		|| 	coords.y-coordsTopLeft.y < 0
-		||	coords.y-coordsTopLeft.y >= 8
-	)
-		return nullptr;
-
-	return activeField[coords.x-coordsTopLeft.x][coords.y-coordsTopLeft.y];
 }
 
 void Game::lockGameMode() 
@@ -983,10 +976,10 @@ bool Game::hovered_field_changed()
 void Game::draw_board()
 {
 	// narysowanie wszystkich widocznych pól planszy
-	for (int x = 0; x < level.width; x++)
-		for (int y = 0; y < level.height; y++)
+	for (int x = 0; x < fullBoard.getWidth(); x++)
+		for (int y = 0; y < fullBoard.getHeight(); y++)
 		{
-			auto f = *level.board[x][y];
+			auto f = *fullBoard.getField(x,y);
 
 			// funkcja SFML zamieniająca współrzędne kamery na ekranowe
 			sf::Vector2i pos =

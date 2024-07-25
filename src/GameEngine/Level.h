@@ -27,6 +27,8 @@ public:
 
 	// załadowanie planszy z pliku tekstowego
 	bool loadMapFromFile(std::string level_name);
+
+	friend class FullBoard;
 private:
 	// tablica na tekstury kafelków
 	sf::Texture texture[Field::tiles_count];
@@ -36,8 +38,6 @@ private:
 
 	// wymiary całej planszy (rzeczywisty rozmiar powyższej tablicy)
 	unsigned short width, height;
-
-	friend class Game;
 };
 
 #endif /* GAME_ENGINE_LEVEL */

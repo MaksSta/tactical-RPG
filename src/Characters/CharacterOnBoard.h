@@ -65,10 +65,7 @@ public:
 	// inicjalizacja domyślnych ustawień dla postaci
 	void init();
 
-	// pobiera współrzędne postaci na planszy liczone w polach
 	sf::Vector2i getCoords();
-
-	// ustawia współrzędne postaci na planszy liczone w polach
 	void setCoords(sf::Vector2i);
 
 	// pobiera sprity dla obecnej aktywności i kierunku postaci

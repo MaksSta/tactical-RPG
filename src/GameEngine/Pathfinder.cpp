@@ -2,6 +2,7 @@
 
 Pathfinder::Pathfinder(Field* activeFields[8][8], std::vector<Field*> blockedFields)
 {
+
     for(int x = 0; x < 8; x++)
         for(int y = 0; y < 8; y++)
         {
@@ -10,6 +11,7 @@ Pathfinder::Pathfinder(Field* activeFields[8][8], std::vector<Field*> blockedFie
 
             // nadanie wszystkim polom osobnych id (z adresami ich samych)
             id[field[x][y]] = field[x][y];
+            coords[field[x][y]] = {x, y};
 
             if (std::find(blockedFields.begin(), blockedFields.end(), field[x][y] ) != blockedFields.end())
                 // ustawienie stanu pól zablokowanych pól podanych
@@ -57,10 +59,10 @@ Road Pathfinder::astar_search(Field* start_field, Field* finish_field, int max_d
 		for (unsigned short y = 0; y < 8; y++)
 		{
             // ustawienie odległości od pola końcowego dla wszystkich pól
-			h_scores[x][y] = calculate_score(sf::Vector2i(x, y), finish_field->getCoords());
+			h_scores[x][y] = calculate_score(sf::Vector2i(x, y), coords[finish_field]);
 
             // dla pola startowego:
-			if (x == start_field->getCoords().x && y == start_field->getCoords().y)
+			if (x == coords[start_field].x && y == coords[start_field].y)
 			{
                 // f (łączna odlegość) ma wartość odległości od pola końcowego
 				f_scores[x][y] = h_scores[x][y];
@@ -89,10 +91,10 @@ Road Pathfinder::astar_search(Field* start_field, Field* finish_field, int max_d
 
         for (std::vector<Field*>::iterator p = 1 + path_vector.begin(); p != path_vector.end(); p++)
         {
-            sf::Vector2i a = (*p)->getCoords();
+            sf::Vector2i a = coords[*p];
             // porównywane są kolejne wyniki f, aż do napotkania elementu z minimum
             if (f_scores[a.x][a.y] < 
-                f_scores[(*min_f_field_iterator)->getCoords().x][(*min_f_field_iterator)->getCoords().y])
+                f_scores[coords[*min_f_field_iterator].x][coords[*min_f_field_iterator].y])
             {
                 min_f_field_iterator = p;
             }
@@ -103,22 +105,22 @@ Road Pathfinder::astar_search(Field* start_field, Field* finish_field, int max_d
         // wyjęcie pola z obecnie najniższym wynikiem f z poszukiwanej drogi...
         path_vector.erase(min_f_field_iterator);
         // ...i oznaczenie go jako przebyty
-        states[min_f_field->getCoords().x][min_f_field->getCoords().y] = PathState::Visited;
+        states[coords[min_f_field].x][coords[min_f_field].y] = PathState::Visited;
 
         // najkrósza droga pokazuje już na końcowe pole == zakończono
-        if (min_f_field->getCoords() == finish_field->getCoords())
+        if (coords[min_f_field] == coords[finish_field])
             astar_finished = true;
 
         // "otworzenie" sąsiadujących pól dla tego z obecnie najlepszym wynikiem
         for (Field* adjacent_field : getAdjacentFields(min_f_field))
         {
-            sf::Vector2i adjacent_cell = adjacent_field->getCoords();
+            sf::Vector2i adjacent_cell = coords[adjacent_field];
 
             // rozpatrywane są tylko pola, które nie zostały jeszcze oznaczonego jako visited przy sprawdzaniu
             if (states[adjacent_cell.x][adjacent_cell.y] != PathState::Visited) 
             {
                 // pobranie obecnej wartość odległości od pola startowego
-                float temp_g_score = g_scores[min_f_field->getCoords().x][min_f_field->getCoords().y];
+                float temp_g_score = g_scores[coords[min_f_field].x][coords[min_f_field].y];
                 
                // powiększenie tej odlełości o 1
                temp_g_score++;
@@ -176,7 +178,7 @@ Road Pathfinder::astar_search(Field* start_field, Field* finish_field, int max_d
         reversed_road.push_back({path_field});
         reversed_directions.push_back({direction});
 
-        states[path_field->getCoords().x][path_field->getCoords().y] = PathState::Path;
+        states[coords[path_field].x][coords[path_field].y] = PathState::Path;
 
         // iterowanie po liście pól wstecz aż do pola startowego 
         path_field = previous_field[path_field];
@@ -197,7 +199,7 @@ std::vector<Field*> Pathfinder::getAdjacentFields(Field* field)
     // zwracana lista - pola w sąsiedztwie
     std::vector<Field*> adjacentFields;
 
-    // lista wskaźników pól w sąsiedztwie, jeśli nie istenieje takie pole, również dopisane jest nullptr
+    // lista wskaźników pól w sąsiedztwie, jeśli nie istnieje takie pole, również dopisane jest nullptr
     std::vector<Field*> possible_neightbours;
     
     possible_neightbours.push_back(tryGetFieldInDistance(field, sf::Vector2i{-1, 0}));
@@ -210,7 +212,10 @@ std::vector<Field*> Pathfinder::getAdjacentFields(Field* field)
         if (next_to == nullptr)
             continue;
 
-        PathState state_of_neightbour = states[next_to->getCoords().x][next_to->getCoords().y];
+/*** TODO:
+ *  I właśnie tu nie można używać już  getCoords, bo mogą wykazać powyżej [8][8] !!!
+ */
+        PathState state_of_neightbour = states[coords[next_to].x][coords[next_to].y];
 
         if (state_of_neightbour != PathState::Blocked)
             adjacentFields.push_back(next_to);
@@ -222,7 +227,7 @@ std::vector<Field*> Pathfinder::getAdjacentFields(Field* field)
 
 Field* Pathfinder::tryGetFieldInDistance(Field* field_a, sf::Vector2i offset)
 {
-    auto new_pos = field_a->getCoords() + offset;
+    auto new_pos = coords[field_a] + offset;
 
     if (new_pos.x < 0 || new_pos.x >= 8 || new_pos.y < 0 || new_pos.y >= 8)
         return nullptr;

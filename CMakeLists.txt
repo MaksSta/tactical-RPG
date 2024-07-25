@@ -40,7 +40,10 @@ set(SOURCE_FILES
 	src/UI/Button.cpp
 	src/UI/TextBox.cpp
 	src/UI/Textfield.cpp
-	src/UI/UI.cpp)
+	src/UI/UI.cpp
+	src/GameEngine/FullBoard.cpp
+	src/GameEngine/ActiveBoard.cpp
+	)
 
 SET(HEADER_FILES
 	src/Abilities/Ability.h
@@ -73,7 +76,10 @@ SET(HEADER_FILES
 	src/UI/Button.h
 	src/UI/TextBox.h
 	src/UI/Textfield.h
-	src/UI/UI.h)
+	src/UI/UI.h
+	src/GameEngine/FullBoard.h
+	src/GameEngine/ActiveBoard.h
+	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 

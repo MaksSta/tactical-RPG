@@ -56,7 +56,7 @@ public:
     */
     Road astar_search(Field* start_field, Field* finish_field, int max_distance);
 private:
-    // tablica wskaźników do pól, na których pracuje Pathfinder
+    // tablica wskaźników do pól na których pracuje Pathfinder
     Field* field[8][8];
 
     /** 
@@ -77,6 +77,8 @@ private:
     /************* DOTYCZY ALGORYTMU SPRAWDZAJĄCEGO CZY POLA SĄ POŁĄCZONE **********/
     // tablica do identyfikacja grup (wysp) pól, identyczna wartość w id informuje, że pola są połączone
     std::map<Field*, Field*> id;
+
+    std::map<Field*, sf::Vector2i> coords;
 
     // połączenie ze sobą dwóch pól poprzez podmianę wartości w tablicy id
     void connect(Field* p, Field* q);

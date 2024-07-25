@@ -32,12 +32,12 @@ void Camera::update(float delta)
 	// zablokowanie pozycji dstPos na do granic całej mapy
 	if (dstPos.x < getSize().x / 2)
 		dstPos.x = getSize().x / 2;
-	else if (dstPos.x > map_size.x - getSize().x / 2 )
+	else if (dstPos.x > map_size.x - getSize().x / 2)
 		dstPos.x = map_size.x - getSize().x / 2 ;
 	if (dstPos.y < getSize().y / 2)
 		dstPos.y = getSize().y / 2;
-	else if (dstPos.y > map_size.y - getSize().y / 2 )
-		dstPos.y = map_size.y - getSize().y / 2 ;
+	else if (dstPos.y > map_size.y - getSize().y / 2)
+		dstPos.y = map_size.y - getSize().y / 2;
 
 	// dopóki kamera nie wskazuje na miejsce decolowe wykonuj przesunięcie
 	if (getCenter() != dstPos) {
