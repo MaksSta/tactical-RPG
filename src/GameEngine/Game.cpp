@@ -164,10 +164,13 @@ void Game::run()
 				/****************************************************************/
 				case InputMode::character_is_selected:
 				{
+					bool turn_finished = false;
+
 					// automatyczne spasowanie gdy zostało postaci 0 punktów akcji
 					if (selectedCharacter->getAP() == 0)
 					{
 						finishTurn();
+						turn_finished = true;
 					}
 
 					// akcje kliknięcia myszą dla elementów UI - LPM
@@ -202,10 +205,15 @@ void Game::run()
 								else if (b->getAction() == Button::Action::endturn)
 								{
 									finishTurn();
+									turn_finished = true;
 								}
 							}
 						}
 					}
+
+					if (turn_finished)
+						break;
+
 					// sprawdzenie akcji na planszy wymaga najechania myszką na jakieś pole
 					if (hoveredField != nullptr)
 					{
