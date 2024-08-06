@@ -122,8 +122,7 @@ private:
 	// sprawdzenie czy podane pole znajduje się w zasięgu obecnie wybranego do wykonania ataku
 	bool isFieldInRange(Field* field, Range& range);
 
-	sf::Vector2i getLocalCoords(CharacterOnBoard*);
-	sf::Vector2i getLocalCoords(Field*);
+	Field* getFieldOccupedBy(CharacterOnBoard*);
 
 	// sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
 	CharacterOnBoard* getCharacterOnField(Field* field);
@@ -133,9 +132,6 @@ private:
 
 	// zwraca tylko żyjące postacie
 	std::vector<CharacterOnBoard*> getAliveCharacters();
-
-	// uzyskanie pola podając współrzędne kafelka z całej mapy
-	Field* get_active_field_from_absolute_coords(sf::Vector2i);	
 
 	// przełącza tryb gry na zablokowany (by wywołać całą kolejkę animacji)
 	void lockGameMode();

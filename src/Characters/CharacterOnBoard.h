@@ -28,17 +28,17 @@ class CharacterOnBoard : public sf::Drawable, public Character {
 public:
 	/** 
 	 * Utworzonie postaci, którą po zainicjowaniu wyświetlać się będzie na ekranie
+	 * \param start_coords pocztąwkowa pozycja na planszy
 	 * \param _name nazwa postaci do wyświetlenia
 	 * \param _team przez kogo sterowana jest postać
 	 * \param _max_hp maksymalna i zarazem początkowa ilość punktów życia
-	 * \param start_coords pocztąwkowa pozycja na planszy
 	 * \param _padding opcjonalny padding wyświetlanej postaci
 	 * \param _scale opcjonalne skalowanie wielkości wyświetlanej postaci
 	*/
-	CharacterOnBoard(	std::string _name,
+	CharacterOnBoard(	sf::Vector2i start_coords,
+						std::string _name,
 						Team _team,
 						short _max_hp,
-						sf::Vector2i start_coords, 
 						sf::Vector2f _padding = {0, 0},
 						float _scale = 1.0 );
 

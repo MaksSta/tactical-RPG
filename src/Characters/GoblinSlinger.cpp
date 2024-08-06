@@ -2,10 +2,10 @@
 
 GoblinSlinger::GoblinSlinger(sf::Vector2i start_coords) 
 :
-	CharacterOnBoard(	"Goblin slinger",
+	CharacterOnBoard(	start_coords,
+						"Goblin slinger",
                         Team::enemy,
 						10,
-						start_coords,
 						{-2, -2},
 						2
 					)

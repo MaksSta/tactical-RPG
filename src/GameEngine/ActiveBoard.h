@@ -1,27 +1,35 @@
 /** 
- * Aktywna część planszy całej planszy, czyli obszar 8x8 obecnie widocznych pól
+ * Obszar 8x8 obecnie widocznych pól na których można wykonywać w grze akcje.
+ *
+ * Przed rozpoczęciem użyciem klasy, należy załadować ją metodą loadActiveFields
+ * i wywoływać ją za każdym razem gdy chce się pobrać inną część pełnej planszy.
  */
 
-#ifndef GAME_ENGINE_ACTIVE_BOARD_H_
-#define GAME_ENGINE_ACTIVE_BOARD_H_
+#ifndef GAME_ENGINE_ACTIVEBOARD_H_
+#define GAME_ENGINE_ACTIVEBOARD_H_
 
 #include "Field.h"
-#include "Level.h"
 #include "FullBoard.h"
 
 class ActiveBoard {
 public:
-    ActiveBoard();
-
+	/**
+	 * \param coordsTopLeft współrzędne, które odzwierciedlają pole {0, 0} na pełnej planszy gry
+	 * \param fullBoard pełna plansza gry z której pobierane są wskaźniki do pól
+	*/
     void loadActiveFields(sf::Vector2i coordsTopLeft, FullBoard& fullBoard);
 	
-	Field* getFieldByLocalCoords(sf::Vector2i);
-    Field* getFieldFromAbsoluteCoords(sf::Vector2i);
+	Field* getField(sf::Vector2i coords);
+	sf::Vector2i getCoordsOf(Field* checked_field);
 
 	friend class Game;
 private:
 	Field* field[8][8];
-	sf::Vector2i globalCoordsOfTopLeft;
 };
 
-#endif /* GAME_ENGINE_ACTIVE_BOARD_H_ */
+namespace errors
+{
+	struct field_not_found {};
+}
+
+#endif /* GAME_ENGINE_ACTIVEBOARD_H_ */

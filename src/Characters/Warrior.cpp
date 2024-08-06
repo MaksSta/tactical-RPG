@@ -2,10 +2,10 @@
 
 Warrior::Warrior(sf::Vector2i start_coords) 
 :
-	CharacterOnBoard(	"Warrior",
+	CharacterOnBoard(	start_coords,
+						"Warrior",
 						Team::player,
 						15,
-						start_coords,
 						{-2, -2},
 						2
 					)

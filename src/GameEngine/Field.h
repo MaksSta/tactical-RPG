@@ -18,12 +18,8 @@ public:
 		tiles_count
 	};
 
-    Field(sf::Vector2i _coords, TileType _type);	
-
-	sf::Vector2i getCoords();
-   	void setCoords(sf::Vector2i new_coords);
+    Field(TileType _type);
 protected:
-	sf::Vector2i coords;
     TileType type;
 };
 

@@ -2,10 +2,10 @@
 
 Sorceress::Sorceress(sf::Vector2i start_coords)
 :
-	CharacterOnBoard(	"Sorceress",
+	CharacterOnBoard(	start_coords,
+						"Sorceress",
 						Team::player,
 						12,
-						start_coords,
 						{-2, -2},
 						2 
 					)

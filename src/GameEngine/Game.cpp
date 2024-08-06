@@ -1,20 +1,19 @@
 #include "Game.h"
 
-Game::Game(	sf::RenderWindow & _window,
-			sf::Vector2u _screen_size,
-		   	sf::Vector2f board_starts_at,
-			sf::Vector2f board_screen_size)
-try:
-	window{&_window},
+Game::Game(sf::RenderWindow &_window,
+		   sf::Vector2u _screen_size,
+		   sf::Vector2f board_starts_at,
+		   sf::Vector2f board_screen_size)
+try : window{&_window},
 	screen_size{_screen_size},
 	camera{
 		board_screen_size,
-		sf::FloatRect {
+		sf::FloatRect{
 			board_starts_at.x,
 			board_starts_at.y,
 			board_screen_size.x / _screen_size.x,
 			board_screen_size.y / _screen_size.y}
-		}
+}
 {
 	// tło całego ekranu
 	background.setFillColor(sf::Color{75, 75, 75});
@@ -29,8 +28,8 @@ try:
 									 board_starts_at.y * screen_size.y - border_size});
 
 	// ustawienie wielkości całej mapy
-	camera.set_map_size(sf::Vector2f(	tile_size * fullBoard.getWidth(),
-										tile_size * fullBoard.getHeight()));
+	camera.set_map_size(sf::Vector2f(tile_size * fullBoard.getWidth(),
+									 tile_size * fullBoard.getHeight()));
 
 	activeBoard.loadActiveFields(coordsTopLeft, fullBoard);
 
@@ -44,7 +43,7 @@ try:
 	charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{6, 7}));
 
 	// dodanie postaci do kolejki bitwy
-	for (auto & character : charactersOnBoard)
+	for (auto &character : charactersOnBoard)
 		battle_queue.addToQueue(character.get());
 
 	// ustawienie tury na pierwszą postać z kolejki
@@ -52,21 +51,19 @@ try:
 	selectCharacter(battle_queue.getCurrentCharacter());
 
 	// dodanie animacji bezczynności (idle) do każdej postaci
-	for (auto & character : charactersOnBoard)
+	for (auto &character : charactersOnBoard)
 	{
-		anim_manager.addIdleAnimation (
+		anim_manager.addIdleAnimation(
 			anim_manager.createAnimation(
 				character.get(),
-				Character::Activity::idle
-			)
-		);
+				Character::Activity::idle));
 	}
 
 	// graficzne ustawienia dla znacznika zaznaczonej postaci
 	indicator_selected_character.setFillColor(sf::Color{0, 135, 0});
 	indicator_selected_character.setRotation(180);
 }
-catch(errors::cannot_open_file & err_file)
+catch (errors::cannot_open_file &err_file)
 {
 	std::cout << "Error! Cannot open file: " << err_file.filename << std::endl;
 	std::exit(1);
@@ -102,8 +99,8 @@ void Game::run()
 		for (int x = 0; x < 8; x++)
 			for (int y = 0; y < 8; y++)
 			{
-				auto f = activeBoard.field[x][y];
-				if (f->getGlobalBounds().contains(m_pos_on_map)) 
+				auto f = activeBoard.getField({x, y});
+				if (f->getGlobalBounds().contains(m_pos_on_map))
 					hoveredField = f;
 			}
 		// jeśli znaleziono, zostanie ono podświetlone
@@ -113,7 +110,7 @@ void Game::run()
 			hoveredRect.setSize(sf::Vector2f(tile_size, tile_size));
 			hoveredRect.setPosition(hoveredField->getPosition());
 		}
-				
+
 		// ******************************************************************
 		// ****** Obsługa wszystkich wydarzeń z myszy i klawiatury **********
 		// ******************************************************************
@@ -125,23 +122,22 @@ void Game::run()
 			 * Tryb gry: 		KAŻDY
 			 * Pobieranie inputu odblokowanego we wszystkich trybach
 			 * te operacje są stale sprawdzane, gdy wychwycono jakiś event
-			 * 
+			 *
 			 * Znajduje się tu obsługa okna gry, interakcje z GUI itp.
 			 /****************************************************************/
 			// systemowe zamknięcie aplikacji (np. kliknięcie X na pasku okna / alt+f4)
 			if (event.type == sf::Event::Closed)
 				window->close();
-	
+
 			// akcje kliknięcia myszą dla elementów UI - PPM
 			// [możliwe do kliknięcia w każdej fazie gry]
-			for (auto & b: ui.button)
+			for (auto &b : ui.button)
 			{
 				if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window))
 				{
 					// pobranie umiejętności pod przyciskiem
 					auto ability = b.get()->getAbility();
-					if (ability != nullptr
-						&& ability->getCallType() == Attack::CallType::targetable )
+					if (ability != nullptr && ability->getCallType() == Attack::CallType::targetable)
 					{
 						ui.autoselectButton(b.get());
 
@@ -151,13 +147,15 @@ void Game::run()
 				}
 			}
 
-			switch(gameMode) {
+			switch (gameMode)
+			{
 			/****************************************************************
 			 * Tryb gry: 		AKTYWNA TURA GRACZA
 			/****************************************************************/
 			case GameMode::player_turn:
 			{
-				switch(inputMode) {
+				switch (inputMode)
+				{
 				/****************************************************************
 				 * Tryb inputu: 		ZAZNACZONA POSTAĆ, CZEKA NA POLECENIA
 				 * Sprawdzanie możliwości wykonania ruchu i akcji
@@ -174,11 +172,11 @@ void Game::run()
 					}
 
 					// akcje kliknięcia myszą dla elementów UI - LPM
-					for (auto & b: ui.button)
+					for (auto &b : ui.button)
 					{
 						if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window) && !MouseLClickedLastFrame)
 						{
-							if (b->getActivationType() == Button::ActivationType::selectable )
+							if (b->getActivationType() == Button::ActivationType::selectable)
 							{
 								if (b->getAction() == Button::Action::attack)
 								{
@@ -218,7 +216,7 @@ void Game::run()
 					if (hoveredField != nullptr)
 					{
 						// sprawdzenie odbywa się za tylko gdy zmieniło się wskazywane myszką pole (żeby nie odświeżac co klatkę)
-						if (hovered_field_changed()) 
+						if (hovered_field_changed())
 						{
 							// tworzy na ekranie podgląd ruchu i/lub akcji do wykonania
 							checkMoveAndActionsAuto();
@@ -227,9 +225,9 @@ void Game::run()
 						/** Sprawdzenie czy jest jakaś akcja do wykonania (bądź samo przesunięcie)
 						 *  Jeżeli klinięto na lewym przyciskiem myszy to zaakceptuj wywołanie
 						 */
-						if (	mouseClicked(sf::Mouse::Left, hoveredField->getGlobalBounds(), m_pos_on_map)
-							&&	!MouseLClickedLastFrame
-							&& (!road.empty() || !range_player.empty()) )
+						if (mouseClicked(sf::Mouse::Left, hoveredField->getGlobalBounds(), m_pos_on_map)
+							&& !MouseLClickedLastFrame
+							&& (!road.empty() || !range_player.empty()))
 						{
 							// zatwierdzenie akcji do wywołania
 							acceptMoveAndAction();
@@ -237,7 +235,7 @@ void Game::run()
 							// zablokowanie gry aż do skończenia animacji
 							lockGameMode();
 						}
-					} 
+					}
 					else
 					{
 						// kursor znajduje się poza planszą - wyłączenie podglądu akcji do wywołania
@@ -247,21 +245,22 @@ void Game::run()
 					}
 
 					// pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
-					if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack )
+					if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack)
 					{
 						range_player = createRange(ui.getHoveredBtn()->getAbility()->get_in_range());
 						range_created_from_auto = false;
 					}
 
 					// kliknięcie myszką w przycisk wywołania akcji
-					if (ui.getSelectedBtn() )
+					if (ui.getSelectedBtn())
 					{
 						range_player = createRange(ui.getSelectedBtn()->getAbility()->get_in_range());
 						range_created_from_auto = false;
 
 						inputMode = action_is_selected;
 					}
-				} break;
+				}
+				break;
 				/****************************************************************
 				 * Tryb inputu: 		WYRANO AKCJE, NALEŻY WYBRAĆ POLE WYWOŁANIA
 				 * Sprawdzanie możliwości rozegrania akcji na dostępnym polu
@@ -270,21 +269,20 @@ void Game::run()
 				case InputMode::action_is_selected:
 				{
 					// jakiekolwiek kliknięcie LPM oznacza albo akceptacje albo anulowanie akcji
-					if (	mouseClicked(sf::Mouse::Left)
-						&&	!MouseLClickedLastFrame )
+					if (mouseClicked(sf::Mouse::Left) && !MouseLClickedLastFrame)
 					{
 						// sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje i czy to pole jest w zasięgu ataku
-						if (hoveredField && getEnemyOnHoveredField() 
+						if (hoveredField && getEnemyOnHoveredField()
 							&& isFieldInRange(hoveredField, range_player)
 							&& getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
 						{
 							Attack attack = *(ui.getSelectedBtn()->getAbility());
 
-							acceptAttack( attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField) );
-							
+							acceptAttack(attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField));
+
 							// zablokowanie gry aż do skończenia animacji
 							lockGameMode();
-						} 
+						}
 						// nie ma wskazano prawidłowego celu - anulowanie wywoływania
 						else
 						{
@@ -297,9 +295,11 @@ void Game::run()
 						// powrót do zczytywania inputu dla zaznaczonej postaci bez wybranej żadnej akcji
 						inputMode = InputMode::character_is_selected;
 					}
-				} break;
 				}
-			} break;
+				break;
+				}
+			}
+			break;
 			/****************************************************************
 			 * Tryb gry: 		TURA PRZECIWNIKA
 			/****************************************************************/
@@ -314,21 +314,20 @@ void Game::run()
 
 				bool attack_confirmed = false;
 
-				// iteracja kolejnych atakach
-				for (auto & attack : selectedCharacter->getAttacks())
+				// iteracja po kolejnych dostępnych atakach
+				for (auto &attack : selectedCharacter->getAttacks())
 				{
 					if (selectedCharacter->getAP() >= attack.getAP())
 					{
 						Range enemyRange = createRange(attack.get_in_range());
 
-						std::vector<CharacterOnBoard*> targets;
+						std::vector<CharacterOnBoard *> targets;
 
 						// sprawdź czy postać gracza jest w zasięgu
-						for (auto & c : getAliveCharacters())
+						for (auto &c : getAliveCharacters())
 						{
 							// dodanie do listy celów wszystkich postaci z wrogiej drużyny znajdujących się w zasięgu wywołania ataku
-							if (isFieldInRange(activeBoard.getFieldByLocalCoords(getLocalCoords(c)), enemyRange)
-								&& (c->getTeam() != selectedCharacter->getTeam()))
+							if ((isFieldInRange(getFieldOccupedBy(c), enemyRange)) && (c->getTeam() != selectedCharacter->getTeam()))
 							{
 								targets.push_back(c);
 							}
@@ -337,7 +336,7 @@ void Game::run()
 						// znalezienie spośród celów postaci o najniższej ilości hp
 						CharacterOnBoard* target_with_lowest_hp {nullptr};
 						int lowest_hp = 9999;
-						for (auto & t : targets)
+						for (auto &t : targets)
 							if (t->getHP() < lowest_hp)
 							{
 								target_with_lowest_hp = t;
@@ -348,7 +347,7 @@ void Game::run()
 						if (target_with_lowest_hp != nullptr)
 						{
 							acceptAttack(attack, target_with_lowest_hp,
-										enemyRange.getDirectionToThisField(activeBoard.getFieldByLocalCoords(getLocalCoords(target_with_lowest_hp))));
+										 enemyRange.getDirectionToThisField(getFieldOccupedBy(target_with_lowest_hp)));
 
 							// zablokowanie gry aż do skończenia animacji
 							lockGameMode();
@@ -367,26 +366,30 @@ void Game::run()
 				if (selectedCharacter->getAP() > 0)
 				{
 					// wykonanie losowego ruchu
-					int rnd =  rand() % 4;
+					int rnd = rand() % 4;
 
 					sf::Vector2i movement;
-					switch (rnd){
-						case 0:
-							movement = {-1, 0};
+					switch (rnd)
+					{
+					case 0:
+						movement = {-1, 0};
 						break;
-						case 1:
-							movement = {1, 0};
+					case 1:
+						movement = {1, 0};
 						break;
-						case 2:
-							movement = {0, -1};
+					case 2:
+						movement = {0, -1};
 						break;
-						case 3:
-							movement = {0, 1};
+					case 3:
+						movement = {0, 1};
 						break;
 					}
 
 					// sprawdzenie czy ruch po wykonaniu nie prowadzi do zajętego pola lub pola poza planszą
-					Field* field_after_move = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter) + movement);
+					Field* field_after_move =
+						activeBoard.getField(
+							activeBoard.getCoordsOf(getFieldOccupedBy(selectedCharacter))
+							+ movement);
 
 					bool invalid_move = false;
 
@@ -394,7 +397,7 @@ void Game::run()
 					if (field_after_move == nullptr)
 						invalid_move = true;
 
-					for ( auto & bf : getBlockedFields() )
+					for (auto &bf : getBlockedFields())
 					{
 						if (bf == field_after_move)
 							invalid_move = true;
@@ -408,14 +411,14 @@ void Game::run()
 						lockGameMode();
 					}
 				}
-
-			} break;
+			}
+			break;
 			}
 
 			// zapisanie ostatnio wkszywanego myszką pola
 			lastHoveredField = hoveredField;
 		}
-		
+
 		// ponowne zapisanie informacji czy kliknięto LPM myszki
 		if (mouseClicked(sf::Mouse::Left))
 			MouseLClickedLastFrame = true;
@@ -446,7 +449,7 @@ void Game::run()
 		// ********* Wyczyszczenie ekranu i narysowanie wszystkiego *********
 		// ******************************************************************
 		window->clear();
-		
+
 		// narysowanie elementów statycznych, stale widocznych na ekranie w tym samym miejscu
 		window->setView(window->getDefaultView());
 		draw_static_elements();
@@ -462,7 +465,7 @@ void Game::run()
 void Game::update(float delta)
 {
 	// uśmiercenie postaci, dla których liczba hp spadła do zera
-	for (auto & character : getAliveCharacters())
+	for (auto &character : getAliveCharacters())
 		if (character->getHP() == 0 && !character->will_die_soon)
 		{
 			// zaznaczenie że postać zaraz umrze, by nie sprawdzać tego ponownie
@@ -471,14 +474,10 @@ void Game::update(float delta)
 			// dodanie animacji śmierci i następnie zniknięcia
 			anim_manager.addAnimationToQueue(
 				anim_manager.createAnimationDeath(
-					character
-				)
-			);
+					character));
 			anim_manager.addAnimationToQueue(
 				anim_manager.createAnimationDisappear(
-					character
-				)
-			);
+					character));
 		}
 
 	anim_manager.updateIdleAnimations(getAliveCharacters(), delta);
@@ -487,7 +486,7 @@ void Game::update(float delta)
 	// update wszystich postaci
 	for (auto &character : charactersOnBoard)
 		character->update(delta);
-		
+
 	// animacja trójkącika nad zaznaczoną postacią
 	if (selectedCharacter)
 	{
@@ -507,12 +506,9 @@ void Game::update(float delta)
 			}
 
 		indicator_selected_character.setScale(0.4 + indicator_modifier / 2.5, 1.0 - indicator_modifier / 4);
-		indicator_selected_character.setPosition(selectedCharacter->getPosition() 
-													+ sf::Vector2f{50, 50}
-													+ sf::Vector2f{	indicator_selected_character.getGlobalBounds().width / 2,
-																	indicator_modifier * 3.4f}
-													+ sf::Vector2f{0, -48}
-												);
+		indicator_selected_character.setPosition(
+			selectedCharacter->getPosition() + sf::Vector2f{50, 2}
+			+ sf::Vector2f{indicator_selected_character.getGlobalBounds().width / 2, indicator_modifier * 3.4f});
 	}
 
 	// update kamery
@@ -528,11 +524,11 @@ void Game::update(float delta)
 	}
 }
 
-void Game::selectCharacter(CharacterOnBoard* character)
+void Game::selectCharacter(CharacterOnBoard *character)
 {
 	gameMode = player_turn;
 	inputMode = InputMode::character_is_selected;
-	
+
 	selectedCharacter = character;
 
 	// zresetowanie ilości punktów akcji na maksymalną wartość
@@ -545,29 +541,29 @@ void Game::selectCharacter(CharacterOnBoard* character)
 
 	// dodanie przycisków z umiejętnościami (1. wiersz)
 	float n = 0;
-	for (auto & attack : selectedCharacter->getAttacks())
+	for (auto &attack : selectedCharacter->getAttacks())
 	{
 		ui.addNewButton({120 * n, 0},
 						selectedCharacter->getButtonData(attack.getActivity()),
-						attack );
+						attack);
 		n++;
 	}
 
 	// dodanie przycisku zakończenia tury (2. wiersz, na końcu z prawej)
 	ui.addNewButton({480 + 48, 122},
 					selectedCharacter->get_finish_turn_button(),
-					Button::Action::endturn );
+					Button::Action::endturn);
 
 	// zaznaczenie domyślnie wykonywanej akcji na taką samą co ostatnio u tej postaci
 	if (lastDefaultAttack[selectedCharacter])
 	{
-		for(auto & b : ui.button)
+		for (auto &b : ui.button)
 			if (b->getAbility() == lastDefaultAttack[selectedCharacter])
 			{
 				ui.autoselectButton(b.get());
 				break;
 			}
-	} 
+	}
 	else
 	{
 		// jeżeli nie było zmiany domyślnego ataku, to jest nim pierwszy przycisk
@@ -575,7 +571,7 @@ void Game::selectCharacter(CharacterOnBoard* character)
 	}
 }
 
-void Game::selectEnemyCharacter(CharacterOnBoard* character)
+void Game::selectEnemyCharacter(CharacterOnBoard *character)
 {
 	gameMode = enemy_turn;
 
@@ -595,9 +591,9 @@ std::vector<Field*> Game::getBlockedFields()
 	std::vector<Field*> blockedFields;
 
 	// znalezienie wszystkich pól gdzie stoi już inna postać
-	for (auto & character : getAliveCharacters())
+	for (auto &character : getAliveCharacters())
 	{
-		auto af = activeBoard.getFieldByLocalCoords(getLocalCoords(character));
+		auto af = getFieldOccupedBy(character);
 		// pozycja początkowa postaci nie jest uznawana jako zablokowane pole (do zastosowań w pathfindingu)
 		if (character != selectedCharacter)
 			blockedFields.push_back(af);
@@ -610,9 +606,9 @@ void Game::checkMoveAndActionsAuto()
 {
 	// utworzenie obiektu do znalezienia najkrótszej drogi podając informację o aktywnej części planszy
 	Pathfinder pathfinder(activeBoard.field, getBlockedFields());
-	
+
 	// pole startowe drogi = pole zaznaczonej postaci
-	Field* fieldA = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter));
+	Field* fieldA = getFieldOccupedBy(selectedCharacter);
 
 	// ustawienie ilości punktów akcji w podglądzie na początkową wartość, od której będzie odejmowane każde kolejne działanie
 	AP_preview = selectedCharacter->getAP();
@@ -627,9 +623,7 @@ void Game::checkMoveAndActionsAuto()
 		road.clear();
 
 		// próba utworzenie drogi: od pola postaci do wskazywanego pola
-		if (hoveredField 	!= nullptr
-			&& fieldA 		!= nullptr
-			&& fieldA != hoveredField)
+		if (hoveredField != nullptr && fieldA != nullptr && fieldA != hoveredField)
 		{
 			int max_movement = selectedCharacter->getAP();
 			road = pathfinder.astar_search(fieldA, hoveredField, max_movement);
@@ -650,7 +644,7 @@ void Game::checkActionsByHover()
 
 	if (!ui.getAutoselectedBtn())
 		return;
-		
+
 	Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 
 	auto possible_range = attack.get_in_range();
@@ -663,40 +657,38 @@ void Game::checkActionsByHover()
 	{
 		if (road.empty())
 			// w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obcenego pola
-			field_caster = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter));
+			field_caster = getFieldOccupedBy(selectedCharacter);
 		else
-			field_caster  = road.getLastElement();
+			field_caster = road.getLastElement();
 	}
 	// dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola, akcja ruchu zostaje usunięta
 	else if (attack.get_type() == Attack::Type::ranged)
 	{
-		field_caster = activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter));
+		field_caster = getFieldOccupedBy(selectedCharacter);
 		road.clear();
 	}
-	
+
 	// szukane pole na którym można wywołać akcję
-	Field* action_field {nullptr};
+	Field* action_field{nullptr};
 
 	// sprawdzenie czy pole na którym można wykonać akcję jest w jej zasięgu wywołania + stoi tam inna postać
-	for(auto & r : possible_range) 
+	for (auto &r : possible_range)
 	{
 		// uzyskanie współrzędnych kolejnych pól w zasięgu wywołania akcji
-		auto coords_in_range = getLocalCoords(field_caster) + r;
+		auto coords_in_range = activeBoard.getCoordsOf(field_caster) + r;
 
-		for (auto & character : getAliveCharacters())
+		for (auto &character : getAliveCharacters())
 			// sprawdzenie czy na wskazywanym polu znajduje się wroga postać
-			if (	getLocalCoords(hoveredField) == getLocalCoords(character)
-				&&	getLocalCoords(hoveredField) == coords_in_range
-				&&	getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
-				{
-					// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
-					if (AP_preview_local >= attack.getAP())
+			if (hoveredField == getFieldOccupedBy(character) && activeBoard.getCoordsOf(hoveredField) == coords_in_range && getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
+			{
+				// umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
+				if (AP_preview_local >= attack.getAP())
 
-						action_field = activeBoard.getFieldByLocalCoords(coords_in_range);
+					action_field = activeBoard.getField(coords_in_range);
 
-					// dalsze sprawdzanie nie jest potrzebne, bo tylko na jednym polu naraz można wywołać akcję
-					break;
-				}
+				// dalsze sprawdzanie nie jest potrzebne, bo tylko na jednym polu naraz można wywołać akcję
+				break;
+			}
 	}
 
 	std::vector<Field*> action_fields;
@@ -710,13 +702,19 @@ void Game::checkActionsByHover()
 
 		// odjęcie punktów akcji w podglądzie ile zostanie po ataku
 		AP_preview -= attack.getAP();
-	} else
+	}
+	else
 		ui.cancelSimulatingHover();
 
 	// utworzenie podglądu zasięgu ataku
 	range_player = Range(action_fields, field_caster);
 
 	range_created_from_auto = true;
+}
+
+Field* Game::getFieldOccupedBy(CharacterOnBoard* character)
+{
+	return activeBoard.getField( character->getCoords() - coordsTopLeft );
 }
 
 void Game::updateAPpreviewOnBoard()
@@ -727,10 +725,8 @@ void Game::updateAPpreviewOnBoard()
 		std::stringstream ss;
 		ss << AP_preview << "/" << selectedCharacter->getMaxAP();
 		text_AP_preview.setString(ss.str());
-		text_AP_preview.setPosition(	hoveredField->getPosition()
-										+ sf::Vector2f{	(tile_size - text_AP_preview.getGlobalBounds().width) / 2, 
-														(tile_size - text_AP_preview.getGlobalBounds().height) / 2 - 3} 
-									);
+		text_AP_preview.setPosition(hoveredField->getPosition() + sf::Vector2f{(tile_size - text_AP_preview.getGlobalBounds().width) / 2,
+																			   (tile_size - text_AP_preview.getGlobalBounds().height) / 2 - 3});
 		text_AP_preview.setFillColor(sf::Color::Yellow);
 	}
 }
@@ -748,7 +744,7 @@ void Game::acceptMoveAndAction()
 		Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 
 		// wywołanie ataku
-		acceptAttack( attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField) );
+		acceptAttack(attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField));
 	}
 }
 
@@ -759,31 +755,27 @@ void Game::moveCharacter(CharacterOnBoard* character, sf::Vector2i offset)
 
 	// dodanie animacji
 
-	anim_manager.addAnimationToQueue (
+	anim_manager.addAnimationToQueue(
 		anim_manager.createAnimationMove(
 			character,
-			Animations::Actions::Move{{ static_cast<float>(offset.x * tile_size),
-										static_cast<float>(offset.y * tile_size)},
-										240.0f}
-		)
-	);
+			Animations::Actions::Move{{static_cast<float>(offset.x * tile_size),
+									   static_cast<float>(offset.y * tile_size)},
+									  240.0f}));
 
 	character->setAP(selectedCharacter->getAP() - 1);
 }
 
 void Game::acceptMovePlayer()
 {
-	// zmiana położenia postaci od razu na docelową pozycję w kontekście logiki gry
-	selectedCharacter->setCoords(road.getLastElement()->getCoords());
+	// zmiana położenia postaci w logice gry od razu na docelową pozycję
+	selectedCharacter->setCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
 
 	// dodanie animacji przesuwającej postać pole po polu
-	for (auto & r: road.get())
-		anim_manager.addAnimationToQueue (
+	for (auto &r : road.get())
+		anim_manager.addAnimationToQueue(
 			anim_manager.createAnimationMove(
 				selectedCharacter,
-				Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f}
-			)
-		);
+				Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f}));
 
 	// odjęcie punktów akcji, po 1 za każde pokonane pole
 	selectedCharacter->setAP(selectedCharacter->getAP() - road.get().size());
@@ -795,13 +787,11 @@ void Game::acceptMovePlayer()
 void Game::acceptAttack(Attack& attack, CharacterOnBoard* target, Direction attack_direction)
 {
 	// dodanie animacji ataku wykonywanego przez postać która atakuje
-	anim_manager.addAnimationToQueue (
+	anim_manager.addAnimationToQueue(
 		anim_manager.createAnimation(
 			selectedCharacter,
 			attack.getActivity(),
-			attack_direction
-		)
-	);
+			attack_direction));
 
 	// odjęcie punktów akcji za atak
 	selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
@@ -810,9 +800,7 @@ void Game::acceptAttack(Attack& attack, CharacterOnBoard* target, Direction atta
 	anim_manager.addAnimationToQueue(
 		anim_manager.createAnimationHurt(
 			target,
-			attack.draw_damage()
-		)
-	);
+			attack.draw_damage()));
 
 	// usunięcie podglądu wywołania akcji
 	range_player.clear();
@@ -821,27 +809,23 @@ void Game::acceptAttack(Attack& attack, CharacterOnBoard* target, Direction atta
 void Game::acceptMultiAttack(Attack& attack, std::vector<CharacterOnBoard*> targets, Direction attack_direction)
 {
 	// dodanie animacji ataku wykonywanego przez postać która atakuje
-	anim_manager.addAnimationToQueue (
+	anim_manager.addAnimationToQueue(
 		anim_manager.createAnimation(
 			selectedCharacter,
 			attack.getActivity(),
-			attack_direction
-		)
-	);
+			attack_direction));
 
 	// odjęcie punktów akcji za atak
 	selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
 
 	// dodanie animacji otrzymania obrażeń zaatakowanych postaci równocześnie
-	std::vector<Animations::Animation*>& set = anim_manager.addNewSet();
-	for( auto & t : targets)
+	std::vector<Animations::Animation*> &set = anim_manager.addNewSet();
+	for (auto &t : targets)
 		anim_manager.addAnimationToSet(
 			set,
-				anim_manager.createAnimationHurt(
+			anim_manager.createAnimationHurt(
 				t,
-				attack.draw_damage()
-			)
-		);
+				attack.draw_damage()));
 
 	// usunięcie podglądu wywołania akcji
 	range_player.clear();
@@ -852,18 +836,18 @@ Range Game::createRange(std::vector<sf::Vector2i> in_range)
 	std::vector<Field*> vec;
 
 	// znalezienie pól będacych w zasięgu
-	for (auto & r : in_range )
+	for (auto &r : in_range)
 	{
-		int xx = getLocalCoords(selectedCharacter).x + r.x;
-		int yy = getLocalCoords(selectedCharacter).y + r.y;
-
-		// sprawdzenie czy pole istenieje na liście aktywnych pól planszy (jest na widocznym ekranie)
-		auto af = activeBoard.getFieldByLocalCoords({xx, yy});
-		if (af != nullptr )
+		Field* af =
+			activeBoard.getField(
+				activeBoard.getCoordsOf(getFieldOccupedBy(selectedCharacter))
+				+ r);
+		
+		if (af != nullptr)
 			vec.push_back(af);
 	}
 
-	Range range(vec, activeBoard.getFieldByLocalCoords(getLocalCoords(selectedCharacter)));
+	Range range(vec, getFieldOccupedBy(selectedCharacter));
 
 	return range;
 }
@@ -873,7 +857,7 @@ void Game::attackAOE(Attack& attack)
 	std::vector<CharacterOnBoard*> targets;
 
 	// zlokalizuj wszystkie postacie w zasięgu ataku i dodaj do listy celów
-	for( auto & r : range_player.get() )
+	for (auto &r : range_player.get())
 	{
 		if (getCharacterOnField(r))
 			targets.push_back(getCharacterOnField(r));
@@ -896,27 +880,17 @@ void Game::finishTurn()
 
 bool Game::isFieldInRange(Field* field, Range& range)
 {
-	for( auto & r : range.get() )
-		if (r->getCoords() == field->getCoords())
+	for (auto &r : range.get())
+		if (r == field)
 			return true;
 
 	return false;
 }
 
-sf::Vector2i Game::getLocalCoords(CharacterOnBoard* character)
-{
-	return character->getCoords() - coordsTopLeft;
-}
-
-sf::Vector2i Game::getLocalCoords(Field* field)
-{
-	return field->getCoords() - coordsTopLeft;
-}
-
 CharacterOnBoard* Game::getCharacterOnField(Field* field)
 {
-	for (auto & character : charactersOnBoard)
-		if ( getLocalCoords(field) == getLocalCoords(character.get()) )
+	for (auto &character : charactersOnBoard)
+		if (field == getFieldOccupedBy(character.get()))
 			return character.get();
 
 	return nullptr;
@@ -930,14 +904,14 @@ CharacterOnBoard* Game::getEnemyOnHoveredField()
 std::vector<CharacterOnBoard*> Game::getAliveCharacters()
 {
 	std::vector<CharacterOnBoard*> aliveCharacters;
-	for (auto & c : charactersOnBoard)
+	for (auto &c : charactersOnBoard)
 		if (c->isAlive())
 			aliveCharacters.push_back(c.get());
 
 	return aliveCharacters;
 }
 
-void Game::lockGameMode() 
+void Game::lockGameMode()
 {
 	if (gameMode == player_turn)
 		gameMode = locked_player_turn;
@@ -945,7 +919,7 @@ void Game::lockGameMode()
 		gameMode = locked_enemy_turn;
 }
 
-void Game::unlockGameMode() 
+void Game::unlockGameMode()
 {
 	if (gameMode == locked_player_turn)
 		gameMode = player_turn;
@@ -960,9 +934,8 @@ void Game::unlockGameMode()
 
 bool Game::mouseClicked(sf::Mouse::Button mouse_btn, sf::FloatRect objRect, sf::Vector2f m_pos)
 {
-	if ((sf::Mouse::isButtonPressed(mouse_btn))
-	 &&	(objRect.contains(m_pos)))
-				return true;
+	if ((sf::Mouse::isButtonPressed(mouse_btn)) && (objRect.contains(m_pos)))
+		return true;
 	return false;
 }
 
@@ -971,7 +944,7 @@ bool Game::mouseClicked(sf::Mouse::Button mouse_btn)
 	if (sf::Mouse::isButtonPressed(mouse_btn))
 		return true;
 	return false;
-} 
+}
 
 bool Game::hovered_field_changed()
 {
@@ -987,36 +960,38 @@ void Game::draw_board()
 	for (int x = 0; x < fullBoard.getWidth(); x++)
 		for (int y = 0; y < fullBoard.getHeight(); y++)
 		{
-			auto f = *fullBoard.getField(x,y);
+			auto f = *fullBoard.getField(x, y);
 
 			// funkcja SFML zamieniająca współrzędne kamery na ekranowe
 			sf::Vector2i pos =
 				window->mapCoordsToPixel(f.getPosition());
 
 			// ograniczenie wyświetlenia tylko do kafelków który pokrywają się z ekranem kamery
-			if ( pos.x + tile_size > screen_size.x * camera.getViewport().left &&
-				pos.y + tile_size > screen_size.y * camera.getViewport().top && 
+			if (pos.x + tile_size > screen_size.x * camera.getViewport().left &&
+				pos.y + tile_size > screen_size.y * camera.getViewport().top &&
 				pos.x < screen_size.x * (camera.getViewport().left + camera.getViewport().width) &&
-				pos.y < screen_size.y * (camera.getViewport().top + camera.getViewport().height) )
+				pos.y < screen_size.y * (camera.getViewport().top + camera.getViewport().height))
 				window->draw(f);
 		}
 
 	// narysowanie wszystkich postaci
 	for (auto &character : charactersOnBoard)
 		window->draw(*character);
-	
+
 	if (selectedCharacter)
 		window->draw(indicator_selected_character);
 
 	// jeśli do wyświetelnia jest podgląd akcji nie podświetla się wskazywane pole
 	bool hide_hovering = false;
-	
+
 	// narysowanie drogi przesunięcia postaci na pólach do przejścia
-	if (!road.empty()) {
+	if (!road.empty())
+	{
 		window->draw(road);
 	}
 
-	if (!range_player.empty()) {
+	if (!range_player.empty())
+	{
 		window->draw(range_player);
 	}
 
@@ -1028,7 +1003,6 @@ void Game::draw_board()
 	// podświetelenie pola wskazywanego kursorem
 	if (hoveredField)
 		window->draw(hoveredRect);
-
 }
 
 void Game::draw_static_elements()

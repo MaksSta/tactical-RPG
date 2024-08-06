@@ -1,9 +1,9 @@
 #include "CharacterOnBoard.h"
 
-CharacterOnBoard::CharacterOnBoard(	std::string _name,
+CharacterOnBoard::CharacterOnBoard(	sf::Vector2i start_coords,
+									std::string _name,
 									Team _team,
 									short _max_hp,
-									sf::Vector2i start_coords,
 									sf::Vector2f _padding, 
 									float _scale) 
 : 

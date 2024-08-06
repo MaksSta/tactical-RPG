@@ -36,7 +36,6 @@ bool Level::loadMapFromFile(std::string level_name)
 			file >> buffer;
 
 			 board[x][y] = std::make_unique<Field>(
-				sf::Vector2i{x, y},
 				static_cast<Field::TileType>(buffer)
 			);
 

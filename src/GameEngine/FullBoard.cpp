@@ -14,6 +14,13 @@ FullBoard::FullBoard(std::string level_name)
 
 Field* FullBoard::getField(int x, int y)
 {
+	if (	x < 0
+		||	x >= getWidth()
+		|| 	y < 0
+		||	y >= getHeight()
+	)
+	return nullptr;
+
     return field[x][y];
 }
     
