@@ -1,6 +1,6 @@
 /**
  * Główna klasa gry w której zawiera się jej pełna mechanika
- * 
+ *
  * Najpierw należy utworzyć jej instancję, konstruktor ładuje wszystkie elementy
  * Następnie wywołanie run() powoduje uruchomienie pętli głównej
 */
@@ -47,7 +47,7 @@ public:
 		action_is_selected,
 	};
 
-	/** 
+	/**
 	 * stworzenie okna gry, inicjalizacja wszystkich elementów gry,
 	 * załadowanie grafik i planszy
 	 * \param window referencja do okna sfml
@@ -56,9 +56,9 @@ public:
 	 * \param board_screen_size rozmiar jaki stanowi plansza gry [w pikselach]
 	*/
 	Game(	sf::RenderWindow &window,
-	 		sf::Vector2u _screen_size,
-			sf::Vector2f board_starts_at,
-			sf::Vector2f board_screen_size);
+        sf::Vector2u _screen_size,
+        sf::Vector2f board_starts_at,
+        sf::Vector2f board_screen_size);
 
 	// uruchomienie gry - wewnątrz znajduje się pętla główna z całą logiką
 	void run();
@@ -77,16 +77,15 @@ private:
 	/**
 	 * dotyczy podglądu akcji tworzącego się dynamicznie przez wskazywanie myszką pól na planszy
 	 * (nie wymaga wcześniejszego wybieranie akcji do wywołania)
-	 * 
+	 *
 	 * sprawdzana jest możliwość wykonania ruchu, jeśli ok tworzony jest jej podgląd
 	 * następnie wewnątrz zostaje wywołane checkActionsByHover(), by sprawdzić czy można
 	 * wywołać również dodatkową akcję poza ruchem
 	*/
 	void checkMoveAndActionsAuto();
-	
 	/**
-	 * sprawdzana jest możliwość wykonania automatycznie wybranej akcji na wskazywanym polu 
-	 * 
+	 * sprawdzana jest możliwość wykonania automatycznie wybranej akcji na wskazywanym polu
+	 *
 	 * jeśli ok tworzony jest jej podgląd
 	 * może przy okazji usunąć obecny podgląd drogi (np. przy ataku z dystansu)
 	*/
@@ -175,7 +174,7 @@ private:
 	// wskazywane myszką obecne pole
 	Field* hoveredField {nullptr};
 
-	// pogląd ścieżki do przejścia akcją ruchu 
+	// pogląd ścieżki do przejścia akcją ruchu
 	Road road;
 
 	// podgląd ataku do wykoniania akcją ataku
@@ -198,7 +197,7 @@ private:
 
 	// współrzędne pola na planszy od których zaczyna się aktywny obszar gry
 	sf::Vector2i coordsTopLeft {0, 0};
-	
+
 	ActiveBoard activeBoard;
 
 	// interejs użytkownika, zaczynający się w miejscu od podanych współrzędnych
