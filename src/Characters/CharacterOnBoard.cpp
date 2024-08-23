@@ -50,7 +50,7 @@ void CharacterOnBoard::update(float deltaTime)
   hpBar.update(deltaTime);
 }
 
-sf::Vector2i CharacterOnBoard::getCoords()
+sf::Vector2i CharacterOnBoard::getCoords() const
 {
   return coords;
 }
@@ -117,12 +117,12 @@ void CharacterOnBoard::move(sf::Vector2f offset)
   position += offset;
 }
 
-sf::FloatRect CharacterOnBoard::getGlobalBounds()
+sf::FloatRect CharacterOnBoard::getGlobalBounds() const
 {
   return sprite.getGlobalBounds();
 }
 
-sf::Vector2f CharacterOnBoard::getPosition()
+sf::Vector2f CharacterOnBoard::getPosition() const
 {
   return position;
 }

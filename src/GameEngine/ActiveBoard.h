@@ -20,8 +20,8 @@ public:
   void loadActiveFields(sf::Vector2i coordsTopLeft,
                         FullBoard& fullBoard);
 
-  Field* getField(sf::Vector2i coords);
-  sf::Vector2i getCoordsOf(Field* checked_field);
+  Field* getField(sf::Vector2i coords) const;
+  sf::Vector2i getCoordsOf(Field* checked_field) const;
 
   friend class Game;
 private:

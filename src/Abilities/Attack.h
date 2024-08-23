@@ -28,19 +28,19 @@ public:
          int _max_dmg,
          bool radiation = false);
 
-  Type get_type();
+  Type get_type() const;
 
-  int get_min_dmg();
-  int get_max_dmg();
-  int get_dmg_variety();
+  int get_min_dmg() const;
+  int get_max_dmg() const;
+  int get_dmg_variety() const;
 
   // wylosowanie obrażeń z przedziału [min_dmg, max_dmg]
-  int draw_damage();
+  int draw_damage() const;
 
-  int getAP();
+  int getAP() const;
 
-  Character::Activity getActivity();
-  CallType getCallType();
+  Character::Activity getActivity() const;
+  CallType getCallType() const;
 private:
   Character::Activity activity;
   CallType callType;

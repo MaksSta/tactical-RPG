@@ -65,10 +65,11 @@ public:
   // inicjalizacja domyślnych ustawień dla postaci
   void init();
 
-  sf::Vector2i getCoords();
+  sf::Vector2i getCoords() const;
   void setCoords(sf::Vector2i);
 
   // pobiera sprity dla obecnej aktywności i kierunku postaci
+  // uwaga, ze względu na to że podaje wartość z mapy, ta metoda nie jest const
   Sprites_data& get_current_sprites_data();
 
   // przestawienie sprite na pierwszą klatkę dla obecnego kierunku i aktywności
@@ -78,12 +79,15 @@ public:
   void takeDamage(int dmg);
 
   // zwraca pełne informacje o wszystkich atakach
+  // uwaga, metoda zwraca odniesienie do orginalnego ataku więc nie jest const
   std::vector<Attack>& getAttacks();
 
+  // uwaga, ze względu na to że podaje wartość z mapy, ta metoda nie jest const
   Button_data& getButtonData(Activity activity);
 
   // zwraca dane potrzebne do utworzenia przycisku zakończenia tury
-  Button_data & get_finish_turn_button();
+  // uwaga, metoda zwraca orginalne dane przycisku więc nie jest const
+  Button_data& get_finish_turn_button();
 
   // przestawia przezroczystość postaci wraz z paskiem hp
   void setTransparency(unsigned char transparency);
@@ -93,8 +97,8 @@ public:
 
   void draw(sf::RenderTarget &target, sf::RenderStates states) const;
   void move(sf::Vector2f offset);
-  sf::FloatRect getGlobalBounds();
-  sf::Vector2f getPosition();
+  sf::FloatRect getGlobalBounds() const;
+  sf::Vector2f getPosition() const;
   void setPosition(sf::Vector2f pos);
   void setTexture(sf::Texture&);
 protected:

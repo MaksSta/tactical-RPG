@@ -42,42 +42,42 @@ Attack::Attack(Character::Activity _activity,
     }
 }
 
-Attack::Type Attack::get_type()
+Attack::Type Attack::get_type() const
 {
   return type;
 }
 
-int Attack::get_min_dmg()
+int Attack::get_min_dmg() const
 {
   return min_dmg;
 }
 
-int Attack::get_max_dmg()
+int Attack::get_max_dmg() const
 {
   return max_dmg;
 }
 
-int Attack::get_dmg_variety()
+int Attack::get_dmg_variety() const
 {
   return max_dmg - min_dmg;
 }
 
-int Attack::draw_damage()
+int Attack::draw_damage() const
 {
   return min_dmg + (get_dmg_variety() ? std::rand() % get_dmg_variety() : 0);
 }
 
-int Attack::getAP()
+int Attack::getAP() const
 {
   return action_points;
 }
 
-Character::Activity Attack::getActivity()
+Character::Activity Attack::getActivity() const
 {
   return activity;
 }
 
-Attack::CallType Attack::getCallType()
+Attack::CallType Attack::getCallType() const
 {
   return callType;
 }

@@ -72,7 +72,7 @@ private:
   void selectEnemyCharacter(CharacterOnBoard* character);
 
   // pobranie zajętych pól na planszy (za wyjątkiem pola na którym jest selectedCharacter)
-  std::vector<Field*> getBlockedFields();
+  std::vector<Field*> getBlockedFields() const;
 
   /**
    * dotyczy podglądu akcji tworzącego się dynamicznie przez wskazywanie myszką pól na planszy
@@ -128,16 +128,16 @@ private:
   bool isFieldInRange(Field* field,
                       Range& range);
 
-  Field* getFieldOccupedBy(CharacterOnBoard*);
+  Field* getFieldOccupedBy(CharacterOnBoard*) const;
 
   // sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
-  CharacterOnBoard* getCharacterOnField(Field* field);
+  CharacterOnBoard* getCharacterOnField(Field* field) const;
 
   // sprawdzenie czy na wskazywanym polu znajduje się inna postać, jeśli tak zwraca wskaźnik do niej
-  CharacterOnBoard* getEnemyOnHoveredField();
+  CharacterOnBoard* getEnemyOnHoveredField() const;
 
   // zwraca tylko żyjące postacie
-  std::vector<CharacterOnBoard*> getAliveCharacters();
+  std::vector<CharacterOnBoard*> getAliveCharacters() const;
 
   // przełącza tryb gry na zablokowany (by wywołać całą kolejkę animacji)
   void lockGameMode();

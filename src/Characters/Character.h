@@ -38,28 +38,30 @@ public:
    * @param _team przez kogo sterowana jest postać
    * @param _max_hp maksymalna i zarazem początkowa ilość punktów życia
    */
-  Character(std::string _name, Team _team, int _max_hp);
+  Character(std::string _name,
+            Team _team,
+            int _max_hp);
 
   void die();
 
-  Activity getActivity();
+  Activity getActivity() const;
   void setActivity(Activity);
 
-  Direction getDirection();
+  Direction getDirection() const;
   void setDirection(Direction);
 
-  bool isAlive();
+  bool isAlive() const;
 
-  Team getTeam();
+  Team getTeam() const;
 
-  int getAP();
+  int getAP() const;
   void setAP(int);
-  int getMaxAP();
+  int getMaxAP() const;
 
-  int getHP();
+  int getHP() const;
   void setHP(int);
 
-  std::string getName();
+  std::string getName() const;
 
   // informacja o tym, że postać zaraz umrze (animacja śmierci czeka już w kolejce)
   bool will_die_soon {false};

@@ -7,7 +7,7 @@ void ActiveBoard::loadActiveFields(sf::Vector2i coordsTopLeft, FullBoard& fullBo
       field[x][y] = fullBoard.getField(coordsTopLeft.x + x, coordsTopLeft.y + y);
 }
 
-Field* ActiveBoard::getField(sf::Vector2i coords)
+Field* ActiveBoard::getField(sf::Vector2i coords) const
 {
   if (coords.x < 0
       || coords.x >= 8
@@ -18,7 +18,7 @@ Field* ActiveBoard::getField(sf::Vector2i coords)
   return field[coords.x][coords.y];
 }
 
-sf::Vector2i ActiveBoard::getCoordsOf(Field* checked_field)
+sf::Vector2i ActiveBoard::getCoordsOf(Field* checked_field) const
 {
   for (int x = 0; x < 8; x++)
     for (int y = 0; y < 8; y++)

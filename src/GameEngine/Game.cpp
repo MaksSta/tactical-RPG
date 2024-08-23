@@ -519,7 +519,7 @@ void Game::selectEnemyCharacter(CharacterOnBoard *character)
   ui.destroyButtons();
 }
 
-std::vector<Field*> Game::getBlockedFields()
+std::vector<Field*> Game::getBlockedFields() const
 {
   std::vector<Field*> blockedFields;
 
@@ -638,7 +638,7 @@ void Game::checkActionsByHover()
   range_created_from_auto = true;
 }
 
-Field* Game::getFieldOccupedBy(CharacterOnBoard* character)
+Field* Game::getFieldOccupedBy(CharacterOnBoard* character) const
 {
   return activeBoard.getField(character->getCoords() - coordsTopLeft);
 }
@@ -798,7 +798,7 @@ bool Game::isFieldInRange(Field* field,
   return false;
 }
 
-CharacterOnBoard* Game::getCharacterOnField(Field* field)
+CharacterOnBoard* Game::getCharacterOnField(Field* field) const
 {
   for (auto &character : charactersOnBoard)
     if (field == getFieldOccupedBy(character.get()))
@@ -807,12 +807,12 @@ CharacterOnBoard* Game::getCharacterOnField(Field* field)
   return nullptr;
 }
 
-CharacterOnBoard* Game::getEnemyOnHoveredField()
+CharacterOnBoard* Game::getEnemyOnHoveredField() const
 {
   return getCharacterOnField(hoveredField);
 }
 
-std::vector<CharacterOnBoard*> Game::getAliveCharacters()
+std::vector<CharacterOnBoard*> Game::getAliveCharacters() const
 {
   std::vector<CharacterOnBoard*> aliveCharacters;
   for (auto &c : charactersOnBoard)
