@@ -1,6 +1,6 @@
 /**
  * Wszystkie potrzebne informacje o ataku jaki może wywołać postać
-*/
+ */
 
 #ifndef ABILITIES_ATTACK_H_
 #define ABILITIES_ATTACK_H_
@@ -9,46 +9,49 @@
 
 class Attack : public Ability {
 public:
-    // rodzaje ataków
-    enum Type {
-        melee,
-        ranged
-    };
+  enum Type {
+    melee,
+    ranged
+  };
 
-    // rodzaj wywołania
-    enum CallType {
-        targetable,
-        instant
-    };
+  enum CallType {
+    targetable,
+    instant
+  };
 
-    Attack(Character::Activity _activity, CallType _callType, int _action_points, int range_min, int range_max, int _min_dmg, int _max_dmg, bool radiation = false);
+  Attack(Character::Activity _activity,
+         CallType _callType,
+         int _action_points,
+         int range_min,
+         int range_max,
+         int _min_dmg,
+         int _max_dmg,
+         bool radiation = false);
 
-    // zwraca rodzaj ataku
-    Type get_type();
+  Type get_type();
 
-    int get_min_dmg();
-    int get_max_dmg();
-    int get_dmg_variety();
+  int get_min_dmg();
+  int get_max_dmg();
+  int get_dmg_variety();
 
-    // wylosowanie obrażeń z przedziału [min_dmg, max_dmg]
-    int draw_damage();
+  // wylosowanie obrażeń z przedziału [min_dmg, max_dmg]
+  int draw_damage();
 
-    int getAP();
+  int getAP();
 
-    Character::Activity getActivity();
-    CallType getCallType();
+  Character::Activity getActivity();
+  CallType getCallType();
 private:
-    Character::Activity activity;
-    CallType callType;
+  Character::Activity activity;
+  CallType callType;
 
-    // koszt wywołania ataku
-    int action_points;
+  // koszt wywołania ataku
+  int action_points;
 
-    // rodzaj ataku
-    Type type;
+  Type type;
 
-    int min_dmg;
-    int max_dmg;
+  int min_dmg;
+  int max_dmg;
 };
 
 #endif /* ABILITIES_ATTACK_H_ */

@@ -5,8 +5,8 @@
 
 class Warrior : public CharacterOnBoard {
 public:
-	// utworzenie postaci na polu planszy o podanych współrzędnych
-	Warrior(sf::Vector2i start_coords);
+  // utworzenie postaci na polu planszy o podanych współrzędnych
+  Warrior(sf::Vector2i start_coords);
 };
 
 #endif /* CHARACTERS_WARRIOR_H_ */

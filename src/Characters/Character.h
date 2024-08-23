@@ -1,11 +1,11 @@
-/** 
+/**
  * Bazowa klasa postaci
  * zawiera informację o:
  *  - aktywności i kierunku
  *  - ilościach obecnych i maksymalnych punktów życia (HP)
  *  - ilościach obecnych i maksymalnych punktów akcji (AP)
  *  - nazwę postaci
-*/
+ */
 
 #ifndef CHARACTERS_CHARACTER_H_
 #define CHARACTERS_CHARACTER_H_
@@ -16,66 +16,66 @@
 
 class Character {
 public:
-	// lista aktywności jaką może przybrać postać
-	enum Activity {
-		idle,
-		move,
-		attack1,
-		attack2,
-		attack3,
-		hurt,
-		death,
-	};
+  // lista aktywności jaką może przybrać postać
+  enum Activity {
+    idle,
+    move,
+    attack1,
+    attack2,
+    attack3,
+    hurt,
+    death,
+  };
 
-	enum Team {
-		player,
-		enemy
-	};
+  enum Team {
+    player,
+    enemy
+  };
 
-	/**
-	 * Utworzenie wstępnej klasy postaci
-	 * \param _name nazwa postaci do wyświetlenia
-	 * \param _team przez kogo sterowana jest postać
-	 * \param _max_hp maksymalna i zarazem początkowa ilość punktów życia
-	*/
-    Character(std::string _name, Team _team, int _max_hp);
+  /**
+   * Utworzenie wstępnej klasy postaci
+   * @param _name nazwa postaci do wyświetlenia
+   * @param _team przez kogo sterowana jest postać
+   * @param _max_hp maksymalna i zarazem początkowa ilość punktów życia
+   */
+  Character(std::string _name, Team _team, int _max_hp);
 
-	void die();
+  void die();
 
-	Activity getActivity();
-	void setActivity(Activity);
+  Activity getActivity();
+  void setActivity(Activity);
 
-	Direction getDirection();
-	void setDirection(Direction);
+  Direction getDirection();
+  void setDirection(Direction);
 
-	bool isAlive();
+  bool isAlive();
 
-	Team getTeam();
+  Team getTeam();
 
-	int getAP();
-	void setAP(int);
-	int getMaxAP();
+  int getAP();
+  void setAP(int);
+  int getMaxAP();
 
-	int getHP();
-	void setHP(int);
+  int getHP();
+  void setHP(int);
 
-	std::string getName();
+  std::string getName();
 
-	// informacja o tym, że postać zaraz umrze (animacja śmierci czeka już w kolejce)
-	bool will_die_soon {false};
+  // informacja o tym, że postać zaraz umrze (animacja śmierci czeka już w kolejce)
+  bool will_die_soon {false};
 protected:
-	bool alive {true};
+  bool alive {true};
 
-	Team team;
+  Team team;
 
-	Activity currentActivity {idle};
-	Direction direction {down};
+  Activity currentActivity{idle};
+  Direction direction{down};
 
-	std::string name;
-	int hp;
-	int max_hp;
+  std::string name;
+  int hp;
+  int max_hp;
 
-	int max_action_points, action_points;  
+  int max_action_points, action_points;
 };
 
 #endif /* CHARACTERS_CHARACTER_H_ */

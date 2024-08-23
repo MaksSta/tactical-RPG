@@ -1,4 +1,4 @@
-/** 
+/**
  * Pełna plansza gry, do załadowania z pliku
  */
 
@@ -12,20 +12,20 @@
 
 class FullBoard {
 public:
-    FullBoard(std::string level_name);
+  FullBoard(std::string level_name);
 
-    Field* getField(int x, int y);
+  Field* getField(int x, int y);
 
-    int getWidth();
-    int getHeight();
+  int getWidth();
+  int getHeight();
 private:
-    Level level{"data/tileset.png", 9};
-    Field* field[max_board_width][max_board_height];
+  Level level{"data/tileset.png", 9};
+  Field* field[max_board_width][max_board_height];
 };
 
-namespace errors 
+namespace errors
 {
-    struct cannot_open_file {std::string filename;};
+  struct cannot_open_file {std::string filename;};
 }
 
 #endif /* GAME_ENGINE_FULLBOARD */

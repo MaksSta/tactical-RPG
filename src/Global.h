@@ -7,17 +7,17 @@
 const unsigned short tile_size = 100;
 
 struct Button_data {
-	std::string img_file_path;
-	std::string desc;
-	
-	std::string id_name;	///< obecnie nieużywane
+  std::string img_file_path;
+  std::string desc;
+
+  std::string id_name;  ///< obecnie nieużywane
 };
 
 enum Direction {
-	left,
-	right,
-	up,
-	down
+  left,
+  right,
+  up,
+  down
 };
 
 #endif /* GLOBAL_H_ */
