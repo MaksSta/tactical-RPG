@@ -80,7 +80,8 @@ public:
   void destroyButtons();
 
   // narysowanie całego interfejsu użytkownika na ekranie
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  void draw(sf::RenderTarget &target,
+            sf::RenderStates states) const;
 
   friend class Game;
 private:

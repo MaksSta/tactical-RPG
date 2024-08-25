@@ -102,7 +102,8 @@ void CharacterOnBoard::init()
 }
 
 
-void CharacterOnBoard::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void CharacterOnBoard::draw(sf::RenderTarget &target,
+                            sf::RenderStates states) const
 {
   // wyświetlenie postaci
   target.draw(sprite);

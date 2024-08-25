@@ -24,7 +24,8 @@ public:
   // zwraca kierunek w jaki zwrócone jest poprzednie pole względem podanego
   virtual Direction getDirectionToThisField(Field* checkedField) = 0;
 
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  void draw(sf::RenderTarget &target,
+            sf::RenderStates states) const;
 protected:
   // wskaźniki do pól z których składa się zbiór
   std::vector<Field*> field;

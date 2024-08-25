@@ -21,8 +21,8 @@ void FieldSet::clear()
   hightlighOnFields.clear();
 }
 
-
-void FieldSet::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void FieldSet::draw(sf::RenderTarget &target,
+                    sf::RenderStates states) const
 {
   for (auto & h : hightlighOnFields) {
     target.draw(h);

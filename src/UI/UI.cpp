@@ -154,7 +154,8 @@ void UI::destroyButtons()
   autoselectedBtn = nullptr;
 }
 
-void UI::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void UI::draw(sf::RenderTarget &target,
+              sf::RenderStates states) const
 {
   if (autoselectedBtn)
     target.draw(selectedBtnBorder);

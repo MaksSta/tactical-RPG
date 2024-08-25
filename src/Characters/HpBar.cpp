@@ -83,7 +83,8 @@ void HpBar::setPosition(sf::Vector2f pos)
                      pos.y - 2);
 }
 
-void HpBar::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void HpBar::draw(sf::RenderTarget &target,
+                 sf::RenderStates states) const
 {
   target.draw(hp_max_bar);
   target.draw(hp_left_bar);

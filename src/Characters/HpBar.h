@@ -30,7 +30,9 @@ public:
   void takeDamage(float dmg);
 
   void setPosition(sf::Vector2f pos);
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+
+  void draw(sf::RenderTarget &target,
+            sf::RenderStates states) const;
 
   friend class CharacterOnBoard;
 private:

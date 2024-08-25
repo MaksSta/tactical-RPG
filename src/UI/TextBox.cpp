@@ -51,7 +51,8 @@ void TextBox::refresh()
                         pos.y + size.y / 2 - textfield.getGlobalBounds().height / 2);
 }
 
-void TextBox::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void TextBox::draw(sf::RenderTarget &target,
+                   sf::RenderStates states) const
 {
   target.draw(background);
   target.draw(label);

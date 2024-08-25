@@ -37,7 +37,8 @@ public:
   // wyliczenie pozycji tekstu i ustawienie go w odpowiednim miejscu
   void refresh();
 
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  void draw(sf::RenderTarget &target,
+            sf::RenderStates states) const;
 private:
   // posób wyrównania tekstu w poziomie
   Alignment alignment_horizontal;

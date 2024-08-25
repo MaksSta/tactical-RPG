@@ -95,7 +95,9 @@ public:
   // wygasza pokazywanie paska z hp
   void disableHpBar();
 
-  void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  void draw(sf::RenderTarget &target,
+            sf::RenderStates states) const;
+
   void move(sf::Vector2f offset);
   sf::FloatRect getGlobalBounds() const;
   sf::Vector2f getPosition() const;
