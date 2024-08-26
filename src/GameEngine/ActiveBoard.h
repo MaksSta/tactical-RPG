@@ -10,6 +10,7 @@
 
 #include "Field.h"
 #include "FullBoard.h"
+#include "../Characters/CharacterOnBoard.h"
 
 class ActiveBoard {
 public:
@@ -20,12 +21,21 @@ public:
   void loadActiveFields(sf::Vector2i coordsTopLeft,
                         FullBoard& fullBoard);
 
+  void addCharacter(CharacterOnBoard* characters);
+
   Field* getField(sf::Vector2i coords) const;
   sf::Vector2i getCoordsOf(Field* checked_field) const;
+
+  Field* getFieldOccupedBy(CharacterOnBoard*) const;
+
+  // sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
+  CharacterOnBoard* getCharacterOnField(Field* field) const;
 
   friend class Game;
 private:
   Field* field[8][8];
+
+  std::vector<CharacterOnBoard*> charactersOnBoard;
 };
 
 namespace errors

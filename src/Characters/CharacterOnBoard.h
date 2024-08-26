@@ -65,8 +65,11 @@ public:
   // inicjalizacja domyślnych ustawień dla postaci
   void init();
 
-  sf::Vector2i getCoords() const;
-  void setCoords(sf::Vector2i);
+  sf::Vector2i getLocalCoords() const;
+  void setLocalCoords(sf::Vector2i);
+
+  sf::Vector2i getGlobalCoords() const;
+  void setGlobalCoords(sf::Vector2i);
 
   // pobiera sprity dla obecnej aktywności i kierunku postaci
   // uwaga, ze względu na to że podaje wartość z mapy, ta metoda nie jest const
@@ -119,8 +122,11 @@ protected:
   // współrzędne postaci na ekranie
   sf::Vector2f position;
 
-  // współrzędne na planszy liczone w kafelkach
-  sf::Vector2i coords;
+  // współrzędne względne - na aktywnej części planszy gry
+  sf::Vector2i localCoords;
+
+  // współrzędne bezwzględne - na całkowitej planszy gry
+  sf::Vector2i globalCoords;
 
   // odstęp od par boków lewo+prawo, góra+dół
   sf::Vector2f padding;

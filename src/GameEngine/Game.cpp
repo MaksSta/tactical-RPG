@@ -43,6 +43,11 @@ Game::Game(sf::RenderWindow &_window,
   charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{5, 6}));
   charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{6, 7}));
 
+  // dodanie widocznych na ekranie postaci do aktywnej planszy
+  for (auto &character : charactersOnBoard) {
+    activeBoard.addCharacter(character.get());
+  }
+
   // dodanie postaci do kolejki bitwy
   for (auto &character : charactersOnBoard)
     battle_queue.addToQueue(character.get());
@@ -285,7 +290,7 @@ void Game::run()
               // sprawdź czy postać gracza jest w zasięgu
               for (auto &c : getAliveCharacters()) {
                 // dodanie do listy celów wszystkich postaci z wrogiej drużyny znajdujących się w zasięgu wywołania ataku
-                if ((isFieldInRange(getFieldOccupedBy(c), enemyRange)) && (c->getTeam() != selectedCharacter->getTeam())) {
+                if ((isFieldInRange(activeBoard.getFieldOccupedBy(c), enemyRange)) && (c->getTeam() != selectedCharacter->getTeam())) {
                   targets.push_back(c);
                 }
               }
@@ -302,7 +307,7 @@ void Game::run()
               // zaakceptowanie ataku dla celu o najniższym hp (o ile istnieje)
               if (target_with_lowest_hp != nullptr) {
                 acceptAttack(attack, target_with_lowest_hp,
-                             enemyRange.getDirectionToThisField(getFieldOccupedBy(target_with_lowest_hp)));
+                             enemyRange.getDirectionToThisField(activeBoard.getFieldOccupedBy(target_with_lowest_hp)));
 
                 // zablokowanie gry aż do skończenia animacji
                 lockGameMode();
@@ -340,7 +345,7 @@ void Game::run()
             
             // sprawdzenie czy ruch po wykonaniu nie prowadzi do zajętego pola lub pola poza planszą
             Field* field_after_move =
-              activeBoard.getField(activeBoard.getCoordsOf(getFieldOccupedBy(selectedCharacter))
+              activeBoard.getField(activeBoard.getCoordsOf(activeBoard.getFieldOccupedBy(selectedCharacter))
                                    + movement);
             
             bool invalid_move = false;
@@ -525,7 +530,7 @@ std::vector<Field*> Game::getBlockedFields() const
 
   // znalezienie wszystkich pól gdzie stoi już inna postać
   for (auto &character : getAliveCharacters()) {
-    auto af = getFieldOccupedBy(character);
+    auto af = activeBoard.getFieldOccupedBy(character);
     // pozycja początkowa postaci nie jest uznawana jako zablokowane pole (do zastosowań w pathfindingu)
     if (character != selectedCharacter)
       blockedFields.push_back(af);
@@ -540,7 +545,7 @@ void Game::checkMoveAndActionsAuto()
   Pathfinder pathfinder(activeBoard.field, getBlockedFields());
 
   // pole startowe drogi = pole zaznaczonej postaci
-  Field* fieldA = getFieldOccupedBy(selectedCharacter);
+  Field* fieldA = activeBoard.getFieldOccupedBy(selectedCharacter);
 
   // ustawienie ilości punktów akcji w podglądzie na początkową wartość, od której będzie odejmowane każde kolejne działanie
   AP_preview = selectedCharacter->getAP();
@@ -586,13 +591,13 @@ void Game::checkActionsByHover()
   if (attack.get_type() == Attack::Type::melee) {
     if (road.empty())
       // w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obcenego pola
-      field_caster = getFieldOccupedBy(selectedCharacter);
+      field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
     else
       field_caster = road.getLastElement();
   }
   // dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola, akcja ruchu zostaje usunięta
   else if (attack.get_type() == Attack::Type::ranged) {
-    field_caster = getFieldOccupedBy(selectedCharacter);
+    field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
     road.clear();
   }
   
@@ -606,7 +611,7 @@ void Game::checkActionsByHover()
     
     for (auto &character : getAliveCharacters()) {
       // sprawdzenie czy na wskazywanym polu znajduje się wroga postać
-      if (hoveredField == getFieldOccupedBy(character) &&
+      if (hoveredField == activeBoard.getFieldOccupedBy(character) &&
           activeBoard.getCoordsOf(hoveredField) == coords_in_range &&
           getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam()) {
         // umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
@@ -636,11 +641,6 @@ void Game::checkActionsByHover()
   range_player = Range(action_fields, field_caster);
 
   range_created_from_auto = true;
-}
-
-Field* Game::getFieldOccupedBy(CharacterOnBoard* character) const
-{
-  return activeBoard.getField(character->getCoords() - coordsTopLeft);
 }
 
 void Game::updateAPpreviewOnBoard()
@@ -675,7 +675,8 @@ void Game::moveCharacter(CharacterOnBoard* character,
                          sf::Vector2i offset)
 {
   // zmiana położenia postaci od razu na pozycję po przesunięciu w kontekście logiki gry
-  character->setCoords(selectedCharacter->getCoords() + offset);
+  character->setGlobalCoords(selectedCharacter->getGlobalCoords() + offset);
+  character->setLocalCoords(selectedCharacter->getLocalCoords() + offset);
   
   // dodanie animacji
   anim_manager.addAnimationToQueue(anim_manager.createAnimationMove(character,
@@ -689,7 +690,8 @@ void Game::moveCharacter(CharacterOnBoard* character,
 void Game::acceptMovePlayer()
 {
   // zmiana położenia postaci w logice gry od razu na docelową pozycję
-  selectedCharacter->setCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
+  selectedCharacter->setLocalCoords(activeBoard.getCoordsOf(road.getLastElement()));
+  selectedCharacter->setGlobalCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
 
   // dodanie animacji przesuwającej postać pole po polu
   for (auto &r : road.get())
@@ -751,14 +753,14 @@ Range Game::createRange(std::vector<sf::Vector2i> in_range)
   // znalezienie pól będacych w zasięgu
   for (auto &r : in_range) {
     Field* af =
-      activeBoard.getField(activeBoard.getCoordsOf(getFieldOccupedBy(selectedCharacter))
+      activeBoard.getField(activeBoard.getCoordsOf(activeBoard.getFieldOccupedBy(selectedCharacter))
                            + r);
     
     if (af != nullptr)
       vec.push_back(af);
   }
 
-  Range range(vec, getFieldOccupedBy(selectedCharacter));
+  Range range(vec, activeBoard.getFieldOccupedBy(selectedCharacter));
 
   return range;
 }
@@ -769,8 +771,8 @@ void Game::attackAOE(Attack& attack)
 
   // zlokalizuj wszystkie postacie w zasięgu ataku i dodaj do listy celów
   for (auto &r : range_player.get()) {
-    if (getCharacterOnField(r))
-      targets.push_back(getCharacterOnField(r));
+    if (activeBoard.getCharacterOnField(r))
+      targets.push_back(activeBoard.getCharacterOnField(r));
   }
 
   acceptMultiAttack(attack, targets, selectedCharacter->getDirection());
@@ -798,18 +800,9 @@ bool Game::isFieldInRange(Field* field,
   return false;
 }
 
-CharacterOnBoard* Game::getCharacterOnField(Field* field) const
-{
-  for (auto &character : charactersOnBoard)
-    if (field == getFieldOccupedBy(character.get()))
-      return character.get();
-
-  return nullptr;
-}
-
 CharacterOnBoard* Game::getEnemyOnHoveredField() const
 {
-  return getCharacterOnField(hoveredField);
+  return activeBoard.getCharacterOnField(hoveredField);
 }
 
 std::vector<CharacterOnBoard*> Game::getAliveCharacters() const

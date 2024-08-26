@@ -128,11 +128,6 @@ private:
   bool isFieldInRange(Field* field,
                       Range& range);
 
-  Field* getFieldOccupedBy(CharacterOnBoard*) const;
-
-  // sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
-  CharacterOnBoard* getCharacterOnField(Field* field) const;
-
   // sprawdzenie czy na wskazywanym polu znajduje się inna postać, jeśli tak zwraca wskaźnik do niej
   CharacterOnBoard* getEnemyOnHoveredField() const;
 

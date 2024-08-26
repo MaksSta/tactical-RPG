@@ -8,11 +8,14 @@ CharacterOnBoard::CharacterOnBoard(sf::Vector2i start_coords,
                                    float _scale)
   :
   Character(_name, _team, _max_hp),
-  coords{start_coords},
+  globalCoords{start_coords},
   padding{_padding},
   hpBar{getPosition(), hp, max_hp}
 {
   sprite.setScale(_scale, _scale);
+
+  localCoords = {globalCoords.x % 8,
+                 globalCoords.y % 8};
 }
 
 void CharacterOnBoard::loadAnimation(Activity activity,
@@ -50,14 +53,24 @@ void CharacterOnBoard::update(float deltaTime)
   hpBar.update(deltaTime);
 }
 
-sf::Vector2i CharacterOnBoard::getCoords() const
+sf::Vector2i CharacterOnBoard::getLocalCoords() const
 {
-  return coords;
+  return localCoords;
 }
 
-void CharacterOnBoard::setCoords(sf::Vector2i new_coords)
+void CharacterOnBoard::setLocalCoords(sf::Vector2i new_coords)
 {
-  coords = new_coords;
+  localCoords = new_coords;
+}
+
+sf::Vector2i CharacterOnBoard::getGlobalCoords() const
+{
+  return globalCoords;
+}
+
+void CharacterOnBoard::setGlobalCoords(sf::Vector2i new_coords)
+{
+  globalCoords = new_coords;
 }
 
 void CharacterOnBoard::reset_texture() {
@@ -98,9 +111,9 @@ void CharacterOnBoard::init()
   reset_texture();
 
   // umiejscowienie postaci na ekranie
-  setPosition(sf::Vector2f(getCoords().x * tile_size, getCoords().y * tile_size));
+  setPosition(sf::Vector2f(getLocalCoords().x * tile_size,
+                           getLocalCoords().y * tile_size));
 }
-
 
 void CharacterOnBoard::draw(sf::RenderTarget &target,
                             sf::RenderStates states) const
