@@ -46,3 +46,56 @@ CharacterOnBoard* ActiveBoard::getCharacterOnField(Field* field) const
 
   return nullptr;
 }
+
+bool ActiveBoard::isFieldInRange(Field* field,
+                                 Range& range)
+{
+  for (auto &r : range.get())
+    if (r == field)
+      return true;
+
+  return false;
+}
+
+Range ActiveBoard::createRange(CharacterOnBoard* character,
+                               std::vector<sf::Vector2i> in_range)
+{
+  std::vector<Field*> vec;
+
+  // znalezienie pól będacych w zasięgu
+  for (auto &r : in_range) {
+    Field* af =
+      getField(getCoordsOf(getFieldOccupedBy(character))
+               + r);
+    
+    if (af != nullptr)
+      vec.push_back(af);
+  }
+
+  Range range(vec, getFieldOccupedBy(character));
+
+  return range;
+}
+
+std::vector<Field*> ActiveBoard::getBlockedFields() const
+{
+  std::vector<Field*> blockedFields;
+
+  // znalezienie wszystkich pól gdzie stoi już inna, żywa postać
+  for (auto &character : getAliveCharacters()) {
+    auto af = getFieldOccupedBy(character);
+    blockedFields.push_back(af);
+  }
+  
+  return blockedFields;
+}
+
+std::vector<CharacterOnBoard*> ActiveBoard::getAliveCharacters() const
+{
+  std::vector<CharacterOnBoard*> aliveCharacters;
+  for (auto &character : charactersOnBoard)
+    if (character->isAlive())
+      aliveCharacters.push_back(character);
+
+  return aliveCharacters;
+}

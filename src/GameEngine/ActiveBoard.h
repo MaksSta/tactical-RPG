@@ -11,6 +11,7 @@
 #include "Field.h"
 #include "FullBoard.h"
 #include "../Characters/CharacterOnBoard.h"
+#include "Range.h"
 
 class ActiveBoard {
 public:
@@ -30,6 +31,21 @@ public:
 
   // sprawdzenie czy na podanym polu znajduje się postać, jeśli tak zwraca wskaźnik do niej
   CharacterOnBoard* getCharacterOnField(Field* field) const;
+
+  // sprawdzenie czy podane pole znajduje się w zasięgu obecnie wybranego do wykonania ataku
+  bool isFieldInRange(Field* field,
+                      Range& range);
+
+  // utworzenie obiektu range na podstawie podanych przesunięć (względem selectedCharacter)
+  Range createRange(CharacterOnBoard* character,
+                    std::vector<sf::Vector2i> in_range);
+
+
+  // pobranie zajętych pól na planszy
+  std::vector<Field*> getBlockedFields() const;
+
+  // zwraca tylko żyjące postacie
+  std::vector<CharacterOnBoard*> getAliveCharacters() const;
 
   friend class Game;
 private:

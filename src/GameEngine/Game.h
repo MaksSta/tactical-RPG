@@ -13,6 +13,7 @@
 #include <memory>
 #include <array>
 
+#include "../Global.h"
 #include "ActiveBoard.h"
 #include "FullBoard.h"
 #include "Pathfinder.h"
@@ -28,7 +29,6 @@
 #include "../Characters/Warrior.h"
 #include "../Characters/Sorceress.h"
 #include "../Characters/GoblinSlinger.h"
-#include "../Global.h"
 
 class Game {
 public:
@@ -71,9 +71,6 @@ private:
   // przełączenie tury na wybraną postać (sterowną przez komputer)
   void selectEnemyCharacter(CharacterOnBoard* character);
 
-  // pobranie zajętych pól na planszy (za wyjątkiem pola na którym jest selectedCharacter)
-  std::vector<Field*> getBlockedFields() const;
-
   /**
    * dotyczy podglądu akcji tworzącego się dynamicznie przez wskazywanie myszką pól na planszy
    * (nie wymaga wcześniejszego wybieranie akcji do wywołania)
@@ -115,24 +112,14 @@ private:
                          std::vector<CharacterOnBoard*> targets,
                          Direction attack_direction);
 
-  // utworzenie obiektu range na podstawie podanych przesunięć (względem selectedCharacter)
-  Range createRange(std::vector<sf::Vector2i> in_range);
-
   // wywołanie ataku obszarowego (na wszystkich postaciach w obecnym obiekcie range)
   void attackAOE(Attack& attack);
 
   // zakończenie tury, przejście do kolejnej postaci w kolejce bitwy
   void finishTurn();
 
-  // sprawdzenie czy podane pole znajduje się w zasięgu obecnie wybranego do wykonania ataku
-  bool isFieldInRange(Field* field,
-                      Range& range);
-
   // sprawdzenie czy na wskazywanym polu znajduje się inna postać, jeśli tak zwraca wskaźnik do niej
   CharacterOnBoard* getEnemyOnHoveredField() const;
-
-  // zwraca tylko żyjące postacie
-  std::vector<CharacterOnBoard*> getAliveCharacters() const;
 
   // przełącza tryb gry na zablokowany (by wywołać całą kolejkę animacji)
   void lockGameMode();
