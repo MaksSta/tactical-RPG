@@ -9,7 +9,7 @@ GoblinSlinger::GoblinSlinger(sf::Vector2i start_coords)
                    {-2, -2},
                    2)
 {
-  attack.push_back({Activity::attack1, Attack::CallType::targetable, 3, 2, 4, 2, 4});
+  attack.push_back({Activity::attack1, Abilities::Attack::CallType::targetable, 3, 2, 4, 2, 4});
 
   const int w = 48;
   const int h = 48;

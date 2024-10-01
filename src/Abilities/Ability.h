@@ -10,13 +10,16 @@
 #include "../Characters/Character.h"
 #include "../Global.h"
 
-class Ability {
-public:
-  // zwraca zasięg wywołania umejetności podany w wektorze przesunięć względem pola postaci
-  std::vector<sf::Vector2i> get_in_range() const;
-protected:
-  // zasięg wywołania umiejetności podany w wektorze przesunięć względem pola postaci
-  std:: vector<sf::Vector2i> in_range;
-};
+namespace Abilities
+{
+  class Ability {
+  public:
+    // zwraca zasięg wywołania umejetności podany w wektorze przesunięć względem pola postaci
+    std::vector<sf::Vector2i> get_in_range() const;
+  protected:
+    // zasięg wywołania umiejetności podany w wektorze przesunięć względem pola postaci
+    std::vector<sf::Vector2i> in_range;
+  };
+}
 
 #endif /* ABILITIES_ABILITY_H_ */

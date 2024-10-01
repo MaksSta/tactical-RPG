@@ -87,7 +87,7 @@ void CharacterOnBoard::takeDamage(int dmg)
   hpBar.takeDamage(final_dmg);
 }
 
-std::vector<Attack>& CharacterOnBoard::getAttacks()
+std::vector<Abilities::Attack>& CharacterOnBoard::getAttacks()
 {
   return attack;
 }

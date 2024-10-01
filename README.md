@@ -4,8 +4,6 @@
 
 ### Gameplay
 My intention is to create a open source game which will require from player logical thinking to win battles by controlling few characters turn after turn. In final perspective I want to give a player wonderful RPG experience by visiting many dungeons located on map with team of various characters and play there battles with enemies controlled by AI.
-### Release
-The goal for first release is to give player opportunity to play sample battle. I came with idea of [markdown file with feature list](Before%20first%20release%20TODO.md) which are left to achieve this goal.
 ### Contribution
 This game is quite big project. If you are C++ programmer with at least basic skills, your participation could help release first version of the game in reasonable time. Working on this game became opportunity to master my practical programming skills. The only condition to contribute on this project is to keep codebase maintainable.
 
@@ -29,6 +27,6 @@ To get source code and compile project run following commands:
 
 ```cd tactical-RPG```
 
-```g++ -std=c++14 -g src/*.cpp src/GameEngine/*.cpp src/Characters/*.cpp src/Animations/*.cpp src/Animations/Actions/*.cpp src/Abilities/*.cpp src/UI/*.cpp -o tactical-RPG -lsfml-graphics -lsfml-window -lsfml-system```
+```g++ -std=c++14 -g src/*.cpp src/GameEngine/*.cpp src/Characters/*.cpp src/Animations/*.cpp src/Animations/Actions/*.cpp src/Abilities/*.cpp src/UI/*.cpp src/AI/*.cpp src/AI/Actions/*.cpp -o tactical-RPG -lsfml-graphics -lsfml-window -lsfml-system```
 ### Compile yourself on other operating systems
 [Download SFML](https://www.sfml-dev.org/download.php) for your OS and use [tutorial for your configuration](https://www.sfml-dev.org/tutorials/#getting-started).

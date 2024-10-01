@@ -11,14 +11,14 @@ UI::UI(sf::Vector2f _starts_at)
 
 void UI::addNewButton(sf::Vector2f pos,
                       Button_data& data,
-                      Attack& ability)
+                      Abilities::Attack& ability)
 {
   auto callType = ability.getCallType();
   Button::ActivationType buttonType;
 
-  if (callType == Attack::CallType::targetable)
+  if (callType == Abilities::Attack::CallType::targetable)
     buttonType = Button::ActivationType::selectable;
-  else if (callType == Attack::CallType::instant)
+  else if (callType == Abilities::Attack::CallType::instant)
     buttonType = Button::ActivationType::clickable;
 
   button.push_back(std::make_unique<Button>(buttonType, &ability, btnsStartPos + pos, data.img_file_path, data.desc));

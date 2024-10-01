@@ -83,7 +83,7 @@ public:
 
   // zwraca pełne informacje o wszystkich atakach
   // uwaga, metoda zwraca odniesienie do orginalnego ataku więc nie jest const
-  std::vector<Attack>& getAttacks();
+  std::vector<Abilities::Attack>& getAttacks();
 
   // uwaga, ze względu na to że podaje wartość z mapy, ta metoda nie jest const
   Button_data& getButtonData(Activity activity);
@@ -117,7 +117,7 @@ protected:
   HpBar hpBar;
 
   // wektor wszystkich ataków postaci
-  std::vector<Attack> attack;
+  std::vector<Abilities::Attack> attack;
 
   // współrzędne postaci na ekranie
   sf::Vector2f position;

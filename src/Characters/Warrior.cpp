@@ -19,7 +19,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 
   button_data_for_attack[Character::Activity::attack1] = button_attack1_data;
 
-  attack.push_back({Character::Activity::attack1, Attack::CallType::targetable, 2, 1, 1, 3, 4});
+  attack.push_back({Character::Activity::attack1, Abilities::Attack::CallType::targetable, 2, 1, 1, 3, 4});
 
   Button_data button_attack3_data;
   button_attack3_data.desc = "Power attack";
@@ -28,7 +28,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
 
   button_data_for_attack[Character::Activity::attack3] = button_attack3_data;
 
-  attack.push_back({Character::Activity::attack3, Attack::CallType::targetable, 5, 1, 2, 5, 10});
+  attack.push_back({Character::Activity::attack3, Abilities::Attack::CallType::targetable, 5, 1, 2, 5, 10});
 
   Button_data button_attack2_data;
   button_attack2_data.desc = "Ground attack [aoe]";
@@ -36,7 +36,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
   button_attack2_data.id_name = "attack_ground";
 
   button_data_for_attack[Activity::attack2] = button_attack2_data;
-  attack.push_back({Activity::attack2, Attack::CallType::instant, 3, 1, 2, 2, 3, true});
+  attack.push_back({Activity::attack2, Abilities::Attack::CallType::instant, 3, 1, 2, 2, 3, true});
 
   const int w = 48;
   const int h = 48;

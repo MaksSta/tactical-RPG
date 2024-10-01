@@ -19,7 +19,7 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
 
   button_data_for_attack[Activity::attack1] = button_attack1_data;
 
-  attack.push_back({Activity::attack1, Attack::CallType::targetable, 3, 1, 4, 3, 6});
+  attack.push_back({Activity::attack1, Abilities::Attack::CallType::targetable, 3, 1, 4, 3, 6});
 
   const int w = 48;
   const int h = 48;

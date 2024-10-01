@@ -62,7 +62,7 @@ source_file.write(
   button_data_for_attack[Activity::attack1] = button_attack1_data;
 
   // TODO zmienić ustawienia ataku, kolejny argumenty po Activity::attack1 to: rodzaj ataku, koszt akcji, min range, max range, min dmg, max dmg
-  attack.push_back({Activity::attack1, Attack::CallType::targetable, 3, 1, 4, 3, 6});
+  attack.push_back({Activity::attack1, Abilities::Attack::CallType::targetable, 3, 1, 4, 3, 6});
 
   // TODO w celu dodania kolejnych ataków należy skopiować cały powyższy fragment zmieniając attack1 na attack2 itd.
   // należy również skopiować fragment na końcu pliku w którym ładowana jest grafika postaci do ataku

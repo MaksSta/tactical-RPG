@@ -41,7 +41,7 @@ public:
    * \param _desc opis przycisku, który wyświetla się po najechaniu myszką
    */
   Button(ActivationType activationType,
-         Attack* _ability,
+         Abilities::Attack* _ability,
          sf::Vector2f pos,
          std::string img_file_path,
          std::string _desc);
@@ -56,7 +56,7 @@ public:
 
   // zwraca wskaźnik do wywoływanej akcji
   // TODO powinno zamiast Attack* zwracać typ podstawowy (Ability*)
-  Attack* getAbility();
+  Abilities::Attack* getAbility();
 
   // zwraca rodzaj akcji jaką powoduje wciśnięcie przycisku
   Action getAction();
@@ -80,7 +80,7 @@ private:
 
   // wskaźnik do umiejętności jaką wywoła wciśniecie przycisku
   // TODO powinien to być typ podstawowy (Ability*)
-  Attack* ability{nullptr};
+  Abilities::Attack* ability{nullptr};
 
   // opis umiejętności wykonywanej przyciskiem
   std::string desc;

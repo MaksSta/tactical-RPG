@@ -32,7 +32,7 @@ public:
    */
   void addNewButton(sf::Vector2f pos,
                     Button_data& data,
-                    Attack& ability);
+                    Abilities::Attack& ability);
 
   /**
    * tworzy nowy przycisk wywołujący specjalne zdarzenie

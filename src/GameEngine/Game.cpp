@@ -85,8 +85,7 @@ void Game::run()
   camera.setDstPos(camera.getCenter());
 
   // ********************* PĘTLA GŁÓWNA GRY *********************
-  while (window->isOpen())
-    {
+  while (window->isOpen()) {
       // ********************************************************************
       // ****** Niezbędne operacje do odświeżania w każdej klatce gry *******
       // ********************************************************************
@@ -135,7 +134,7 @@ void Game::run()
           if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window)) {
             // pobranie umiejętności pod przyciskiem
             auto ability = b.get()->getAbility();
-            if (ability != nullptr && ability->getCallType() == Attack::CallType::targetable) {
+            if (ability != nullptr && ability->getCallType() == Abilities::Attack::CallType::targetable) {
               ui.autoselectButton(b.get());
 
               // zapisanie informacji z ostatnio wybranym atakiem atakiem domyślnym u tej postaci
@@ -248,7 +247,7 @@ void Game::run()
               if (hoveredField && getEnemyOnHoveredField()
                   && activeBoard.isFieldInRange(hoveredField, range_player)
                   && getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam()) {
-                Attack attack = *(ui.getSelectedBtn()->getAbility());
+                Abilities::Attack attack = *(ui.getSelectedBtn()->getAbility());
                 
                 acceptAttack(attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField));
                 
@@ -273,105 +272,40 @@ void Game::run()
          * Tryb gry:    TURA PRZECIWNIKA
         /****************************************************************/
         case enemy_turn: {
-          // skończenie tury i nie sprawdzanie dalszych działań gdy punkty akcji wynoszą 0
-          if (selectedCharacter->getAP() == 0) {
+          // wygenerowanie najlepszej decyzji jaką AI widzi w danej chwili
+          if (ai_decision.empty()) {
+            AI::Core ai(selectedCharacter, activeBoard);
+            ai_decision = ai.calculateBestDecision();
+          }
+
+          // pobieranie kolejnych akcji do wywołania
+          AI::Action* action = ai_decision.popNextAction();
+
+          if (dynamic_cast<AI::Move*>(action)) {
+            moveCharacter(selectedCharacter, action->getRoad());
+
+            lockGameMode();
+            break;
+          }
+
+          if (dynamic_cast<AI::Attack*>(action)) {
+            acceptAttack(*(action->getAttackInfo().attack), action->getAttackInfo().target,
+              action->getAttackInfo().range.getDirectionToThisField(activeBoard.getFieldOccupedBy(action->getAttackInfo().target)));
+
+            lockGameMode();            
+            break;
+          }
+
+          if (dynamic_cast<AI::FinishTurn*>(action)) {
             finishTurn();
             break;
           }
-
-          bool attack_confirmed = false;
-                
-          // iteracja po kolejnych dostępnych atakach
-          for (auto &attack : selectedCharacter->getAttacks()) {
-            if (selectedCharacter->getAP() >= attack.getAP()) {
-              Range enemyRange = activeBoard.createRange(selectedCharacter, attack.get_in_range());
-              
-              std::vector<CharacterOnBoard*> targets;
-
-              // sprawdź czy postać gracza jest w zasięgu
-              for (auto &c : activeBoard.getAliveCharacters()) {
-                // dodanie do listy celów wszystkich postaci z wrogiej drużyny znajdujących się w zasięgu wywołania ataku
-                if ((activeBoard.isFieldInRange(activeBoard.getFieldOccupedBy(c), enemyRange)) && (c->getTeam() != selectedCharacter->getTeam())) {
-                  targets.push_back(c);
-                }
-              }
-
-              // znalezienie spośród celów postaci o najniższej ilości hp
-              CharacterOnBoard* target_with_lowest_hp{nullptr};
-              int lowest_hp = 9999;
-              for (auto &t : targets)
-                if (t->getHP() < lowest_hp) {
-                  target_with_lowest_hp = t;
-                  lowest_hp = t->getHP();
-                }
-
-              // zaakceptowanie ataku dla celu o najniższym hp (o ile istnieje)
-              if (target_with_lowest_hp != nullptr) {
-                acceptAttack(attack, target_with_lowest_hp,
-                             enemyRange.getDirectionToThisField(activeBoard.getFieldOccupedBy(target_with_lowest_hp)));
-
-                // zablokowanie gry aż do skończenia animacji
-                lockGameMode();
-
-                attack_confirmed = true;
-                break;
-              }
-            }
-          }
-
-          // zaprzestanie dalszego sprawdzania wydarzeń jeśli wykonano już atak
-          if (attack_confirmed)
-            break;
           
-          // dopóki zostały punkty akcji, wykonuje losowy ruch na jedno z możliwych pól
-          if (selectedCharacter->getAP() > 0) {
-            // wykonanie losowego ruchu
-            int rnd = rand() % 4;
-            
-            sf::Vector2i movement;
-            switch (rnd) {
-            case 0:
-              movement = {-1, 0};
-              break;
-            case 1:
-              movement = {1, 0};
-              break;
-            case 2:
-              movement = {0, -1};
-              break;
-            case 3:
-              movement = {0, 1};
-              break;
-            }
-            
-            // sprawdzenie czy ruch po wykonaniu nie prowadzi do zajętego pola lub pola poza planszą
-            Field* field_after_move =
-              activeBoard.getField(activeBoard.getCoordsOf(activeBoard.getFieldOccupedBy(selectedCharacter))
-                                   + movement);
-            
-            bool invalid_move = false;
-            
-            // blokowanie ruchu wychodzącego poza atywną część planszy
-            if (field_after_move == nullptr)
-              invalid_move = true;
-            
-            for (auto &bf : activeBoard.getBlockedFields()) {
-              if (bf == field_after_move)
-                invalid_move = true;
-            }
-            
-            if (!invalid_move) {
-              moveCharacter(selectedCharacter, movement);
-              
-              // zablokowanie gry aż do skończenia animacji
-              lockGameMode();
-            }
-          }
         } break;
         }
-        
-          // zapisanie ostatnio wkszywanego myszką pola
-          lastHoveredField = hoveredField;
+                
+        // zapisanie ostatnio wkszywanego myszką pola
+        lastHoveredField = hoveredField;
       }
 
       // ponowne zapisanie informacji czy kliknięto LPM myszki
@@ -381,7 +315,7 @@ void Game::run()
         MouseLClickedLastFrame = false;
 
       // ******************************************************************
-      // ******** Update wszystkich elemnetów w bieżącej klatce ************
+      // ******** Update wszystkich elemnetów w bieżącej klatce ***********
       // ******************************************************************
 
       // zmierzenie czasu jaki upłynął pomiędzy klatkami
@@ -572,7 +506,7 @@ void Game::checkActionsByHover()
   if (!ui.getAutoselectedBtn())
     return;
 
-  Attack attack = *(ui.getAutoselectedBtn()->getAbility());
+  Abilities::Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 
   auto possible_range = attack.get_in_range();
 
@@ -580,7 +514,7 @@ void Game::checkActionsByHover()
   Field* field_caster;
 
   // dla ataków z bliska końcowe pole road stanowi pole wywołania (ruch postaci + akcja ataku)
-  if (attack.get_type() == Attack::Type::melee) {
+  if (attack.get_type() == Abilities::Attack::Type::melee) {
     if (road.empty())
       // w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obcenego pola
       field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
@@ -588,7 +522,7 @@ void Game::checkActionsByHover()
       field_caster = road.getLastElement();
   }
   // dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola, akcja ruchu zostaje usunięta
-  else if (attack.get_type() == Attack::Type::ranged) {
+  else if (attack.get_type() == Abilities::Attack::Type::ranged) {
     field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
     road.clear();
   }
@@ -656,7 +590,7 @@ void Game::acceptMoveAndAction()
   }
   if (!range_player.empty()) {
     // pobiera informację o autoataku z przycisku z domyślnie wywoływanym atakiem
-    Attack attack = *(ui.getAutoselectedBtn()->getAbility());
+    Abilities::Attack attack = *(ui.getAutoselectedBtn()->getAbility());
     
     // wywołanie ataku
     acceptAttack(attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField));
@@ -664,40 +598,31 @@ void Game::acceptMoveAndAction()
 }
 
 void Game::moveCharacter(CharacterOnBoard* character,
-                         sf::Vector2i offset)
+                         Road& road)
 {
-  // zmiana położenia postaci od razu na pozycję po przesunięciu w kontekście logiki gry
-  character->setGlobalCoords(selectedCharacter->getGlobalCoords() + offset);
-  character->setLocalCoords(selectedCharacter->getLocalCoords() + offset);
-  
-  // dodanie animacji
-  anim_manager.addAnimationToQueue(anim_manager.createAnimationMove(character,
-                                                                    Animations::Actions::Move{{static_cast<float>(offset.x * tile_size),
-                                                                                                 static_cast<float>(offset.y * tile_size)},
-                                                                                              240.0f}));
+  // zmiana położenia postaci w logice gry od razu na docelową pozycję
+  character->setLocalCoords(activeBoard.getCoordsOf(road.getLastElement()));
+  character->setGlobalCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
 
-  character->setAP(selectedCharacter->getAP() - 1);
+  // dodanie animacji przesuwającej postać pole po polu
+  for (auto &r : road.get())
+    anim_manager.addAnimationToQueue(anim_manager.createAnimationMove(character,
+                                                                      Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f}));
+
+  // odjęcie punktów akcji, po 1 za każde pokonane pole
+  character->setAP(character->getAP() - road.get().size());
 }
 
 void Game::acceptMovePlayer()
 {
-  // zmiana położenia postaci w logice gry od razu na docelową pozycję
-  selectedCharacter->setLocalCoords(activeBoard.getCoordsOf(road.getLastElement()));
-  selectedCharacter->setGlobalCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
-
-  // dodanie animacji przesuwającej postać pole po polu
-  for (auto &r : road.get())
-    anim_manager.addAnimationToQueue(anim_manager.createAnimationMove(selectedCharacter,
-                                                                      Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f}));
-
-  // odjęcie punktów akcji, po 1 za każde pokonane pole
-  selectedCharacter->setAP(selectedCharacter->getAP() - road.get().size());
-
+  moveCharacter(selectedCharacter, road);
+  
   // wyczyszczenie podglądu drogi
   road.clear();
 }
 
-void Game::acceptAttack(Attack& attack, CharacterOnBoard* target,
+void Game::acceptAttack(Abilities::Attack& attack,
+                        CharacterOnBoard* target,
                         Direction attack_direction)
 {
   // dodanie animacji ataku wykonywanego przez postać która atakuje
@@ -716,7 +641,8 @@ void Game::acceptAttack(Attack& attack, CharacterOnBoard* target,
   range_player.clear();
 }
 
-void Game::acceptMultiAttack(Attack& attack, std::vector<CharacterOnBoard*> targets,
+void Game::acceptMultiAttack(Abilities::Attack& attack,
+                             std::vector<CharacterOnBoard*> targets,
                              Direction attack_direction)
 {
   // dodanie animacji ataku wykonywanego przez postać która atakuje
@@ -738,7 +664,7 @@ void Game::acceptMultiAttack(Attack& attack, std::vector<CharacterOnBoard*> targ
   range_player.clear();
 }
 
-void Game::attackAOE(Attack& attack)
+void Game::attackAOE(Abilities::Attack& attack)
 {
   std::vector<CharacterOnBoard*> targets;
 

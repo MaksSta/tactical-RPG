@@ -1,5 +1,7 @@
 #include "Attack.h"
 
+using namespace Abilities;
+
 Attack::Attack(Character::Activity _activity,
                CallType _callType,
                int _action_points,

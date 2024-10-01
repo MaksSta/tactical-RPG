@@ -26,6 +26,8 @@
 #include "../UI/TextBox.h"
 #include "../Abilities/Attack.h"
 #include "../Animations/Manager.h"
+#include "../AI/Core.h"
+
 #include "../Characters/Warrior.h"
 #include "../Characters/Sorceress.h"
 #include "../Characters/GoblinSlinger.h"
@@ -95,25 +97,24 @@ private:
   // akceptuje wywołania ruchu i/lub akcji
   void acceptMoveAndAction();
 
-  // przesunięcie postaci o podaną odleglość pól na plaszy (używać tylko dla przesunięć o 1 pole)
   void moveCharacter(CharacterOnBoard* character,
-                     sf::Vector2i offset);
+                     Road& road);
 
   // ustawia postać na nowym polu, wywołuje animację ruchu
   void acceptMovePlayer();
 
   // wywołanie akcji podanego ataku na podanej postaci
-  void acceptAttack(Attack& attack,
+  void acceptAttack(Abilities::Attack& attack,
                     CharacterOnBoard* target,
                     Direction attack_direction);
 
   // wywołanie akcji ataku na wielu celach równocześnie
-  void acceptMultiAttack(Attack& attack,
+  void acceptMultiAttack(Abilities::Attack& attack,
                          std::vector<CharacterOnBoard*> targets,
                          Direction attack_direction);
 
   // wywołanie ataku obszarowego (na wszystkich postaciach w obecnym obiekcie range)
-  void attackAOE(Attack& attack);
+  void attackAOE(Abilities::Attack& attack);
 
   // zakończenie tury, przejście do kolejnej postaci w kolejce bitwy
   void finishTurn();
@@ -175,7 +176,7 @@ private:
   bool range_created_from_auto;
 
   // ostatnio wybierany domyślny atak dla danej postaci
-  std::map<CharacterOnBoard*, Attack*> lastDefaultAttack;
+  std::map<CharacterOnBoard*, Abilities::Attack*> lastDefaultAttack;
 
   // ilość akcji jaka zostanie w przypadku wykonania wskazywanej akcji
   int AP_preview;
@@ -191,13 +192,16 @@ private:
 
   ActiveBoard activeBoard;
 
+  // obecna kolejka akcji, które zostały do wykonania przez ai
+  AI::Decision ai_decision;
+
   // interejs użytkownika, zaczynający się w miejscu od podanych współrzędnych
   UI ui{{880, 475}};
 
   // czy w ostatniej klatce wciśnięto LPM
   bool MouseLClickedLastFrame;
 
-  // informacja sprawdzana co klatkę, by 1razowo odświeżyć niektóre elementy
+  // informacja sprawdzana co klatkę, by 1-razowo odświeżyć niektóre elementy
   bool justUnlocked;
 
   // ostatnio najeżdzane pole na planszy

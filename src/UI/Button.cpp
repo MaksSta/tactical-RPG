@@ -1,7 +1,7 @@
 #include "Button.h"
 
 Button::Button(ActivationType _activationType,
-               Attack* _ability,
+               Abilities::Attack* _ability,
                sf::Vector2f pos,
                std::string img_file_path,
                std::string _desc)
@@ -49,7 +49,7 @@ void Button::Update(float deltaTime)
   }
 }
 
-Attack* Button::getAbility()
+Abilities::Attack* Button::getAbility()
 {
   return ability;
 }
