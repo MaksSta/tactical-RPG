@@ -79,12 +79,7 @@ void CharacterOnBoard::reset_texture() {
 
 void CharacterOnBoard::takeDamage(int dmg)
 {
-  // ograniczonie otrzymanych obrażeń do pozostałej ilości hp
-  int final_dmg = std::min(dmg, hp);
-  hp -= final_dmg;
-
-  // animacja na pasku hp
-  hpBar.takeDamage(final_dmg);
+  hp -= dmg;
 }
 
 std::vector<Abilities::Attack>& CharacterOnBoard::getAttacks()
@@ -149,6 +144,11 @@ void CharacterOnBoard::setPosition(sf::Vector2f pos)
 void CharacterOnBoard::setTransparency(unsigned char transparency)
 {
   sprite.setColor({255, 255, 255, transparency});
+}
+
+HpBar& CharacterOnBoard::getHpBar()
+{
+  return hpBar;
 }
 
 void CharacterOnBoard::disableHpBar()

@@ -1,6 +1,6 @@
 #include "HpBar.h"
 
-HpBar::HpBar(sf::Vector2f pos, int& _hp, int& _max_hp)
+HpBar::HpBar(sf::Vector2f pos, int _hp, int& _max_hp)
   :
   hp{_hp},
   max_hp{_max_hp}
@@ -31,6 +31,8 @@ HpBar::HpBar(sf::Vector2f pos, int& _hp, int& _max_hp)
 
 void HpBar::update(float deltaTime)
 {
+  // TODO cały ten efekt tak naprawdę powinien zostać przeniesiony do klasy animacji, i dać tu deklarację przyjaźni
+
   // zablokowanie efektu skracania paska obrażeń na czas zamrożenia
   if (damage_effect_freeze > 0) {
       damage_effect_freeze -= deltaTime;
@@ -38,14 +40,14 @@ void HpBar::update(float deltaTime)
   else
     // efekt otrzymania obrażeń w czasie na pasku obrażeń
     if (damage_effect > 0) {
-      damage_effect -= deltaTime * 20;
+      damage_effect -= deltaTime * 25;
       if (damage_effect < 0)
         damage_effect = 0;
     }
 
   damage_bar.setSize({damage_effect, 12});
 
-  // aktualizacja obecnego i maksymalnego hp w napisie
+  // punkty hp w napisie na pasku
   std::stringstream ss;
   ss << hp << "/" << max_hp;
   hpText.setString(ss.str());
@@ -53,8 +55,10 @@ void HpBar::update(float deltaTime)
 
 void HpBar::takeDamage(float dmg)
 {
+  hp -= dmg;
+
   // ustawienie efektu zamrożenia
-  damage_effect_freeze = 0.25;
+  damage_effect_freeze = 0.18;
 
   // ustawienie efektu otrzmywania obrażeń
   damage_effect = 50 * dmg/static_cast<float>(max_hp);
@@ -65,6 +69,11 @@ void HpBar::takeDamage(float dmg)
   // umiejscowienie paska z efektem otrzymania obrażeń po prawej od pasku obecnych hp
   damage_bar.setPosition(hp_left_bar.getGlobalBounds().left + hp_left_bar.getGlobalBounds().width - 2,
                          hp_left_bar.getPosition().y);
+}
+
+bool HpBar::isTakingDamage() const
+{
+  return (damage_effect);
 }
 
 void HpBar::setPosition(sf::Vector2f pos)

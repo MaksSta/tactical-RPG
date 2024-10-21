@@ -18,15 +18,21 @@ Animation* Manager::createAnimation(CharacterOnBoard* animatedObj,
 }
 
 Animation* Manager::createAnimationMove(CharacterOnBoard* animatedObj,
-                                        Animations::Actions::Move move)
+                                        Animations::Actions::Move move,
+                                        bool isBlocking)
 {
-  return new Animations::MoveBy(animatedObj, move);
+  return new Animations::MoveBy(animatedObj, move, isBlocking);
 }
 
-Animation* Manager::createAnimationHurt(CharacterOnBoard* animatedObj,
-                                        int damage)
+Animation* Manager::createAnimationHurt(CharacterOnBoard* animatedObj)
 {
-  return new Animations::Hurt(animatedObj, damage);
+  return new Animations::Hurt(animatedObj);
+}
+
+Animation* Manager::createAnimationTakeDamageHP(CharacterOnBoard* animatedObj,
+                                                int damage)
+{
+  return new Animations::ChangeHpBar(animatedObj, damage);
 }
 
 Animation* Manager::createAnimationDeath(CharacterOnBoard* animatedObj)
@@ -43,9 +49,9 @@ std::vector<Animation*>& Manager::addNewSet()
 {
   // utworzenie nowej, pustej ścieżki animacji
   std::vector<Animation*> new_set;
-  sets_queue.push(new_set);
+  sets_deqeue.push_back(new_set);
 
-  return sets_queue.back();
+  return sets_deqeue.back();
 }
 
 void Manager::addAnimationToSet(std::vector<Animation*>& set, Animation* animation)
@@ -75,16 +81,15 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
   auto object = animation.animatedObj;
   auto & sprites_data = object->get_current_sprites_data();
 
-  // zwiększenie numeru klatki dla animowanego obiektu (dla klas animujących teksturę, tj. pochodnych OnTexture)
-  if (dynamic_cast<OnTexture*>(&animation))
-    current_frame[object] += delta * sprites_data.fps;
-
   // info, że animacja wykonała się do ostatniej klatki
   bool loop_reseted = false;
 
-  // utrzymanie wartości licznika animacji w jej zakresie
-  while (current_frame[object] >= sprites_data.textures.size() )
-    {
+  // zwiększenie numeru klatki dla animowanego obiektu (dla klas animujących teksturę, tj. pochodnych OnTexture)
+  if (dynamic_cast<OnTexture*>(&animation)) {
+    current_frame[object] += delta * sprites_data.fps;
+
+    // utrzymanie wartości licznika animacji w jej zakresie
+    while (current_frame[object] >= sprites_data.textures.size()) {
       if (animation.finish_condition == Animations::FinishCondition::to_last_frame)
         current_frame[object] = sprites_data.textures.size() - 1;
       else
@@ -92,9 +97,9 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
 
       loop_reseted = true;
     }
-
-  // ustawienie tekstury na zaokrąglony do int numer obecnej klatki tego obiektu
-  object->setTexture(sprites_data.textures[static_cast<int>(current_frame[object])]);
+    // ustawienie tekstury na zaokrąglony do int numer obecnej klatki tego obiektu
+    object->setTexture(sprites_data.textures[static_cast<int>(current_frame[object])]);
+  }
 
   // sprawdzanie czy spełniony został warunek kończący animację
   switch (animation.finish_condition) {
@@ -108,6 +113,11 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
     if (loop_reseted)
       return true;
   } break;
+  case FinishCondition::special_no_reset_texture : {
+    if (animation.special_finish_condition_obtained()) {
+      return true;
+    }
+  } break;
   case FinishCondition::special: {
     if (animation.special_finish_condition_obtained()) {
       object->reset_texture();
@@ -115,16 +125,18 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
     }
   } break;
   }
+
+  // animacja nie zakończyła się
   return false;
 }
 
 void Manager::updateAnimationsStack(float delta)
 {
-  // jeżeli obecny zbiór animacji jest pusty, pobranie kolejnego z kolejki o ile jakieś zostały
-  if (current_set.empty() && !sets_queue.empty()) {
+  // jeżeli obecny zbiór animacji jest pusty, pobranie kolejnego z kolejki (o ile jakieś animacje czekają)
+  if (current_set.empty() && !sets_deqeue.empty()) {
     // zdjęcie oczekującego zbioru animacji z kolejki
-    current_set = sets_queue.front();
-    sets_queue.pop();
+    current_set = sets_deqeue.front();
+    sets_deqeue.pop_front();
 
     // i uruchomienie wszystkich animacji w nim
     for (auto & animation : current_set) {
@@ -166,7 +178,8 @@ void Manager::updateAnimationsStack(float delta)
     }
 }
 
-void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters, float delta)
+void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters,
+                                   float delta)
 {
   // zmiana statusu na idle wszystkim postaciom, dla których nie odgrywa się żadna animacja w tej chwili
   for (auto & character : characters) {
@@ -191,7 +204,21 @@ void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters, fl
 
 bool Manager::anyAnimationLocking()
 {
-  if (sets_queue.empty() && current_set.empty())
-    return false;
-  return true;
+  // sprawdzenie czy jakaś z oczekujących animacji blokuje
+  for (auto & set : sets_deqeue) {
+    for (auto & anim : set) {
+      if (anim->isBlocking) {
+        return true;
+      }
+    }
+  }
+
+  // spradzenie czy jakaś oczekująca animacja z obecnie wywoływanej kolejki animacji blokuje
+  for (auto & anim : current_set) {
+    if (anim->isBlocking) {
+      return true;
+    }
+  }
+
+  return false;
 }

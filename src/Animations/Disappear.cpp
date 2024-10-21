@@ -7,11 +7,12 @@ Disappear::Disappear(CharacterOnBoard* _animatedObj,
                      Direction _direction)
 {
   animatedObj = _animatedObj;
-	activity = _activity;
-	direction = _direction;
+  activity = _activity;
+  direction = _direction;
 
-  finish_condition = special;
+  finish_condition = special_no_reset_texture;
   isResettingFrame = false;
+  isBlocking = false;
 }
 
 void Disappear::animate(float delta)

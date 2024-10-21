@@ -78,7 +78,7 @@ public:
   // przestawienie sprite na pierwszą klatkę dla obecnego kierunku i aktywności
   void reset_texture();
 
-  // zmniejsza wartość hp postaci i dodaje animcję na pasku życia
+  // zmniejsza wartość hp postaci
   void takeDamage(int dmg);
 
   // zwraca pełne informacje o wszystkich atakach
@@ -94,6 +94,8 @@ public:
 
   // przestawia przezroczystość postaci wraz z paskiem hp
   void setTransparency(unsigned char transparency);
+
+  HpBar& getHpBar();
 
   // wygasza pokazywanie paska z hp
   void disableHpBar();

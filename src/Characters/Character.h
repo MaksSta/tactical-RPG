@@ -64,10 +64,8 @@ public:
   std::string getName() const;
 
   // informacja o tym, że postać zaraz umrze (animacja śmierci czeka już w kolejce)
-  bool will_die_soon {false};
+  bool will_die_this_turn {false};
 protected:
-  bool alive {true};
-
   Team team;
 
   Activity currentActivity{idle};

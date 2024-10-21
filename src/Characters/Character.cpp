@@ -17,12 +17,11 @@ Character::Character(std::string _name,
 void Character::die()
 {
   setActivity(Character::Activity::death);
-  alive = false;
 }
 
 bool Character::isAlive() const
 {
-  return alive;
+  return !will_die_this_turn;
 }
 
 Character::Team Character::getTeam() const

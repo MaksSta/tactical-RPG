@@ -20,7 +20,8 @@ namespace Animations
      * @param move to akcja ruchu ze specjalnej grupy klas do akcji w animacjach
      */
     MoveBy(CharacterOnBoard* _animatedObject,
-           Actions::Move& move);
+           Actions::Move& move,
+           bool _isBlocking);
 
     // wyzaczenie punktu końcowego i wywołanie init z klasy bazowej
     void init();

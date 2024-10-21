@@ -49,6 +49,7 @@ set(SOURCE_FILES
 	src/AI/Actions/Move.cpp
 	src/AI/Actions/Attack.cpp
 	src/AI/Actions/FinishTurn.cpp
+	src/Animations/ChangeHpBar.cpp
 	)
 
 SET(HEADER_FILES
@@ -91,6 +92,7 @@ SET(HEADER_FILES
 	src/AI/Actions/Move.h
 	src/AI/Actions/Attack.h
 	src/AI/Actions/FinishTurn.h
+	src/Animations/ChangeHpBar.h
 	)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})

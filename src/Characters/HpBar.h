@@ -21,13 +21,15 @@ public:
    * \param _max_hp referencja do maksymalnego hp postaci
    */
   HpBar(sf::Vector2f pos,
-        int& _hp,
+        int _hp,
         int& _max_hp);
 
   void update(float deltaTime);
 
   // wywołanie efektu otrzymania obrażeń na pasku
   void takeDamage(float dmg);
+
+  bool isTakingDamage() const;
 
   void setPosition(sf::Vector2f pos);
 
@@ -36,8 +38,8 @@ public:
 
   friend class CharacterOnBoard;
 private:
-  // referencja do aktualnego hp postaci
-  int& hp;
+  // obecnie widoczne, pozostałe hp postaci
+  int hp;
 
   // referencja do maksymalnego hp postaci
   int& max_hp;

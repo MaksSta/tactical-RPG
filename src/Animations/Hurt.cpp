@@ -2,18 +2,9 @@
 
 using namespace Animations;
 
-Hurt::Hurt(CharacterOnBoard* _animatedObj,
-           int _damage)
+Hurt::Hurt(CharacterOnBoard* _animatedObj)
   :
-  OnTexture(_animatedObj, Character::hurt, _animatedObj->getDirection()),
-  damage{_damage}
+  OnTexture(_animatedObj, Character::hurt, _animatedObj->getDirection())
 {
-}
-
-void Hurt::init()
-{
-  OnTexture::init();
-
-  // otrzymanie obrażeń przez animowaną postać
-  animatedObj->takeDamage(damage);
+  isBlocking = false;
 }

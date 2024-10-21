@@ -24,12 +24,4 @@ void OnTexture::init()
     throw errors::no_anim_for_activity();
 }
 
-void OnTexture::animate(float delta) {}
-
-bool OnTexture::special_finish_condition_obtained() const {
-  // zgłoszenie wyjątku, ponieważ specjalny warunek występuje tylko w wyspecjalizowancyh klasach pochodnych
-  // skoro nie został odziedziczony oznacza to, że klasa dla której wywołano tę funkcję ma inny waurnek końcowy
-  // jeżeli zgłoszono, sprawdzić czy finish_condition nie został niesłusznie ustawiony na special
-  // skoro ma zostać sprawdzony własny niestandardowy warunek zakończenia animacji, należy zdefiniować tę metodę w klasie pochodnej
-  throw errors::undefined_special_condition();
-}
+//void OnTexture::animate(float delta) {}

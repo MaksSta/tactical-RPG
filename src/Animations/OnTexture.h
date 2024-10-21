@@ -29,10 +29,10 @@ namespace Animations
 
     // w przypadku OnTexture metoda ta nie wykonuje żadnych działań, gdyż klatkami zarządza Manager
     // w celu wywoływania dodatkowych działań w czasie animacji należy zastąpić tę metodę w klasie pochodnej
-    virtual void animate(float delta);
+    //virtual void animate(float delta);
 
     // specjalny warunek animacji - metoda to musi zostać odziedziczona
-    bool special_finish_condition_obtained() const;
+    //bool special_finish_condition_obtained() const;
   protected:
     // aktywność jaką otrzyna postać przy wywołaniu animacji
     Character::Activity activity;
@@ -40,13 +40,6 @@ namespace Animations
     // kierunek jaki otrzyma postać przy wywołaniu animacji
     Direction direction;
   };
-
-  // błędy jakie można napotkać podczas animacji
-  namespace errors
-  {
-    struct no_anim_for_activity{};
-    struct undefined_special_condition{};
-  }
 }
 
 #endif /* ANIMATIONS_ONTEXTURE_H_ */

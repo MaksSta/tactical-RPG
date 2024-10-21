@@ -3,13 +3,15 @@
 using namespace Animations;
 
 MoveBy::MoveBy( CharacterOnBoard* _animatedObj,
-                Actions::Move& move)
+                Actions::Move& move,
+                bool _isBlocking)
   :
   OnTexture(_animatedObj, Character::move, move.direction, FinishCondition::special),
   offset(move.offset),
   speed(move.speed)
 {
   isResettingFrame = false;
+  isBlocking = _isBlocking;
 }
 
 void MoveBy::init()

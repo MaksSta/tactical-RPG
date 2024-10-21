@@ -30,10 +30,12 @@
 
 #include "../Characters/Character.h"
 
+#include "Animation.h"
 #include "MoveBy.h"
 #include "Hurt.h"
 #include "Death.h"
 #include "Disappear.h"
+#include "ChangeHpBar.h"
 
 #include "Actions/Move.h"
 
@@ -67,7 +69,8 @@ namespace Animations
      * @return zwraca wskaźnik do nowo utworzonej animacji
      */
     Animation* createAnimationMove(CharacterOnBoard* animatedObj,
-                                   Animations::Actions::Move move);
+                                   Animations::Actions::Move move,
+                                   bool isBlocking);
 
     /**
      * tworzy animację otrzymywania obrażeń, która redukuje punkty życia postaci
@@ -75,7 +78,16 @@ namespace Animations
      * @param damage to ilość punktów obrażeń, jaką otrzyma postać podczas animacji
      * @return zwraca wskaźnik do nowo utworzonej animacji
      */
-    Animation* createAnimationHurt(CharacterOnBoard* animatedObj, int damage);
+    Animation* createAnimationHurt(CharacterOnBoard* animatedObj);
+
+     /**
+     * tworzy animację otrzymywania obrażeń, która odejmuje punkty życia z paska
+     * @param animatedObj wskaźnik do postaci na której wykonywana będzie animacja
+     * @param damage to ilość punktów obrażeń, jaką otrzyma postać podczas animacji
+     * @return zwraca wskaźnik do nowo utworzonej animacji
+     */
+    Animation* createAnimationTakeDamageHP(CharacterOnBoard* animatedObj,
+                                           int damage);
 
     /**
      * tworzy animację umierania, która przestawia status postaci na umierający
@@ -116,7 +128,7 @@ namespace Animations
     bool anyAnimationLocking();
   private:
     // kolejka zbiorów animacji czekających do wywołania
-    std::queue<std::vector<Animation*>> sets_queue;
+    std::deque<std::vector<Animation*>> sets_deqeue;
 
     // węzeł z równolegle wykonywanymi animacjami
     std::vector<Animation*> current_set;

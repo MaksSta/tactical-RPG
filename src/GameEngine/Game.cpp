@@ -328,7 +328,7 @@ void Game::run()
       // update przycisków z interfejsu użytkownika
       ui.updateButtons(m_pos_on_window, deltaTime);
 
-      // odblokowanie możliwości ruchu po skończeniu wywołania kolejki animacji
+      // odblokowanie interakcji w grze, gdy nie ma żadnej oczekującej animacji, która blokuje
       if (!anim_manager.anyAnimationLocking()) {
         unlockGameMode();
       }
@@ -351,11 +351,11 @@ void Game::run()
 }
 
 void Game::update(float delta) {
-  // uśmiercenie postaci, dla których liczba hp spadła do zera
+  // uśmiercenie postaci dla których liczba hp spadła do zera
   for (auto &character : activeBoard.getAliveCharacters())
-    if (character->getHP() == 0 && !character->will_die_soon) {
+    if (character->getHP() == 0 && !character->will_die_this_turn) {
       // zaznaczenie że postać zaraz umrze, by nie sprawdzać tego ponownie
-      character->will_die_soon = true;
+      character->will_die_this_turn = true;
 
       // dodanie animacji śmierci i następnie zniknięcia
       anim_manager.addAnimationToQueue(anim_manager.createAnimationDeath(character));
@@ -446,8 +446,6 @@ void Game::selectCharacter(CharacterOnBoard *character)
 
 void Game::selectEnemyCharacter(CharacterOnBoard *character)
 {
-  gameMode = enemy_turn;
-
   selectedCharacter = character;
 
   // zresetowanie ilości punktów akcji na maksymalną wartość
@@ -479,9 +477,11 @@ void Game::checkMoveAndActionsAuto()
   // sprawdzenie czy są na najechanym polu są też akcje do wywołania
   checkActionsByHover();
 
+  // FIXME? sprawdzić czy własnie tu znajduje się problem, że dla drugiego potencjalnego ataku skasuje drogę (miałem taki bug)
+
   // w przypadku gdy nie ma w tej chwili podglądu żadnej akcji wyczyść podgląd drogi i utwórz od nowa
   if (range_player.empty()) {
-    // czyszczenie road za każdym razem gdy zmieniło się wskaztwane myszką pole
+    // czyszczenie road za każdym razem gdy zmieniło się wskazywane myszką pole
     road.clear();
 
     // próba utworzenie drogi: od pola postaci do wskazywanego pola
@@ -516,14 +516,16 @@ void Game::checkActionsByHover()
   // dla ataków z bliska końcowe pole road stanowi pole wywołania (ruch postaci + akcja ataku)
   if (attack.get_type() == Abilities::Attack::Type::melee) {
     if (road.empty())
-      // w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obcenego pola
+      // w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obecnego pola
       field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
     else
       field_caster = road.getLastElement();
   }
-  // dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola, akcja ruchu zostaje usunięta
+  // dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola
   else if (attack.get_type() == Abilities::Attack::Type::ranged) {
     field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
+
+    // w przypadku znalezienia calu dla ataku dystansowego nie ma przesunięcia postaci
     road.clear();
   }
   
@@ -591,7 +593,7 @@ void Game::acceptMoveAndAction()
   if (!range_player.empty()) {
     // pobiera informację o autoataku z przycisku z domyślnie wywoływanym atakiem
     Abilities::Attack attack = *(ui.getAutoselectedBtn()->getAbility());
-    
+
     // wywołanie ataku
     acceptAttack(attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField));
   }
@@ -605,9 +607,16 @@ void Game::moveCharacter(CharacterOnBoard* character,
   character->setGlobalCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
 
   // dodanie animacji przesuwającej postać pole po polu
-  for (auto &r : road.get())
+  for (auto &r : road.get()) {
+    bool isBlocking = true;
+    // rozpoczęcie przesunięcie na ostatni kafelek drogi odblokowauje od razu grę
+    if (r == road.getLastElement())
+      isBlocking = false;
+
     anim_manager.addAnimationToQueue(anim_manager.createAnimationMove(character,
-                                                                      Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f}));
+                                                                      Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f},
+                                                                      isBlocking));
+  }
 
   // odjęcie punktów akcji, po 1 za każde pokonane pole
   character->setAP(character->getAP() - road.get().size());
@@ -633,10 +642,20 @@ void Game::acceptAttack(Abilities::Attack& attack,
   // odjęcie punktów akcji za atak
   selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
 
+  int drawn_damage = attack.draw_damage();
+  int damage = std::min(drawn_damage, target->getHP());
+
   // dodanie animacji otrzymania obrażeń zaatakowanej postaci
-  anim_manager.addAnimationToQueue(anim_manager.createAnimationHurt(target,
-                                                                    attack.draw_damage()));
-  
+  anim_manager.addAnimationToQueue(anim_manager.createAnimationHurt(target));
+
+  // utworzenie zbioru równolegle wywoływanego, żeby animacja Hurt była rzem z TakeDamageHP
+  std::vector<Animations::Animation*> &set = anim_manager.addNewSet();
+  anim_manager.addAnimationToSet(set,
+                                 anim_manager.createAnimationTakeDamageHP(target,
+                                                                          damage));
+
+  target->takeDamage(damage);
+
   // usunięcie podglądu wywołania akcji
   range_player.clear();
 }
@@ -655,10 +674,21 @@ void Game::acceptMultiAttack(Abilities::Attack& attack,
 
   // dodanie animacji otrzymania obrażeń zaatakowanych postaci równocześnie
   std::vector<Animations::Animation*> &set = anim_manager.addNewSet();
-  for (auto &t : targets)
+  std::vector<Animations::Animation*> &set2 = anim_manager.addNewSet();
+
+  for (auto &target : targets) {
+    int drawn_damage = attack.draw_damage();
+    int damage = std::min(drawn_damage, target->getHP());
+
     anim_manager.addAnimationToSet(set,
-                                   anim_manager.createAnimationHurt(t,
-                                                                    attack.draw_damage()));
+                                   anim_manager.createAnimationHurt(target));
+
+    // i teraz równolegle dodaje animację na pasku życia
+    anim_manager.addAnimationToSet(set2,
+                                   anim_manager.createAnimationTakeDamageHP(target, damage));
+
+    target->takeDamage(damage);
+  }
 
   // usunięcie podglądu wywołania akcji
   range_player.clear();
@@ -669,9 +699,9 @@ void Game::attackAOE(Abilities::Attack& attack)
   std::vector<CharacterOnBoard*> targets;
 
   // zlokalizuj wszystkie postacie w zasięgu ataku i dodaj do listy celów
-  for (auto &r : range_player.get()) {
-    if (activeBoard.getCharacterOnField(r))
-      targets.push_back(activeBoard.getCharacterOnField(r));
+  for (auto &range : range_player.get()) {
+    if (activeBoard.getCharacterOnField(range))
+      targets.push_back(activeBoard.getCharacterOnField(range));
   }
 
   acceptMultiAttack(attack, targets, selectedCharacter->getDirection());
@@ -679,6 +709,24 @@ void Game::attackAOE(Abilities::Attack& attack)
 
 void Game::finishTurn()
 {
+
+  // zamiana trybu gry na taki jaki jest u drużyny postaci, która ma ruch
+  // (zrobione też po to by jednocześnie zachować blokadę trybu gry)
+  if (selectedCharacter->getTeam() != Character::Team::player )
+  {
+    if (gameMode == GameMode::player_turn)
+      gameMode = player_turn;
+    else if (gameMode == GameMode::locked_enemy_turn)
+      gameMode = locked_player_turn;
+  }
+  else if (selectedCharacter->getTeam() != Character::Team::enemy )
+  {
+    if (gameMode == GameMode::player_turn)
+      gameMode = enemy_turn;
+    else if (gameMode == GameMode::locked_player_turn)
+      gameMode = locked_enemy_turn;
+  }
+
   battle_queue.switchToNextCharacter();
 
   auto currentCharacter = battle_queue.getCurrentCharacter();
@@ -687,6 +735,7 @@ void Game::finishTurn()
     selectCharacter(currentCharacter);
   else if (currentCharacter->getTeam() == Character::Team::enemy)
     selectEnemyCharacter(currentCharacter);
+
 }
 
 CharacterOnBoard* Game::getEnemyOnHoveredField() const
