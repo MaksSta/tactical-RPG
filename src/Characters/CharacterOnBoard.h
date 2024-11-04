@@ -18,7 +18,7 @@
 #include "../Abilities/Attack.h"
 #include "../Global.h"
 
-// zestaw wszystkich danych o pojedyńczej animacji sprita
+// zestaw danych do animacji jednego zestawu spritów
 struct Sprites_data {
   std::vector<sf::Texture> textures;
   float fps;
@@ -74,6 +74,8 @@ public:
   // pobiera sprity dla obecnej aktywności i kierunku postaci
   // uwaga, ze względu na to że podaje wartość z mapy, ta metoda nie jest const
   Sprites_data& get_current_sprites_data();
+
+  int getDurationOfAnimationData(std::pair<Activity, Direction> data);
 
   // przestawienie sprite na pierwszą klatkę dla obecnego kierunku i aktywności
   void reset_texture();

@@ -4,7 +4,8 @@ using namespace Animations;
 
 Death::Death(CharacterOnBoard* _animatedObj)
   :
-  OnTexture(_animatedObj, Character::death,
+  OnTexture(_animatedObj,
+            Character::death,
             _animatedObj->getDirection(),
             to_last_frame)
 {
@@ -14,7 +15,4 @@ Death::Death(CharacterOnBoard* _animatedObj)
 void Death::init()
 {
   OnTexture::init();
-
-  // wywołanie śmierci postaci
-  animatedObj->die();
 }

@@ -207,7 +207,8 @@ void Game::run()
                */
               if (mouseClicked(sf::Mouse::Left, hoveredField->getGlobalBounds(), m_pos_on_map)
                   && !MouseLClickedLastFrame
-                  && (!road.empty() || !range_player.empty())) {
+                  && (!road.empty() || !range_player.empty()))
+              {
                 // zatwierdzenie akcji do wywołania
                 acceptMoveAndAction();
                 
@@ -328,7 +329,7 @@ void Game::run()
       // update przycisków z interfejsu użytkownika
       ui.updateButtons(m_pos_on_window, deltaTime);
 
-      // odblokowanie interakcji w grze, gdy nie ma żadnej oczekującej animacji, która blokuje
+      // odblokowanie interakcji w grze, gdy nie ma żadnej oczekującej animacji, która blokuje postaci
       if (!anim_manager.anyAnimationLocking()) {
         unlockGameMode();
       }
@@ -350,18 +351,31 @@ void Game::run()
     }
 }
 
-void Game::update(float delta) {
+void Game::update(float delta)
+{
   // uśmiercenie postaci dla których liczba hp spadła do zera
   for (auto &character : activeBoard.getAliveCharacters())
-    if (character->getHP() == 0 && !character->will_die_this_turn) {
+  {
+    if (character->getHP() == 0 && !character->will_die_this_turn)
+    {
       // zaznaczenie że postać zaraz umrze, by nie sprawdzać tego ponownie
       character->will_die_this_turn = true;
 
+      // czas ostatniej animacji na tej konkretnej postaci, żeby śmierć była od razu po
+      auto time = anim_manager.calculateTimeToLastAnimationFinish(character);
+      std::cout << "DEATH --- czas do rozpoczęcia: " << time << "\n";
+
+
+      Animations::Sequence & sequence_after_other_animations_finish =
+        anim_manager.addNewSequenceParallelAfterTime(time);
+
       // dodanie animacji śmierci i następnie zniknięcia
-      anim_manager.addAnimationToQueue(anim_manager.createAnimationDeath(character));
-      anim_manager.addAnimationToQueue(anim_manager.createAnimationDisappear(character));
+      sequence_after_other_animations_finish.push_back(anim_manager.createAnimationDeath(character));
+      sequence_after_other_animations_finish.push_back(anim_manager.createAnimationDisappear(character));
     }
-  
+  }
+
+  // udpate animacji bezczynności
   anim_manager.updateIdleAnimations(activeBoard.getAliveCharacters(), delta);
   anim_manager.updateAnimationsStack(delta);
   
@@ -374,12 +388,14 @@ void Game::update(float delta) {
     indicator_modifier += delta * (indicator_frame_raise ? 1 : -1);
     
     if (indicator_frame_raise)
-      while (indicator_modifier > 1) {
+      while (indicator_modifier > 1)
+      {
         indicator_modifier = 1;
         indicator_frame_raise = false;
       }
     else
-      while (indicator_modifier < 0) {
+      while (indicator_modifier < 0)
+      {
         indicator_modifier = 0;
         indicator_frame_raise = true;
       }
@@ -514,7 +530,8 @@ void Game::checkActionsByHover()
   Field* field_caster;
 
   // dla ataków z bliska końcowe pole road stanowi pole wywołania (ruch postaci + akcja ataku)
-  if (attack.get_type() == Abilities::Attack::Type::melee) {
+  if (attack.get_type() == Abilities::Attack::Type::melee)
+  {
     if (road.empty())
       // w momencie gdy nie ma do wykonania ruchu, akcji wywoływana jest z obecnego pola
       field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
@@ -537,11 +554,13 @@ void Game::checkActionsByHover()
     // uzyskanie współrzędnych kolejnych pól w zasięgu wywołania akcji
     auto coords_in_range = activeBoard.getCoordsOf(field_caster) + r;
     
-    for (auto &character : activeBoard.getAliveCharacters()) {
+    for (auto &character : activeBoard.getAliveCharacters())
+    {
       // sprawdzenie czy na wskazywanym polu znajduje się wroga postać
       if (hoveredField == activeBoard.getFieldOccupedBy(character) &&
           activeBoard.getCoordsOf(hoveredField) == coords_in_range &&
-          getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam()) {
+          getEnemyOnHoveredField()->getTeam() != selectedCharacter->getTeam())
+      {
         // umieszczenie ataku w podglądzie jeżeli ilość akcji będzie wystarczająca by go wykonać
         if (AP_preview_local >= attack.getAP())
           action_field = activeBoard.getField(coords_in_range);
@@ -606,16 +625,20 @@ void Game::moveCharacter(CharacterOnBoard* character,
   character->setLocalCoords(activeBoard.getCoordsOf(road.getLastElement()));
   character->setGlobalCoords(activeBoard.getCoordsOf(road.getLastElement()) + coordsTopLeft);
 
+  auto& sequence_moves = anim_manager.addNewSetParallel();
+
   // dodanie animacji przesuwającej postać pole po polu
-  for (auto &r : road.get()) {
+  for (auto &r : road.get())
+  {
     bool isBlocking = true;
     // rozpoczęcie przesunięcie na ostatni kafelek drogi odblokowauje od razu grę
-    if (r == road.getLastElement())
-      isBlocking = false;
+    // FIXME na razie wyłączam ten feature, bo animacja się zawiesza
+   // if (r == road.getLastElement())
+     // isBlocking = false;
 
-    anim_manager.addAnimationToQueue(anim_manager.createAnimationMove(character,
-                                                                      Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f},
-                                                                      isBlocking));
+   sequence_moves.push_back(anim_manager.createAnimationMove(character,
+                                                             Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f},
+                                                             isBlocking));
   }
 
   // odjęcie punktów akcji, po 1 za każde pokonane pole
@@ -634,27 +657,36 @@ void Game::acceptAttack(Abilities::Attack& attack,
                         CharacterOnBoard* target,
                         Direction attack_direction)
 {
-  // dodanie animacji ataku wykonywanego przez postać która atakuje
-  anim_manager.addAnimationToQueue(anim_manager.createAnimation(selectedCharacter,
-                                                                attack.getActivity(),
-                                                                attack_direction));
-
   // odjęcie punktów akcji za atak
   selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
 
   int drawn_damage = attack.draw_damage();
   int damage = std::min(drawn_damage, target->getHP());
 
-  // dodanie animacji otrzymania obrażeń zaatakowanej postaci
-  anim_manager.addAnimationToQueue(anim_manager.createAnimationHurt(target));
-
-  // utworzenie zbioru równolegle wywoływanego, żeby animacja Hurt była rzem z TakeDamageHP
-  std::vector<Animations::Animation*> &set = anim_manager.addNewSet();
-  anim_manager.addAnimationToSet(set,
-                                 anim_manager.createAnimationTakeDamageHP(target,
-                                                                          damage));
-
   target->takeDamage(damage);
+
+  // dodanie animacji ataku wykonywanego przez postać która atakuje
+  Animations::Sequence & sequence_after_other_animations_finish_0 =
+    anim_manager.addNewSequenceParallelAfterTime(anim_manager.calculateTimeToLastAnimationFinish());
+
+  sequence_after_other_animations_finish_0.push_back(anim_manager.createAnimation(selectedCharacter,
+                                                                                  attack.getActivity(),
+                                                                                  attack_direction));
+
+  // dodanie animacji otrzymania obrażeń zaatakowanej postaci
+  auto time = anim_manager.calculateTimeToLastAnimationFinish();
+  std::cout << "HURT --- czas do rozpoczęcia: " << time << " ms\n";
+
+  Animations::Sequence & sequence_after_other_animations_finish_1 =
+    anim_manager.addNewSequenceParallelAfterTime(time);
+  Animations::Sequence & sequence_after_other_animations_finish_2 =
+    anim_manager.addNewSequenceParallelAfterTime(time);
+
+  // równolegle wywołanie Hurt z TakeDamageHP
+  sequence_after_other_animations_finish_1.push_back(anim_manager.createAnimationHurt(target));
+
+  sequence_after_other_animations_finish_2.push_back(anim_manager.createAnimationTakeDamageHP(target,
+                                                                                              damage));
 
   // usunięcie podglądu wywołania akcji
   range_player.clear();
@@ -664,28 +696,32 @@ void Game::acceptMultiAttack(Abilities::Attack& attack,
                              std::vector<CharacterOnBoard*> targets,
                              Direction attack_direction)
 {
-  // dodanie animacji ataku wykonywanego przez postać która atakuje
-  anim_manager.addAnimationToQueue(anim_manager.createAnimation(selectedCharacter,
-                                                                attack.getActivity(),
-                                                                attack_direction));
-
   // odjęcie punktów akcji za atak
   selectedCharacter->setAP(selectedCharacter->getAP() - attack.getAP());
 
-  // dodanie animacji otrzymania obrażeń zaatakowanych postaci równocześnie
-  std::vector<Animations::Animation*> &set = anim_manager.addNewSet();
-  std::vector<Animations::Animation*> &set2 = anim_manager.addNewSet();
+  // dodanie animacji ataku wykonywanego przez postać która atakuje
+  Animations::Sequence & sequence_after_other_animations_finish_0 =
+    anim_manager.addNewSequenceParallelAfterTime(anim_manager.calculateTimeToLastAnimationFinish());
 
-  for (auto &target : targets) {
+  sequence_after_other_animations_finish_0.push_back(anim_manager.createAnimation(selectedCharacter,
+                                                                                  attack.getActivity(),
+                                                                                  attack_direction));
+  auto time = anim_manager.calculateTimeToLastAnimationFinish();
+
+  // otrzymanie obrażęń oraz dodanie animacji dla wszystkich zaatakowanych postaci równocześnie
+  for (auto &target : targets)
+  {
     int drawn_damage = attack.draw_damage();
     int damage = std::min(drawn_damage, target->getHP());
 
-    anim_manager.addAnimationToSet(set,
-                                   anim_manager.createAnimationHurt(target));
 
-    // i teraz równolegle dodaje animację na pasku życia
-    anim_manager.addAnimationToSet(set2,
-                                   anim_manager.createAnimationTakeDamageHP(target, damage));
+    Animations::Sequence & sequence_after_other_animations_finish_1 =
+      anim_manager.addNewSequenceParallelAfterTime(time);
+    Animations::Sequence & sequence_after_other_animations_finish_2 =
+      anim_manager.addNewSequenceParallelAfterTime(time);
+
+    sequence_after_other_animations_finish_1.push_back(anim_manager.createAnimationHurt(target));
+    sequence_after_other_animations_finish_2.push_back(anim_manager.createAnimationTakeDamageHP(target, damage));
 
     target->takeDamage(damage);
   }

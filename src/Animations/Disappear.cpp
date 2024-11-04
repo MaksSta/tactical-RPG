@@ -13,6 +13,8 @@ Disappear::Disappear(CharacterOnBoard* _animatedObj,
   finish_condition = special_no_reset_texture;
   isResettingFrame = false;
   isBlocking = false;
+
+  duration = sf::milliseconds(500);
 }
 
 void Disappear::animate(float delta)
@@ -26,6 +28,7 @@ void Disappear::animate(float delta)
 
 void Disappear::init()
 {
+  Animation::init();
   animatedObj->disableHpBar();
 }
 

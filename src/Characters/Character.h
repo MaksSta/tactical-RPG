@@ -42,8 +42,6 @@ public:
             Team _team,
             int _max_hp);
 
-  void die();
-
   Activity getActivity() const;
   void setActivity(Activity);
 

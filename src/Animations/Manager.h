@@ -1,21 +1,17 @@
 /**
- * Klasa zarządzająca animacjami
- * Odpowiada za:
- * - wygenerowanie wszelkich animacji animacji na podstawie wytycznych
- * - obługę równolegle wykonywanych animacji bezczyności
- * - obsługę kolejki zbiorów animacji pobieranych jeden po drugim
- * - równlogłe wykonanie wszystkich animacji z obecnie wywoływanego zbioru:
- *   - inicjalizacja nowo zdjętej animacji z kolejki
- *     (co dodatkowo może wywoływać różne zdarzenia np. animacja Hurt zabiera punkty HP)
- *   - animowanie jej, aż do spełenienia jej warunku końcowego
- *   - usunięcie po jego spełnieniu
+ *  Klasa ta obsługuje animację według koncepcji:
  *
- *  Graficzne przedstawienie przykładowego obsłużenia czterech zbiórów animacji ABCD
- *  ponumerowano wszystkie animacje w jednym zbiorze, znaki === oznaczają czas trwania animacji
+ *  animacje wykonywane kolejką jedna po drugiej to sekwencja
+ *  równolegle wykonywane jest wiele ścieżek
  *
- *  [A1===][B1==]  [C1=====]   [D1==]
- *         [B2====][C2===]
- *                 [C3========]
+ *  cyfry przedstawieniają kolejno wykonywane sekwnecje,
+ *  a literki każdą ze ścieżek
+ *   === oznacza czas trwania animacji
+ *  przykładowo jak to może wyglądać dla
+ *  ---------------------------------> Czas
+ *  [A1==][A2==][A3==]
+ *       [B1====][B2===]
+ *                      [C1===]
  */
 
 #ifndef ANIMATIONS_MANAGER_H_
@@ -41,6 +37,17 @@
 
 namespace Animations
 {
+  class Sequence : public std::vector<Animation*> {
+  public:
+    sf::Time timeToStart;
+
+    sf::Clock stoper;
+
+    Sequence() {
+      stoper.restart();
+    }
+  };
+
   class Manager {
   public:
     /**
@@ -99,44 +106,56 @@ namespace Animations
     /**
      * tworzy animację zniknięcia postaci, która wyłącza natychmiast pasek z hp
      * @param animatedObj wskaźnik do postaci na której wykonywana będzie animacja
-     * @return zwraca wskaźnik do nowo utworzonej animacji
+     * @return wskaźnik do nowo utworzonej animacji
      */
     Animation* createAnimationDisappear(CharacterOnBoard* animatedObj);
 
-    // utworzenie nowego zbioru na równolegle wykonujące się animacje
-    std::vector<Animation*>& addNewSet();
-
-    // dodanie animacji do wskazanego zbioru równolegle wykonywanych animacji
-    void addAnimationToSet(std::vector<Animation*>& set, Animation* animation);
+    /**
+     * utworzenie nowego zbioru na równolegle wykonujące się animacje
+     * @return referencja do pustej sekwencji, która też jest nowo tworzona w całym zbiorze
+     */
+    Sequence& addNewSetParallel();
 
     // dodanie animacji do kolejki (automatycznie tworząc dla niej nowy zbiór)
-    void addAnimationToQueue(Animation* animation);
+    // obecnie nieużywam, bo to jest to samo co metoda wyżej do której robie push_back()
+    void addInNewSetAndBlock(Animation* animation);
+
+    // podaje czas do ukończenia podanej ścieżki animacji
+    int calculateTimeLeft_ms(Sequence& sequence,
+                             CharacterOnBoard* character = nullptr);
+
+    // podaje czas do ukończenia wszystkich animacji
+    int calculateTimeToLastAnimationFinish(CharacterOnBoard* character = nullptr);
+
+    Sequence& addNewSequenceParallelAfterTime(int time_in_ms);
+
+    // TODO do napisania: dodoje animację jako następną po wybranej
+    void addAfterThatAnimation(Animation* animation);
 
     // dodanie animacji do wektora równolegle wywoływanych animacji bezczynności
     void addIdleAnimation(Animation* animation);
 
-    // wykonanie animacji dla bieżącej klatki
+    // wykonanie wszystkich animacji dla bieżącej klatki
     void updateAnimationsStack(float delta);
 
     // update wszystkich animacji bezczynności
-    void updateIdleAnimations(std::vector<CharacterOnBoard*> characters, float delta);
+    void updateIdleAnimations(std::vector<CharacterOnBoard*> characters,
+                              float delta);
 
     // update wybranej animacj i zwrócenie wyniku o tym czy się zakończyła
-    bool update_animation_and_check_if_finished(Animation& animation, float delta);
+    bool update_animation_and_check_if_finished(Animation& animation,
+                                                float delta);
 
     // zwraca informację czy zostały jakieś animacje w kolejce (blokują one tryb gry)
     bool anyAnimationLocking();
   private:
-    // kolejka zbiorów animacji czekających do wywołania
-    std::deque<std::vector<Animation*>> sets_deqeue;
-
-    // węzeł z równolegle wykonywanymi animacjami
-    std::vector<Animation*> current_set;
+     //  wszystkie animacje, umieszczone w równolegle wykonywanych ścieżkach
+    std::vector<Sequence> parallel_played_sequences;
 
     // równolegle wykonywane animacje bezczynności (nie blokują trybu gry)
     std::vector<Animation*> idle_animations;
 
-    // klatka na której jest animacja dla wybranej postaci
+    // klatka na której jest animacja dla podanej z postaci
     std::map<CharacterOnBoard*, float> current_frame;
   };
 }

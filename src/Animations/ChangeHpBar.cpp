@@ -2,7 +2,8 @@
 
 using namespace Animations;
 
-ChangeHpBar::ChangeHpBar(CharacterOnBoard *_animatedObj, int _dmg)
+ChangeHpBar::ChangeHpBar(CharacterOnBoard *_animatedObj,
+                         int _dmg)
   :
   dmg{_dmg},
   hpBar{_animatedObj->getHpBar()}
@@ -10,10 +11,12 @@ ChangeHpBar::ChangeHpBar(CharacterOnBoard *_animatedObj, int _dmg)
   animatedObj = _animatedObj;
   isBlocking = false;
   finish_condition = FinishCondition::special_no_reset_texture;
+
+  duration = sf::milliseconds(300);
 }
 
-void ChangeHpBar::init()
-{
+void ChangeHpBar::init() {
+  Animation::init();
   hpBar.takeDamage(dmg);
 }
 

@@ -18,7 +18,8 @@ namespace Animations
     * animacja
     * @param _dmg ilość otrzymanych obrażeń
     */
-    ChangeHpBar(CharacterOnBoard *_animatedObject, int _dmg);
+    ChangeHpBar(CharacterOnBoard *_animatedObject,
+                int _dmg);
 
     void init();
 

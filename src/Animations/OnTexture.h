@@ -25,14 +25,7 @@ namespace Animations
               FinishCondition _finish_condition = no_repeat);
 
     // inicjalizacja animacji, w praktyce zmienia tylko stan postaci
-    void init();
-
-    // w przypadku OnTexture metoda ta nie wykonuje żadnych działań, gdyż klatkami zarządza Manager
-    // w celu wywoływania dodatkowych działań w czasie animacji należy zastąpić tę metodę w klasie pochodnej
-    //virtual void animate(float delta);
-
-    // specjalny warunek animacji - metoda to musi zostać odziedziczona
-    //bool special_finish_condition_obtained() const;
+    virtual void init();
   protected:
     // aktywność jaką otrzyna postać przy wywołaniu animacji
     Character::Activity activity;

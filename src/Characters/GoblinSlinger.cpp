@@ -39,7 +39,7 @@ GoblinSlinger::GoblinSlinger(sf::Vector2i start_coords)
   loadAnimation(Activity::hurt, down,  "data/GoblinSlinger/Down/Png/GoblinSlingerDownHurt.png",   frames_hurt, fps_hurt, w, h);
 
   const int frames_death = 9;
-  const float fps_death = frames_death * 3;
+  const float fps_death = frames_death * 1.5;
 
   loadAnimation(Activity::death, left,  "data/GoblinSlinger/Left/Png/GoblinSlingerLeftDeath.png",   frames_death, fps_death, w, h);
   loadAnimation(Activity::death, right, "data/GoblinSlinger/Right/Png/GoblinSlingerRightDeath.png", frames_death, fps_death, w, h);

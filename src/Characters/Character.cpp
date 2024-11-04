@@ -14,11 +14,6 @@ Character::Character(std::string _name,
   action_points = max_action_points;
 }
 
-void Character::die()
-{
-  setActivity(Character::Activity::death);
-}
-
 bool Character::isAlive() const
 {
   return !will_die_this_turn;

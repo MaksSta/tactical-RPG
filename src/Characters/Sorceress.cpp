@@ -49,7 +49,7 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
   loadAnimation(Activity::hurt, down,  "data/Sorceress/Down/Png/SorceressDownHurt.png",   frames_hurt, fps_hurt, w, h);
 
   const int frames_death = 10;
-  const float fps_death = frames_death * 2.5;
+  const float fps_death = frames_death * 1.25;
 
   loadAnimation(Activity::death, left,  "data/Sorceress/Left/Png/SorceressLeftDeath.png",   frames_death, fps_death, w, h);
   loadAnimation(Activity::death, right, "data/Sorceress/Right/Png/SorceressRightDeath.png", frames_death, fps_death, w, h);

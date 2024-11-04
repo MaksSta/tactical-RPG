@@ -28,10 +28,12 @@ namespace Animations
     // wskaźnik do postaci na której wykonywana będzie animacja
     CharacterOnBoard* animatedObj {nullptr};
 
+    virtual void init() {started = true; stoper.restart();}
+
     // funkcja wywoływana co klatkę animacji, możliwy override
     virtual void animate(float delta) {}
 
-    virtual void init() = 0;
+    sf::Time getTimeLeft() { return duration - stoper.getElapsedTime(); }
 
     virtual bool special_finish_condition_obtained() const {
       // specjalny warunek musi zostać napisany jako override, tam gdzie chcemy wpisać własny warunek zakończenia
@@ -47,6 +49,12 @@ namespace Animations
 
     // czy podczas wywoływania tej animacji decyzje w grze pozostają zablokowane aż do jej zakończenia
     bool isBlocking{true};
+
+    sf::Time duration; // trzeba zainijować czasem trwania
+
+    bool started{false};
+    sf::Clock stoper;
+
   };
 
 

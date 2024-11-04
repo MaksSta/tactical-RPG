@@ -66,7 +66,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
   loadAnimation(Activity::hurt, down,  "data/Warrior/Down/Png/WarriorDownHurt.png",     frames_hurt, fps_hurt, w, h);
 
   const int frames_death = 5;
-  const float fps_death = frames_death * 2;
+  const float fps_death = frames_death * 1.5;
 
   loadAnimation(Activity::death, left,   "data/Warrior/Left/Png/WarriorLeftDeath.png",   frames_death, fps_death, w, h);
   loadAnimation(Activity::death, right,  "data/Warrior/Right/Png/WarriorRightDeath.png", frames_death, fps_death, w, h);

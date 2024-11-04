@@ -45,27 +45,86 @@ Animation* Manager::createAnimationDisappear(CharacterOnBoard* animatedObj)
   return new Animations::Disappear(animatedObj, animatedObj->getActivity(), animatedObj->getDirection());
 }
 
-std::vector<Animation*>& Manager::addNewSet()
+void Manager::addAfterThatAnimation(Animation* animation)
 {
-  // utworzenie nowej, pustej ścieżki animacji
-  std::vector<Animation*> new_set;
-  sets_deqeue.push_back(new_set);
-
-  return sets_deqeue.back();
+  // TODO przeszukać jeszcze raz wszystkie animacje i wstawić za nią
 }
 
-void Manager::addAnimationToSet(std::vector<Animation*>& set, Animation* animation)
+Sequence& Manager::addNewSetParallel()
 {
-  set.push_back(animation);
+  Sequence new_sequence;
+  parallel_played_sequences.push_back(new_sequence);
+  return parallel_played_sequences.back();
 }
 
-void Manager::addAnimationToQueue(Animation* animation)
+void Manager::addInNewSetAndBlock(Animation* animation)
 {
-  // utworzenie nowego pustego zbioru na animacje
-  std::vector<Animation*>& set = addNewSet();
+  // tworzy nowy zbiór i zwraca
+  Sequence& sequence = addNewSetParallel();
 
   // wrzucenie tam animacji
-  addAnimationToSet(set, animation);
+  sequence.push_back(animation);
+}
+
+int Manager::calculateTimeLeft_ms(Sequence& sequence, CharacterOnBoard* character)
+{
+  int time_in_ms = 0;
+  int cumulated_time = 0;
+
+  for (auto & animation : sequence)
+  {
+    cumulated_time += animation->getTimeLeft().asMilliseconds();
+
+    if (character == nullptr)
+    {
+      time_in_ms = cumulated_time;
+    }
+    else
+    {
+      // jeżeli jest animacja na tej postaci, to musi dodać czas wykonania wszystkich przed nią
+      if (animation->animatedObj == character)
+      {
+        time_in_ms = cumulated_time;
+      }
+    }
+  }
+
+  auto seq_left_time = sequence.timeToStart.asMilliseconds() - sequence.stoper.getElapsedTime().asMilliseconds();
+
+  time_in_ms += seq_left_time;
+
+  time_in_ms += 50; // TYMCZASOWE dodanie trochę dodatykowych ms odstępu żeby mieć pewność że animacja wykona się faktycznie po
+
+  return time_in_ms;
+}
+
+int Manager::calculateTimeToLastAnimationFinish(CharacterOnBoard* character)
+{
+  int max_time_in_ms = 0;
+
+  // znajdź czas po którym skończy się ostatnia ze wszystkich obecnych animacji ze wszystkich ścieżek
+  for (auto sequence : parallel_played_sequences)
+  {
+    auto time_of_this_sequence = calculateTimeLeft_ms(sequence, character);
+
+    if (max_time_in_ms < time_of_this_sequence)
+      max_time_in_ms = time_of_this_sequence;
+  }
+
+  return max_time_in_ms;
+}
+
+Sequence& Manager::addNewSequenceParallelAfterTime(int time_in_ms)
+{
+  Sequence new_sequence;
+
+  sf::Time maxTime = sf::milliseconds(time_in_ms);
+
+  // pobiera czas do zakónczenia podanych sekwnencji
+  new_sequence.timeToStart = maxTime;
+
+  parallel_played_sequences.push_back(new_sequence);
+  return parallel_played_sequences.back();
 }
 
 void Manager::addIdleAnimation(Animation* animation)
@@ -85,14 +144,19 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
   bool loop_reseted = false;
 
   // zwiększenie numeru klatki dla animowanego obiektu (dla klas animujących teksturę, tj. pochodnych OnTexture)
-  if (dynamic_cast<OnTexture*>(&animation)) {
+  if (dynamic_cast<OnTexture*>(&animation))
+  {
+    // animowanie sprita
     current_frame[object] += delta * sprites_data.fps;
 
     // utrzymanie wartości licznika animacji w jej zakresie
-    while (current_frame[object] >= sprites_data.textures.size()) {
+    while (current_frame[object] >= sprites_data.textures.size())
+    {
       if (animation.finish_condition == Animations::FinishCondition::to_last_frame)
+        // zakończenie animacji na ostatniej klatce
         current_frame[object] = sprites_data.textures.size() - 1;
       else
+        // cofnięcie o całą rolkę do tyłu
         current_frame[object] -= sprites_data.textures.size();
 
       loop_reseted = true;
@@ -102,24 +166,32 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
   }
 
   // sprawdzanie czy spełniony został warunek kończący animację
-  switch (animation.finish_condition) {
-  case FinishCondition::no_repeat: {
+  switch (animation.finish_condition)
+  {
+  case FinishCondition::no_repeat:
+  {
     if (loop_reseted) {
       object->reset_texture();
       return true;
     }
   } break;
-  case FinishCondition::to_last_frame: {
-    if (loop_reseted)
-      return true;
-  } break;
-  case FinishCondition::special_no_reset_texture : {
-    if (animation.special_finish_condition_obtained()) {
+  case FinishCondition::to_last_frame:
+  {
+    if (loop_reseted) {
       return true;
     }
   } break;
-  case FinishCondition::special: {
-    if (animation.special_finish_condition_obtained()) {
+  case FinishCondition::special_no_reset_texture:
+  {
+    if (animation.special_finish_condition_obtained())
+    {
+      return true;
+    }
+  } break;
+  case FinishCondition::special:
+  {
+    if (animation.special_finish_condition_obtained())
+    {
       object->reset_texture();
       return true;
     }
@@ -132,17 +204,26 @@ bool Manager::update_animation_and_check_if_finished(Animation& animation,
 
 void Manager::updateAnimationsStack(float delta)
 {
-  // jeżeli obecny zbiór animacji jest pusty, pobranie kolejnego z kolejki (o ile jakieś animacje czekają)
-  if (current_set.empty() && !sets_deqeue.empty()) {
-    // zdjęcie oczekującego zbioru animacji z kolejki
-    current_set = sets_deqeue.front();
-    sets_deqeue.pop_front();
+  // lista animacji, która właśnie się zakończyła i będzie musiała zostać zdjęta
+  std::vector<Animation*> animationsToErase;
 
-    // i uruchomienie wszystkich animacji w nim
-    for (auto & animation : current_set) {
-      // wychwycenie wyjątku w przypadku próby uruchomienia animacji która nie jest zdefiniowana
+  for (auto & sequence : parallel_played_sequences)
+  {
+    // poczekanie, aż upłynie wystarczająco dużo czasu do startu sekwencji
+    if (sequence.stoper.getElapsedTime().asMilliseconds() < sequence.timeToStart.asMilliseconds())
+      continue;
+
+    if (sequence.empty())
+      continue;
+
+    // pobranie pierwszej animacji z każdej równolegle wykonywanej ścieżki
+    auto animation_to_play = sequence.front();
+
+    // jeżeli animacja się nie rozpoczęła, to jest teraz odpalana
+    if (!animation_to_play->started)
+    {
       try {
-        animation->init();
+        animation_to_play->init();
       }
       catch (errors::no_anim_for_activity) {
         // w przeciwnym razie program zawiesiłby się
@@ -151,52 +232,73 @@ void Manager::updateAnimationsStack(float delta)
       }
 
       // ustawienie animacji na początkową klatkę (tylko dla animacji z ustawionym isResettingFrame)
-      if (animation->isResettingFrame) {
-        current_frame[animation->animatedObj] = 0;
+      if (animation_to_play->isResettingFrame) {
+        current_frame[animation_to_play->animatedObj] = 0;
       }
     }
-  }
 
-  std::vector<Animation*> animationsToErase;
-
-  // wywołanie wszystkich kolejnych animacji z danego zbioru równocześnie
-  for (auto & an : current_set) {
-    if (update_animation_and_check_if_finished(*an, delta)) {
-      // dodanie zakończonej animacji do usunięcia za chwilę
-      animationsToErase.push_back(an);
+    // animowanie, a jeżeli animacja się zakończyła to będzię zdjęta
+    if (update_animation_and_check_if_finished(*animation_to_play, delta)) {
+      animationsToErase.push_back(animation_to_play);
     }
   }
 
-  // usunięcie zakończonych animacji ze zbioru i z pamięci
+  // usunięcie zakończonych animacji ze zbioru (i z pamięci)
   for (auto & an : animationsToErase)
-    for(std::vector<Animation*>::iterator it = current_set.begin(); it != current_set.end(); it++) {
-      if (*it == an) {
-        current_set.erase(it);
-        delete an;
-        break;
+  {
+    bool quit_loop = false;
+
+    for (auto & sequence : parallel_played_sequences)
+    {
+      if (sequence.empty())
+        continue;
+
+      for (std::vector<Animation*>::iterator it = sequence.begin(); it != sequence.end(); it++)
+      {
+        if (*it == an) {
+          sequence.erase(it);
+          delete an;
+          quit_loop = true;
+          break;
+        }
       }
+      if (quit_loop)
+        break;
     }
+  }
+
 }
 
 void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters,
                                    float delta)
 {
   // zmiana statusu na idle wszystkim postaciom, dla których nie odgrywa się żadna animacja w tej chwili
-  for (auto & character : characters) {
+  for (auto & character : characters)
+  {
     bool any_animation_on_it = false;
-    for (auto & animation : current_set) {
-      // sprawdzenie czy jest obecnie jakaś animacja na tej postaci
-      if (animation->animatedObj == character) {
-        any_animation_on_it = true;
-        break;
+    for (auto & sequence : parallel_played_sequences)
+    {
+      if (sequence.empty())
+        continue;
+
+      for (auto & animation : sequence)
+      {
+        // sprawdzenie czy jest obecnie jakaś animacja na tej postaci
+        if (animation->animatedObj == character)
+        {
+          any_animation_on_it = true;
+          break;
+        }
       }
     }
+
     if (!any_animation_on_it)
       character->setActivity(Character::Activity::idle);
   }
 
   // update wszystkich animacji bezczynności
-  for(auto & ani : idle_animations) {
+  for (auto & ani : idle_animations)
+  {
     if (ani->animatedObj->getActivity() == Character::Activity::idle)
       update_animation_and_check_if_finished(*ani, delta);
   }
@@ -205,18 +307,11 @@ void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters,
 bool Manager::anyAnimationLocking()
 {
   // sprawdzenie czy jakaś z oczekujących animacji blokuje
-  for (auto & set : sets_deqeue) {
+  for (auto & set : parallel_played_sequences) {
     for (auto & anim : set) {
       if (anim->isBlocking) {
         return true;
       }
-    }
-  }
-
-  // spradzenie czy jakaś oczekująca animacja z obecnie wywoływanej kolejki animacji blokuje
-  for (auto & anim : current_set) {
-    if (anim->isBlocking) {
-      return true;
     }
   }
 

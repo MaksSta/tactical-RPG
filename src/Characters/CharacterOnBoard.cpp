@@ -39,6 +39,11 @@ void CharacterOnBoard::loadAnimation(Activity activity,
   sprites_data[{activity, direction}] = newOne;
 }
 
+int CharacterOnBoard::getDurationOfAnimationData(std::pair<Activity, Direction> data)
+{
+  return sprites_data[data].textures.size() / sprites_data[data].fps * 1000;
+}
+
 Sprites_data& CharacterOnBoard::get_current_sprites_data()
 {
   return sprites_data[{currentActivity, direction}];

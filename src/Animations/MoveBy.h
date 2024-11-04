@@ -25,6 +25,7 @@ namespace Animations
 
     // wyzaczenie punktu końcowego i wywołanie init z klasy bazowej
     void init();
+
   protected:
     // wykonywanie przesunięcia na ekranie
     virtual void animate(float delta);
