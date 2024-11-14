@@ -37,14 +37,12 @@ public:
   // tryb aktywności w jakim znajduje się gracza
   enum GameMode {
     player_turn,
-    locked_player_turn,
     enemy_turn,
-    locked_enemy_turn,
   };
 
   // dodatkowy trybu aktywności, który szczegółowo decyduje o sposobie wczytywania danych wejściowych
+  // istotny tylko dla ruchu gracza (dla gameMode == player_turn)
   enum InputMode {
-    none,
     character_is_selected,
     action_is_selected,
   };
@@ -67,10 +65,10 @@ public:
 private:
   void update(float deltaTime);
 
-  // przełączenie tury na wybraną postać (sterowną przez gracza)
-  void selectCharacter(CharacterOnBoard* character);
+  // przełączenie tury na wybraną postać (sterowaną przez gracza)
+  void selectPlayerCharacter(CharacterOnBoard* character);
 
-  // przełączenie tury na wybraną postać (sterowną przez komputer)
+  // przełączenie tury na wybraną postać (sterowaną przez komputer)
   void selectEnemyCharacter(CharacterOnBoard* character);
 
   /**
@@ -149,11 +147,14 @@ private:
   // czy wykryto zmianę ostatnio wskazywanego pola na planszy
   bool hovered_field_changed();
 
-  // tryb aktywności w jakim znajduje się gra
   GameMode gameMode;
+  InputMode inputMode;
 
-  // dodatkowy trybu aktywności, który decyduje o tym jakie czytać wydarzenia z myszy/klawiatury
-  InputMode inputMode{none};
+  // czy gra jest zablokowana (oczekiwanie na wykonanie animacji)
+  bool gameLocked{false};
+
+  // stan gotowści na podejmowanie działań (czytanie inputu, bądź akcje komputera)
+  bool waiting_for_action{false};
 
   FullBoard fullBoard{"example_level.txt"};
 
@@ -201,9 +202,6 @@ private:
   // czy w ostatniej klatce wciśnięto LPM
   bool MouseLClickedLastFrame;
 
-  // informacja sprawdzana co klatkę, by 1-razowo odświeżyć niektóre elementy
-  bool justUnlocked;
-
   // ostatnio najeżdzane pole na planszy
   Field* lastHoveredField{nullptr};
 
@@ -213,9 +211,7 @@ private:
   // standardowa pozyja kursora myszy liczona od krawędzi okna
   sf::Vector2f m_pos_on_window;
 
-  /********************************************************************/
-  /**************** ANIMACJE - WSZYSTKO BY NIMI ZARZĄDZAĆ *************/
-  /********************************************************************/
+  // przejmuje pełną obsługę nad animacjami
   Animations::Manager anim_manager;
 
   /********************************************************************/

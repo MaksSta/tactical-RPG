@@ -50,12 +50,13 @@ Game::Game(sf::RenderWindow &_window,
   }
 
   // dodanie postaci do kolejki bitwy
-  for (auto &character : charactersOnBoard)
+  for (auto &character : charactersOnBoard) {
     battle_queue.addToQueue(character.get());
+  }
 
   // ustawienie tury na pierwszą postać z kolejki
   battle_queue.setOnFirstCharacter();
-  selectCharacter(battle_queue.getCurrentCharacter());
+  selectPlayerCharacter(battle_queue.getCurrentCharacter());
 
   // dodanie animacji bezczynności (idle) do każdej postaci
   for (auto &character : charactersOnBoard) {
@@ -67,14 +68,17 @@ Game::Game(sf::RenderWindow &_window,
   indicator_selected_character.setFillColor(sf::Color{0, 135, 0});
   indicator_selected_character.setRotation(180);
 }
-catch (errors::cannot_open_file &err_file) {
+catch (errors::cannot_open_file &err_file)
+{
   std::cout << "Error! Cannot open file: " << err_file.filename << std::endl;
   std::exit(1);
 }
 
 void Game::run()
 {
+  // domyślne rozpoczęcie gry z turą gracza
   gameMode = player_turn;
+  inputMode = character_is_selected;
 
   // tu zapisywany będzie czas narysowania ostatniej klatki ekranu
   sf::Time lastUpdate = time.getElapsedTime();
@@ -84,76 +88,83 @@ void Game::run()
                    8 * tile_size / 2 * 1);
   camera.setDstPos(camera.getCenter());
 
-  // ********************* PĘTLA GŁÓWNA GRY *********************
-  while (window->isOpen()) {
-      // ********************************************************************
-      // ****** Niezbędne operacje do odświeżania w każdej klatce gry *******
-      // ********************************************************************
+  while (window->isOpen())
+  {
+    // ********************************************************************
+    // ****** Niezbędne operacje do odświeżania w każdej klatce gry *******
+    // ********************************************************************
 
-      // pozycja myszy w całym oknie
-      m_pos_on_window = static_cast<sf::Vector2f>(sf::Mouse::getPosition(*window));
+    // pozycja myszy w całym oknie
+    m_pos_on_window = static_cast<sf::Vector2f>(sf::Mouse::getPosition(*window));
 
-      // pozycja myszy przekonwertowana na pozycje w obszarze ekranu aktywnego gry
-      m_pos_on_map = window->mapPixelToCoords(sf::Mouse::getPosition(*window), camera);
+    // pozycja myszy przekonwertowana na pozycje w obszarze ekranu aktywnego gry
+    m_pos_on_map = window->mapPixelToCoords(sf::Mouse::getPosition(*window), camera);
 
-      // znalezienie pola pod którym jest myszka
-      hoveredField = nullptr;
-      for (int x = 0; x < 8; x++)
-        for (int y = 0; y < 8; y++) {
-          auto f = activeBoard.getField({x, y});
-          if (f->getGlobalBounds().contains(m_pos_on_map))
-            hoveredField = f;
-        }
-      // jeśli znaleziono, zostanie ono podświetlone
-      if (hoveredField) {
-        hoveredRect.setFillColor(sf::Color{0, 20, 255, 16});
-        hoveredRect.setSize(sf::Vector2f(tile_size, tile_size));
-        hoveredRect.setPosition(hoveredField->getPosition());
+    // znalezienie pola pod którym jest myszka
+    hoveredField = nullptr;
+    for (int x = 0; x < 8; x++) {
+      for (int y = 0; y < 8; y++)
+      {
+        auto f = activeBoard.getField({x, y});
+        if (f->getGlobalBounds().contains(m_pos_on_map))
+          hoveredField = f;
       }
+    }
+    // jeśli znaleziono, zostanie ono podświetlone
+    if (hoveredField)
+    {
+      hoveredRect.setFillColor(sf::Color{0, 20, 255, 16});
+      hoveredRect.setSize(sf::Vector2f(tile_size, tile_size));
+      hoveredRect.setPosition(hoveredField->getPosition());
+    }
 
-      // ******************************************************************
-      // ****** Obsługa wszystkich wydarzeń z myszy i klawiatury **********
-      // ******************************************************************
-      while (window->pollEvent(event) || justUnlocked) {
-        justUnlocked = false;
+    // ******************************************************************
+    // **************** Obsługa wszystkich wydarzeń *********************
+    // ******************************************************************
+    while (window->pollEvent(event) || waiting_for_action)
+    {
+      waiting_for_action = false;
 
-        /****************************************************************
-         * Tryb gry:    KAŻDY
-         * Pobieranie inputu odblokowanego we wszystkich trybach
-         * te operacje są stale sprawdzane, gdy wychwycono jakiś event
-         *
-         * Znajduje się tu obsługa okna gry, interakcje z GUI itp.
-        /****************************************************************/
-        // systemowe zamknięcie aplikacji (np. kliknięcie X na pasku okna / alt+f4)
-        if (event.type == sf::Event::Closed)
-          window->close();
+      // systemowe zamknięcie aplikacji (np. kliknięcie X na pasku okna / alt+f4)
+      if (event.type == sf::Event::Closed)
+        window->close();
 
-        // akcje kliknięcia myszą dla elementów UI - PPM
-        // [możliwe do kliknięcia w każdej fazie gry]
-        for (auto &b : ui.button) {
-          if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window)) {
-            // pobranie umiejętności pod przyciskiem
-            auto ability = b.get()->getAbility();
-            if (ability != nullptr && ability->getCallType() == Abilities::Attack::CallType::targetable) {
-              ui.autoselectButton(b.get());
+      // akcje kliknięcia myszą dla elementów UI - PPM
+      // [możliwe do kliknięcia w każdej fazie gry]
+      for (auto &b : ui.button)
+      {
+        if (mouseClicked(sf::Mouse::Right) && b->getGlobalBounds().contains(m_pos_on_window))
+        {
+          // pobranie umiejętności pod przyciskiem
+          auto ability = b.get()->getAbility();
+          if (ability != nullptr && ability->getCallType() == Abilities::Attack::CallType::targetable)
+          {
+            ui.autoselectButton(b.get());
 
-              // zapisanie informacji z ostatnio wybranym atakiem atakiem domyślnym u tej postaci
-              lastDefaultAttack[selectedCharacter] = b.get()->getAbility();
-            }
+            // zapisanie informacji z ostatnio wybranym atakiem atakiem domyślnym u tej postaci
+            lastDefaultAttack[selectedCharacter] = b.get()->getAbility();
           }
         }
+      }
 
-        switch (gameMode) {
-        /****************************************************************
-         * Tryb gry:    AKTYWNA TURA GRACZA
-        /****************************************************************/
-        case GameMode::player_turn: {
-          switch (inputMode) {
-          /****************************************************************
-           * Tryb inputu:     ZAZNACZONA POSTAĆ, CZEKA NA POLECENIA
-           * Sprawdzanie możliwości wykonania ruchu i akcji
-          /****************************************************************/
-          case InputMode::character_is_selected: {
+      if (!gameLocked)
+      {
+        switch (gameMode)
+        {
+        case GameMode::player_turn:
+        {
+          /**
+           * Tryb gry: TURA GRACZA
+           */
+
+          switch (inputMode)
+          {
+          case InputMode::character_is_selected:
+          {
+            /**
+             * Tryb inputu: ZAZNACZONA POSTAĆ, CZEKA NA POLECENIA
+             * Sprawdzanie możliwości wykonania ruchu i akcji
+             */
             bool turn_finished = false;
             
             // automatyczne spasowanie gdy zostało postaci 0 punktów akcji
@@ -163,27 +174,35 @@ void Game::run()
             }
 
             // akcje kliknięcia myszą dla elementów UI - LPM
-            for (auto &b : ui.button) {
-              if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window) && !MouseLClickedLastFrame) {
-                if (b->getActivationType() == Button::ActivationType::selectable) {
-                  if (b->getAction() == Button::Action::attack) {
+            for (auto &b : ui.button)
+            {
+              if (mouseClicked(sf::Mouse::Left) && b->getGlobalBounds().contains(m_pos_on_window) && !MouseLClickedLastFrame)
+              {
+                if (b->getActivationType() == Button::ActivationType::selectable)
+                {
+                  if (b->getAction() == Button::Action::attack)
+                  {
                     // jeżeli liczba akcji jest wystarczająca by wykonać tę akcję, zaznacza przycisk
-                    if (selectedCharacter->getAP() >= b->getAbility()->getAP()) {
+                    if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+                    {
                       ui.selectButton(b.get());
                     }
                   }
                 }
-                else if (b->getActivationType() == Button::ActivationType::clickable) {
-                  if (b->getAction() == Button::Action::attack) {
+                else if (b->getActivationType() == Button::ActivationType::clickable)
+                {
+                  if (b->getAction() == Button::Action::attack)
+                  {
                     // jeżeli liczba akcji jest wystarczająca, wywołuje natychmiastowo akcję
-                    if (selectedCharacter->getAP() >= b->getAbility()->getAP()) {
+                    if (selectedCharacter->getAP() >= b->getAbility()->getAP())
+                    {
                       attackAOE(*b->getAbility());
                       
-                      // zablokowanie gry aż do skończenia animacji
                       lockGameMode();
                     }
                   }
-                  else if (b->getAction() == Button::Action::endturn) {
+                  else if (b->getAction() == Button::Action::endturn)
+                  {
                     finishTurn();
                     turn_finished = true;
                   }
@@ -195,14 +214,17 @@ void Game::run()
               break;
             
             // sprawdzenie akcji na planszy wymaga najechania myszką na jakieś pole
-            if (hoveredField != nullptr) {
+            if (hoveredField != nullptr)
+            {
               // sprawdzenie odbywa się za tylko gdy zmieniło się wskazywane myszką pole (żeby nie odświeżac co klatkę)
-              if (hovered_field_changed()) {
+              if (hovered_field_changed())
+              {
                 // tworzy na ekranie podgląd ruchu i/lub akcji do wykonania
                 checkMoveAndActionsAuto();
               }
 
-              /** Sprawdzenie czy jest jakaś akcja do wykonania (bądź samo przesunięcie)
+              /**
+               *  Sprawdzenie czy jest jakaś akcja do wykonania (bądź samo przesunięcie)
                *  Jeżeli klinięto na lewym przyciskiem myszy to zaakceptuj wywołanie
                */
               if (mouseClicked(sf::Mouse::Left, hoveredField->getGlobalBounds(), m_pos_on_map)
@@ -212,10 +234,11 @@ void Game::run()
                 // zatwierdzenie akcji do wywołania
                 acceptMoveAndAction();
                 
-                // zablokowanie gry aż do skończenia animacji
                 lockGameMode();
               }
-            } else {
+            }
+            else
+            {
               // kursor znajduje się poza planszą - wyłączenie podglądu akcji do wywołania
               road.clear();
               range_player.clear();
@@ -223,25 +246,28 @@ void Game::run()
             }
 
             // pokazanie podglądu ataku na planszy gdy najedzie się myszką na przycisk
-            if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack) {
+            if (ui.getHoveredBtn() && ui.getHoveredBtn()->getAction() == Button::attack)
+            {
               range_player = activeBoard.createRange(selectedCharacter, ui.getHoveredBtn()->getAbility()->get_in_range());
               range_created_from_auto = false;
             }
 
             // kliknięcie myszką w przycisk wywołania akcji
-            if (ui.getSelectedBtn()) {
+            if (ui.getSelectedBtn())
+            {
               range_player = activeBoard.createRange(selectedCharacter, ui.getSelectedBtn()->getAbility()->get_in_range());
               range_created_from_auto = false;
               
               inputMode = action_is_selected;
             }
           } break;
-          /****************************************************************
-           * Tryb inputu:     WYRANO AKCJE, NALEŻY WYBRAĆ POLE WYWOŁANIA
-           * Sprawdzanie możliwości rozegrania akcji na dostępnym polu
-           * Zaznaczenie pola poza dostępnym obszarem anuluje akcję
-          /****************************************************************/
           case InputMode::action_is_selected: {
+            /**
+             * Tryb inputu: WYRANO AKCJE, NALEŻY WYBRAĆ POLE WYWOŁANIA
+             * Sprawdzanie możliwości rozegrania akcji na dostępnym polu
+             * Zaznaczenie pola poza dostępnym obszarem anuluje akcję
+             */
+
             // jakiekolwiek kliknięcie LPM oznacza albo akceptacje albo anulowanie akcji
             if (mouseClicked(sf::Mouse::Left) && !MouseLClickedLastFrame) {
               // sprawdzanie czy na wskazywanym polu jest postać na której można wywołać akcje i czy to pole jest w zasięgu ataku
@@ -252,7 +278,6 @@ void Game::run()
                 
                 acceptAttack(attack, getEnemyOnHoveredField(), range_player.getDirectionToThisField(hoveredField));
                 
-                // zablokowanie gry aż do skończenia animacji
                 lockGameMode();
               }
               else {
@@ -269,12 +294,14 @@ void Game::run()
           } break;
           }
         } break;
-        /****************************************************************
-         * Tryb gry:    TURA PRZECIWNIKA
-        /****************************************************************/
         case enemy_turn: {
+          /**
+           * Tryb gry: TURA PRZECIWNIKA/KOMPUTERA
+           */
+
           // wygenerowanie najlepszej decyzji jaką AI widzi w danej chwili
-          if (ai_decision.empty()) {
+          if (ai_decision.empty())
+          {
             AI::Core ai(selectedCharacter, activeBoard);
             ai_decision = ai.calculateBestDecision();
           }
@@ -282,73 +309,81 @@ void Game::run()
           // pobieranie kolejnych akcji do wywołania
           AI::Action* action = ai_decision.popNextAction();
 
-          if (dynamic_cast<AI::Move*>(action)) {
+          if (dynamic_cast<AI::Move*>(action))
+          {
             moveCharacter(selectedCharacter, action->getRoad());
 
             lockGameMode();
             break;
           }
 
-          if (dynamic_cast<AI::Attack*>(action)) {
+          if (dynamic_cast<AI::Attack*>(action))
+          {
             acceptAttack(*(action->getAttackInfo().attack), action->getAttackInfo().target,
-              action->getAttackInfo().range.getDirectionToThisField(activeBoard.getFieldOccupedBy(action->getAttackInfo().target)));
+                         action->getAttackInfo().range.getDirectionToThisField(activeBoard.getFieldOccupedBy(action->getAttackInfo().target)));
 
-            lockGameMode();            
+            lockGameMode();
             break;
           }
 
-          if (dynamic_cast<AI::FinishTurn*>(action)) {
+          if (dynamic_cast<AI::FinishTurn *>(action))
+          {
             finishTurn();
             break;
           }
-          
+
         } break;
         }
-                
-        // zapisanie ostatnio wkszywanego myszką pola
-        lastHoveredField = hoveredField;
       }
-
-      // ponowne zapisanie informacji czy kliknięto LPM myszki
-      if (mouseClicked(sf::Mouse::Left))
-        MouseLClickedLastFrame = true;
-      else
-        MouseLClickedLastFrame = false;
-
-      // ******************************************************************
-      // ******** Update wszystkich elemnetów w bieżącej klatce ***********
-      // ******************************************************************
-
-      // zmierzenie czasu jaki upłynął pomiędzy klatkami
-      float deltaTime = time.getElapsedTime().asSeconds() - lastUpdate.asSeconds();
-      lastUpdate = time.getElapsedTime();
-
-      // update dla wszystkich elementów gry
-      update(deltaTime);
-
-      // update przycisków z interfejsu użytkownika
-      ui.updateButtons(m_pos_on_window, deltaTime);
-
-      // odblokowanie interakcji w grze, gdy nie ma żadnej oczekującej animacji, która blokuje postaci
-      if (!anim_manager.anyAnimationLocking()) {
-        unlockGameMode();
-      }
-
-      // ******************************************************************
-      // ********* Wyczyszczenie ekranu i narysowanie wszystkiego *********
-      // ******************************************************************
-      window->clear();
-
-      // narysowanie elementów statycznych, stale widocznych na ekranie w tym samym miejscu
-      window->setView(window->getDefaultView());
-      draw_static_elements();
-
-      // narysowanie scrollowanej widokiem kamery planszy gry
-      window->setView(camera);
-      draw_board();
-
-      window->display();
+      // zapisanie ostatnio wkszywanego myszką pola
+      lastHoveredField = hoveredField;
     }
+
+
+    // ponowne zapisanie informacji czy kliknięto LPM myszki
+    if (mouseClicked(sf::Mouse::Left))
+      MouseLClickedLastFrame = true;
+    else
+      MouseLClickedLastFrame = false;
+
+    // ******************************************************************
+    // ******** Update wszystkich elemnetów w bieżącej klatce ***********
+    // ******************************************************************
+
+    // zmierzenie czasu jaki upłynął pomiędzy klatkami
+    float deltaTime = time.getElapsedTime().asSeconds() - lastUpdate.asSeconds();
+    lastUpdate = time.getElapsedTime();
+
+    // update dla wszystkich elementów gry
+    update(deltaTime);
+
+    // update przycisków z interfejsu użytkownika
+    ui.updateButtons(m_pos_on_window, deltaTime);
+
+    // odblokowanie interakcji w grze, gdy nie ma żadnej oczekującej animacji, która blokuje postaci
+    if (!anim_manager.anyAnimationLocking())
+    {
+      unlockGameMode();
+    }
+
+    // żeby można było od razu wykryć akcję na wskazywanym polu (bez konieczności jego zmiany)
+    lastHoveredField = nullptr;
+
+    // ******************************************************************
+    // ********* Wyczyszczenie ekranu i narysowanie wszystkiego *********
+    // ******************************************************************
+    window->clear();
+
+    // narysowanie elementów statycznych, stale widocznych na ekranie w tym samym miejscu
+    window->setView(window->getDefaultView());
+    draw_static_elements();
+
+    // narysowanie scrollowanej widokiem kamery planszy gry
+    window->setView(camera);
+    draw_board();
+
+    window->display();
+  }
 }
 
 void Game::update(float delta)
@@ -379,12 +414,14 @@ void Game::update(float delta)
   anim_manager.updateIdleAnimations(activeBoard.getAliveCharacters(), delta);
   anim_manager.updateAnimationsStack(delta);
   
-  // update wszystich postaci
-  for (auto &character : charactersOnBoard)
+  // update dla wszystich postaci
+  for (auto &character : charactersOnBoard) {
     character->update(delta);
+  }
   
   // animacja trójkącika nad zaznaczoną postacią
-  if (selectedCharacter) {
+  if (selectedCharacter)
+  {
     indicator_modifier += delta * (indicator_frame_raise ? 1 : -1);
     
     if (indicator_frame_raise)
@@ -418,9 +455,10 @@ void Game::update(float delta)
   }
 }
 
-void Game::selectCharacter(CharacterOnBoard *character)
+void Game::selectPlayerCharacter(CharacterOnBoard* character)
 {
   gameMode = player_turn;
+
   inputMode = InputMode::character_is_selected;
 
   selectedCharacter = character;
@@ -462,6 +500,8 @@ void Game::selectCharacter(CharacterOnBoard *character)
 
 void Game::selectEnemyCharacter(CharacterOnBoard *character)
 {
+  gameMode = enemy_turn;
+
   selectedCharacter = character;
 
   // zresetowanie ilości punktów akcji na maksymalną wartość
@@ -493,15 +533,17 @@ void Game::checkMoveAndActionsAuto()
   // sprawdzenie czy są na najechanym polu są też akcje do wywołania
   checkActionsByHover();
 
-  // FIXME? sprawdzić czy własnie tu znajduje się problem, że dla drugiego potencjalnego ataku skasuje drogę (miałem taki bug)
+  // NOTE sprawdzić czy własnie tu znajduje się problem, że dla drugiego potencjalnego ataku skasuje drogę (miałem taki bug)
 
   // w przypadku gdy nie ma w tej chwili podglądu żadnej akcji wyczyść podgląd drogi i utwórz od nowa
-  if (range_player.empty()) {
+  if (range_player.empty())
+  {
     // czyszczenie road za każdym razem gdy zmieniło się wskazywane myszką pole
     road.clear();
 
     // próba utworzenie drogi: od pola postaci do wskazywanego pola
-    if (hoveredField != nullptr && fieldA != nullptr && fieldA != hoveredField) {
+    if (hoveredField != nullptr && fieldA != nullptr && fieldA != hoveredField)
+    {
       int max_movement = selectedCharacter->getAP();
       road = pathfinder.astar_search(fieldA, hoveredField, max_movement);
     }
@@ -550,7 +592,8 @@ void Game::checkActionsByHover()
   Field* action_field{nullptr};
 
   // sprawdzenie czy pole na którym można wykonać akcję jest w jej zasięgu wywołania + stoi tam inna postać
-  for (auto &r : possible_range) {
+  for (auto &r : possible_range)
+  {
     // uzyskanie współrzędnych kolejnych pól w zasięgu wywołania akcji
     auto coords_in_range = activeBoard.getCoordsOf(field_caster) + r;
     
@@ -573,7 +616,8 @@ void Game::checkActionsByHover()
   
   std::vector<Field*> action_fields;
   
-  if (action_field) {
+  if (action_field)
+  {
     action_fields.push_back(action_field);
     
     // podświetlenie przycisku akcji, która może być teraz wywołana
@@ -581,8 +625,11 @@ void Game::checkActionsByHover()
     
     // odjęcie punktów akcji w podglądzie ile zostanie po ataku
     AP_preview -= attack.getAP();
-  } else
+  }
+  else
+  {
     ui.cancelSimulatingHover();
+  }
 
   // utworzenie podglądu zasięgu ataku
   range_player = Range(action_fields, field_caster);
@@ -592,7 +639,8 @@ void Game::checkActionsByHover()
 
 void Game::updateAPpreviewOnBoard()
 {
-  if (hoveredField && selectedCharacter) {
+  if (hoveredField && selectedCharacter)
+  {
     // update wyświetlanych punktów akcji na środku aktywnego pola planszy
     std::stringstream ss;
     ss << AP_preview << "/" << selectedCharacter->getMaxAP();
@@ -630,15 +678,18 @@ void Game::moveCharacter(CharacterOnBoard* character,
   // dodanie animacji przesuwającej postać pole po polu
   for (auto &r : road.get())
   {
-    bool isBlocking = true;
-    // rozpoczęcie przesunięcie na ostatni kafelek drogi odblokowauje od razu grę
-    // FIXME na razie wyłączam ten feature, bo animacja się zawiesza
-   // if (r == road.getLastElement())
-     // isBlocking = false;
 
-   sequence_moves.push_back(anim_manager.createAnimationMove(character,
-                                                             Animations::Actions::Move{road.getOffsetToThisField(r), 240.0f},
-                                                             isBlocking));
+    // taki feature, że gdy już rozpoczyna się przesunięcie na docelowe pole to odblokowauje od razu grę
+    // NOTE koncepcyjnie to na ten moment nie wypali, może poza sytuacją gdzie ostatni ruch natychmiast kończy turę
+    // if (r == road.getLastElement())
+    //   isBlocking = false;
+
+    bool isBlocking = true;
+    sequence_moves.push_back(anim_manager.createAnimationMove(
+                               character,
+                               Animations::Actions::Move{road.getOffsetToThisField(r),
+                                                         240.0f},
+                               isBlocking));
   }
 
   // odjęcie punktów akcji, po 1 za każde pokonane pole
@@ -745,34 +796,17 @@ void Game::attackAOE(Abilities::Attack& attack)
 
 void Game::finishTurn()
 {
-
-  // zamiana trybu gry na taki jaki jest u drużyny postaci, która ma ruch
-  // (zrobione też po to by jednocześnie zachować blokadę trybu gry)
-  if (selectedCharacter->getTeam() != Character::Team::player )
-  {
-    if (gameMode == GameMode::player_turn)
-      gameMode = player_turn;
-    else if (gameMode == GameMode::locked_enemy_turn)
-      gameMode = locked_player_turn;
-  }
-  else if (selectedCharacter->getTeam() != Character::Team::enemy )
-  {
-    if (gameMode == GameMode::player_turn)
-      gameMode = enemy_turn;
-    else if (gameMode == GameMode::locked_player_turn)
-      gameMode = locked_enemy_turn;
-  }
-
   battle_queue.switchToNextCharacter();
 
   auto currentCharacter = battle_queue.getCurrentCharacter();
 
   if (currentCharacter->getTeam() == Character::Team::player)
-    selectCharacter(currentCharacter);
+    selectPlayerCharacter(currentCharacter);
   else if (currentCharacter->getTeam() == Character::Team::enemy)
     selectEnemyCharacter(currentCharacter);
 
 }
+
 
 CharacterOnBoard* Game::getEnemyOnHoveredField() const
 {
@@ -781,23 +815,13 @@ CharacterOnBoard* Game::getEnemyOnHoveredField() const
 
 void Game::lockGameMode()
 {
-  if (gameMode == player_turn)
-    gameMode = locked_player_turn;
-  else if (gameMode == enemy_turn)
-    gameMode = locked_enemy_turn;
+  gameLocked = true;
 }
 
 void Game::unlockGameMode()
 {
-  if (gameMode == locked_player_turn)
-    gameMode = player_turn;
-  else if (gameMode == locked_enemy_turn)
-    gameMode = enemy_turn;
-
-  justUnlocked = true;
-
-  // żeby można było od razu wykryć akcję na wskazywanym polu (bez konieczności jego zmiany)
-  lastHoveredField = nullptr;
+  gameLocked = false;
+  waiting_for_action = true;
 }
 
 bool Game::mouseClicked(sf::Mouse::Button mouse_btn,
@@ -827,25 +851,31 @@ bool Game::hovered_field_changed()
 void Game::draw_board()
 {
   // narysowanie wszystkich widocznych pól planszy
-  for (int x = 0; x < fullBoard.getWidth(); x++)
+  for (int x = 0; x < fullBoard.getWidth(); x++) {
     for (int y = 0; y < fullBoard.getHeight(); y++) {
       auto f = *fullBoard.getField(x, y);
-      
-      // funkcja SFML zamieniająca współrzędne kamery na ekranowe
-      sf::Vector2i pos =
-        window->mapCoordsToPixel(f.getPosition());
 
-      // ograniczenie wyświetlenia tylko do kafelków który pokrywają się z ekranem kamery
+      // funkcja SFML zamieniająca współrzędne kamery na ekranowe
+      sf::Vector2i pos = window->mapCoordsToPixel(f.getPosition());
+
+      // ograniczenie wyświetlenia tylko do kafelków który pokrywają się z
+      // ekranem kamery
       if (pos.x + tile_size > screen_size.x * camera.getViewport().left &&
           pos.y + tile_size > screen_size.y * camera.getViewport().top &&
-          pos.x < screen_size.x * (camera.getViewport().left + camera.getViewport().width) &&
-          pos.y < screen_size.y * (camera.getViewport().top + camera.getViewport().height))
+          pos.x < screen_size.x * (camera.getViewport().left +
+                                   camera.getViewport().width) &&
+          pos.y < screen_size.y *
+                      (camera.getViewport().top + camera.getViewport().height))
+      {
         window->draw(f);
+      }
     }
-  
+  }
+
   // narysowanie wszystkich postaci
-  for (auto &character : charactersOnBoard)
+  for (auto &character : charactersOnBoard) {
     window->draw(*character);
+  }
 
   if (selectedCharacter)
     window->draw(indicator_selected_character);
