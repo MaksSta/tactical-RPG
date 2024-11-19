@@ -11,6 +11,9 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 set(SOURCE_FILES
+	src/Menu/Menu.cpp
+	src/Menu/MenuButton.cpp
+
 	src/Abilities/Ability.cpp
 	src/Abilities/Attack.cpp
 	src/Animations/Actions/Move.cpp
@@ -53,6 +56,9 @@ set(SOURCE_FILES
 	)
 
 SET(HEADER_FILES
+	src/Menu/Menu.h
+	src/Menu/MenuButton.h
+
 	src/Abilities/Ability.h
 	src/Abilities/Attack.h
 	src/Animations/Actions/Move.h

@@ -8,7 +8,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "GameEngine/Game.h"
+#include "Menu/Menu.h"
 
 class Program {
 public:
