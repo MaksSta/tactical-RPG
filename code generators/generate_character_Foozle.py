@@ -1,5 +1,6 @@
 # Skrypt do generowania klasy postaci
-# Skonfigurowany pod ładowanie ścieżek grafik stworzonych przez twórcę Foozle
+# Skonfigurowany pod ładowanie ścieżek grafik pobranych z Foozle.io, stworzonych przez twórcę:
+# Baldur (https://twitter.com/the__baldur)
 
 # Jako argument należy podać nazwę Postaci. Zostaną utworzone pliki:
 # - Header file
@@ -85,9 +86,9 @@ for action in actions:
   const int frames_"""+action+""" = 6;
   const float fps_"""+action+""" = frames_"""+action+""" * 1.5;\n\n""")
      for d in directions:
-	     source_file.write("  loadAnimation(Activity::"+action+", "+d.lower()+", \"data/"+classname + "/" + d + "/Png/" + classname + d + src_for_action[action] +".png\", frames_idle, fps_idle, w, h);\n"
+	     source_file.write("  loadAnimation(Activity::"+action+", "+d.lower()+", \"data/"+classname + "/" + d + "/Png/" + classname + d + src_for_action[action] +".png\", frames_"+action+", fps_"+action+", w, h);\n"
   )
 
-source_file.write('\n\n  //zainicjowanie postaci na ekranie z domyślnymi ustawieniami\n  init();\n}')
+source_file.write('\n\n  // zainicjowanie postaci na ekranie z domyślnymi ustawieniami\n  init();\n}')
 
 print('Utworzono postać '+classname)
