@@ -27,6 +27,12 @@ public:
     death,
   };
 
+  enum Vocation {
+    fighter,
+    ranger,
+    mage
+  };
+
   enum Team {
     player,
     enemy
@@ -39,6 +45,7 @@ public:
    * @param _max_hp maksymalna i zarazem początkowa ilość punktów życia
    */
   Character(std::string _name,
+            Vocation _vocation,
             Team _team,
             int _max_hp);
 
@@ -50,6 +57,7 @@ public:
 
   bool isAlive() const;
 
+  Vocation getVocation() const;
   Team getTeam() const;
 
   int getAP() const;
@@ -65,6 +73,7 @@ public:
   bool will_die_this_turn {false};
 protected:
   Team team;
+  Vocation vocation;
 
   Activity currentActivity{idle};
   Direction direction{down};

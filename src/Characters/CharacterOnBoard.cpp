@@ -2,12 +2,13 @@
 
 CharacterOnBoard::CharacterOnBoard(sf::Vector2i start_coords,
                                    std::string _name,
+                                   Vocation _vocation,
                                    Team _team,
                                    short _max_hp,
                                    sf::Vector2f _padding,
                                    float _scale)
   :
-  Character(_name, _team, _max_hp),
+  Character(_name, _vocation, _team, _max_hp),
   globalCoords{start_coords},
   padding{_padding},
   hpBar{getPosition(), hp, max_hp}

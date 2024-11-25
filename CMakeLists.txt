@@ -25,6 +25,7 @@ set(SOURCE_FILES
 	src/Animations/OnTexture.cpp
 	src/Characters/Character.cpp
 	src/Characters/CharacterOnBoard.cpp
+	src/Characters/GoblinBerserker.cpp
 	src/Characters/GoblinSlinger.cpp
 	src/Characters/HpBar.cpp
 	src/Characters/Sorceress.cpp
@@ -71,6 +72,7 @@ SET(HEADER_FILES
 	src/Animations/OnTexture.h
 	src/Characters/Character.h
 	src/Characters/CharacterOnBoard.h
+	src/Characters/GoblinBerserker.h
 	src/Characters/GoblinSlinger.h
 	src/Characters/HpBar.h
 	src/Characters/Sorceress.h

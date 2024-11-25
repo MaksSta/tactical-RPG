@@ -39,9 +39,9 @@ Game::Game(sf::RenderWindow &_window,
   charactersOnBoard.push_back(std::make_unique<Sorceress>(sf::Vector2i{6, 1}));
 
   charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{2, 6}));
-  charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{1, 7}));
+  charactersOnBoard.push_back(std::make_unique<GoblinBerserker>(sf::Vector2i{1, 7}));
   charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{5, 6}));
-  charactersOnBoard.push_back(std::make_unique<GoblinSlinger>(sf::Vector2i{6, 7}));
+  charactersOnBoard.push_back(std::make_unique<GoblinBerserker>(sf::Vector2i{6, 7}));
 
   // TODO napisać do tego osobną funkcję do uruchamiania przy przewijaniu planszy
   // dodanie widocznych na ekranie postaci do aktywnej planszy

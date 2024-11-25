@@ -31,6 +31,7 @@
 #include "../Characters/Warrior.h"
 #include "../Characters/Sorceress.h"
 #include "../Characters/GoblinSlinger.h"
+#include "../Characters/GoblinBerserker.h"
 
 class Game {
 public:

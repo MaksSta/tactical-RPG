@@ -4,6 +4,7 @@ GoblinSlinger::GoblinSlinger(sf::Vector2i start_coords)
   :
   CharacterOnBoard(start_coords,
                    "Goblin slinger",
+                   Vocation::ranger,
                    Team::enemy,
                    8,
                    {-2, -2},

@@ -1,22 +1,29 @@
 #include "Character.h"
 
 Character::Character(std::string _name,
+                     Vocation _vocation,
                      Team _team,
                      int _max_hp)
   :
   name{_name},
+  vocation{_vocation},
   team{_team},
   max_hp{_max_hp},
-  hp{_max_hp}
+  hp{_max_hp},
+  max_action_points{6}
 {
   // ustawienie punktów akcji na domyślną wartość
-  max_action_points = 6;
   action_points = max_action_points;
 }
 
 bool Character::isAlive() const
 {
   return !will_die_this_turn;
+}
+
+Character::Vocation Character::getVocation() const
+{
+  return vocation;
 }
 
 Character::Team Character::getTeam() const

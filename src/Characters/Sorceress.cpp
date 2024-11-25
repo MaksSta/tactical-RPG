@@ -4,6 +4,7 @@ Sorceress::Sorceress(sf::Vector2i start_coords)
   :
   CharacterOnBoard(start_coords,
                    "Sorceress",
+                   Vocation::mage,
                    Team::player,
                    12,
                    {-2, -2},

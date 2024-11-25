@@ -46,7 +46,8 @@ source_file.write(
   :
   CharacterOnBoard(start_coords,
                    \""""+classname+"""\",
-                   Team::player, // TODO można w tym miejscu zmienić na Team::enemy
+                   Vocation::fighter,   // TODO można zmienić na odpowiednią klasę postaci
+                   Team::player,        // TODO można w tym miejscu zmienić na Team::enemy
                    12,
                    {-2, -2},
                    2)

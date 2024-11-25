@@ -37,6 +37,7 @@ public:
    */
   CharacterOnBoard(sf::Vector2i start_coords,
                    std::string _name,
+                   Vocation _vocation,
                    Team _team,
                    short _max_hp,
                    sf::Vector2f _padding = {0, 0},

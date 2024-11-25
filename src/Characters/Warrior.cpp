@@ -4,6 +4,7 @@ Warrior::Warrior(sf::Vector2i start_coords)
   :
   CharacterOnBoard(start_coords,
                    "Warrior",
+                   Vocation::fighter,
                    Team::player,
                    15,
                    {-2, -2},
