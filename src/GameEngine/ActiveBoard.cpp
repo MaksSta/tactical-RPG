@@ -41,9 +41,14 @@ Field* ActiveBoard::getFieldOccupedBy(CharacterOnBoard* character) const
 CharacterOnBoard* ActiveBoard::getCharacterOnField(Field* field) const
 {
   for (auto &character : charactersOnBoard)
+  {
+    // na jednym polu w teorii może znajdować się więcej niż jedna postać, bo też taka co umarła, należy ją pominąć
+    if (!character->isAlive())
+      continue;
+
     if (field == getFieldOccupedBy(character))
       return character;
-
+  }
   return nullptr;
 }
 
