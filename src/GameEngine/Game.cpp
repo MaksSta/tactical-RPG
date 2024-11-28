@@ -151,6 +151,12 @@ void Game::run()
       {
         switch (gameMode)
         {
+        case GameMode::no_battle:
+        {
+          /**
+           * Tryb gry: PORUSZANIE SIĘ PO PLANSZY
+           */
+        } break;
         case GameMode::player_turn:
         {
           /**
@@ -299,6 +305,22 @@ void Game::run()
            * Tryb gry: TURA PRZECIWNIKA/KOMPUTERA
            */
 
+          // wykrywanie końca walki - porażki w przypadku braku żywych graczy
+          bool any_alive_players_characters{false};
+          for (auto & character : charactersOnBoard)
+          {
+            if (character->isAlive() && character->getTeam() == Character::Team::player)
+            {
+              any_alive_players_characters = true;
+              break;
+            }
+          }
+          if (!any_alive_players_characters)
+          {
+            gameMode = GameMode::no_battle;
+            break;
+          }
+
           // wygenerowanie najlepszej decyzji jaką AI widzi w danej chwili
           if (ai_decision.empty())
           {
@@ -331,6 +353,13 @@ void Game::run()
             finishTurn();
             break;
           }
+
+        } break;
+        case GameMode::defeat:
+        {
+          /**
+           * Tryb gry: PORAŻKA
+           */
 
         } break;
         }

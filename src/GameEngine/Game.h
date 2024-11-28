@@ -35,10 +35,13 @@
 
 class Game {
 public:
-  // tryb aktywności w jakim znajduje się gracza
+
+  // tryb aktywności w jakim znajduje się gra
   enum GameMode {
+    no_battle,
     player_turn,
     enemy_turn,
+    defeat,
   };
 
   // dodatkowy trybu aktywności, który szczegółowo decyduje o sposobie wczytywania danych wejściowych

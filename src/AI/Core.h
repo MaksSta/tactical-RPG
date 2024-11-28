@@ -21,6 +21,17 @@ namespace AI
 
     ActiveBoard* board;
     CharacterOnBoard* controlledCharacter;
+
+    bool any_action_taken;
+    int AP;
+
+    void try_attack();
+    void try_move_and_attack();
+    void calculate_possible_moves();
+    void move_to_the_center();
+    void follow_closest_enemy();
+
+    std::vector<std::vector<sf::Vector2i>> legal_offsets;
   };
 }
 
