@@ -13,6 +13,7 @@
 #include <memory>
 #include <array>
 
+#include "../Fonts.h"
 #include "../Global.h"
 #include "ActiveBoard.h"
 #include "FullBoard.h"
@@ -231,6 +232,9 @@ private:
   sf::CircleShape indicator_selected_character{9, 3};
   float indicator_modifier{0.0f};
   bool indicator_frame_raise{true};
+
+  sf::Text text_defeat;
+  float defeat_transparency{0.0f};
 
   // metoda do rysowania wszystkich obiektów planszy
   void draw_board();

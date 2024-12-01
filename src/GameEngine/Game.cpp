@@ -67,6 +67,16 @@ Game::Game(sf::RenderWindow &_window,
   // graficzne ustawienia dla znacznika zaznaczonej postaci
   indicator_selected_character.setFillColor(sf::Color{0, 135, 0});
   indicator_selected_character.setRotation(180);
+
+  // przygotowanie napisu Defeat
+  text_defeat.setFont(font_rpg);
+  text_defeat.setString("Defeat");
+  text_defeat.setCharacterSize(150);
+  text_defeat.setStyle(sf::Text::Bold);
+  text_defeat.setFillColor(sf::Color{145, 0, 0, 0});
+  text_defeat.setOrigin(text_defeat.getLocalBounds().getPosition());
+  text_defeat.setPosition((window->getSize().x - text_defeat.getGlobalBounds().width) / 2,
+                          (window->getSize().y - text_defeat.getGlobalBounds().height) / 2);
 }
 catch (errors::cannot_open_file &err_file)
 {
@@ -317,7 +327,7 @@ void Game::run()
           }
           if (!any_alive_players_characters)
           {
-            gameMode = GameMode::no_battle;
+            gameMode = GameMode::defeat;
             break;
           }
 
@@ -411,6 +421,10 @@ void Game::run()
     window->setView(camera);
     draw_board();
 
+    // TODO przeniść jako 3cia metoda: rysowanie na wierzchu
+    window->setView(window->getDefaultView());
+    window->draw(text_defeat);
+
     window->display();
   }
 }
@@ -442,17 +456,17 @@ void Game::update(float delta)
   // udpate animacji bezczynności
   anim_manager.updateIdleAnimations(activeBoard.getAliveCharacters(), delta);
   anim_manager.updateAnimationsStack(delta);
-  
+
   // update dla wszystich postaci
   for (auto &character : charactersOnBoard) {
     character->update(delta);
   }
-  
+
   // animacja trójkącika nad zaznaczoną postacią
   if (selectedCharacter)
   {
     indicator_modifier += delta * (indicator_frame_raise ? 1 : -1);
-    
+
     if (indicator_frame_raise)
       while (indicator_modifier > 1)
       {
@@ -471,7 +485,7 @@ void Game::update(float delta)
                                              + sf::Vector2f{indicator_selected_character.getGlobalBounds().width / 2,
                                                  indicator_modifier * 3.4f});
   }
-  
+
   // update kamery
   camera.update(delta);
 
@@ -481,6 +495,15 @@ void Game::update(float delta)
     ss << selectedCharacter->getAP() << "/" << selectedCharacter->getMaxAP();
     // wyświetlenie obrażeń zadawanych przez tą umiejętność
     ui.box_action_points.setString(ss.str());
+  }
+
+  // napis PORAŻKA
+  if (gameMode == GameMode::defeat && !anim_manager.anyAnimationLeft())
+  {
+    defeat_transparency += delta * 95;
+    if (defeat_transparency> 255)
+      defeat_transparency = 255;
+    text_defeat.setFillColor(sf::Color{255,0,0, static_cast<unsigned char>(defeat_transparency)});
   }
 }
 
@@ -610,7 +633,8 @@ void Game::checkActionsByHover()
       field_caster = road.getLastElement();
   }
   // dla ataków z zasięgu wywoływanie odbywa się zawsze z obecnego pola
-  else if (attack.get_type() == Abilities::Attack::Type::ranged) {
+  else if (attack.get_type() == Abilities::Attack::Type::ranged)
+  {
     field_caster = activeBoard.getFieldOccupedBy(selectedCharacter);
 
     // w przypadku znalezienia calu dla ataku dystansowego nie ma przesunięcia postaci
@@ -682,11 +706,13 @@ void Game::updateAPpreviewOnBoard()
 
 void Game::acceptMoveAndAction()
 {
-  if (!road.empty()) {
+  if (!road.empty())
+  {
     // wywołanie ruchu
     acceptMovePlayer();
   }
-  if (!range_player.empty()) {
+  if (!range_player.empty())
+  {
     // pobiera informację o autoataku z przycisku z domyślnie wywoływanym atakiem
     Abilities::Attack attack = *(ui.getAutoselectedBtn()->getAbility());
 

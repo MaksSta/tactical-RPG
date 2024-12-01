@@ -1,6 +1,8 @@
 #include "TextBox.h"
 
-TextBox::TextBox(sf::Vector2f pos,
+TextBox::TextBox(sf::Font& font_inside,
+                 sf::Font& font_outside,
+                 sf::Vector2f pos,
                  sf::Vector2f size,
                  Alignment _alignment_horizontal,
                  std::string text_label,
@@ -9,8 +11,8 @@ TextBox::TextBox(sf::Vector2f pos,
                  unsigned int font_size)
   :
   alignment_horizontal{_alignment_horizontal},
-  label{pos - sf::Vector2f{10, 25}, text_label, 16},
-  textfield{pos, text}
+  label{font_inside, pos - sf::Vector2f{10, 25}, text_label, 16},
+  textfield{font_outside, pos, text}
 {
   textfield.setFillColor(color);
   textfield.setCharacterSize(font_size);

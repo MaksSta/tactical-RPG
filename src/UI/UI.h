@@ -15,6 +15,7 @@
 
 #include "Button.h"
 #include "TextBox.h"
+#include "../Fonts.h"
 #include "../Global.h"
 
 class UI : public sf::Drawable {

@@ -6,6 +6,7 @@
 #define UI_TEXTFIELD_H_
 
 #include <SFML/Graphics.hpp>
+#include "../Fonts.h"
 
 class Textfield : public sf::Text {
 public:
@@ -14,12 +15,11 @@ public:
    * \param pos pozycja na ekranie
    * \param text tekst do wyświetlenia
    */
-  Textfield(sf::Vector2f pos = {0, 0},
+  Textfield(sf::Font& font = font_normal,
+            sf::Vector2f pos = {0, 0},
             std::string text = "",
             unsigned int font_size = 24,
             sf::Color color = sf::Color::White);
-private:
-  sf::Font font;
 };
 
 #endif /* UI_TEXTFIELD_H_ */

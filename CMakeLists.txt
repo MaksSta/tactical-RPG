@@ -14,6 +14,8 @@ set(SOURCE_FILES
 	src/Menu/Menu.cpp
 	src/Menu/MenuButton.cpp
 
+	src/Fonts.cpp
+
 	src/Abilities/Ability.cpp
 	src/Abilities/Attack.cpp
 	src/Animations/Actions/Move.cpp
@@ -57,6 +59,9 @@ set(SOURCE_FILES
 	)
 
 SET(HEADER_FILES
+	src/Global.h
+	src/Fonts.h
+
 	src/Menu/Menu.h
 	src/Menu/MenuButton.h
 
@@ -86,7 +91,6 @@ SET(HEADER_FILES
 	src/GameEngine/Pathfinder.h
 	src/GameEngine/Range.h
 	src/GameEngine/Road.h
-	src/Global.h
 	src/Program.h
 	src/UI/Button.h
 	src/UI/TextBox.h

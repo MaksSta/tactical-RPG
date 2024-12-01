@@ -2,6 +2,7 @@
 #define MENU_MENUBUTTON_H_
 
 #include <SFML/Graphics.hpp>
+#include "../Fonts.h"
 
 class Menu;
 
@@ -21,11 +22,8 @@ private:
   void draw(sf::RenderTarget &target,
             sf::RenderStates states) const;
 
-
   // metoda klasy Menu wywoływana przez ten przycisk
   void (Menu::*onClick)();
-
-  sf::Font font;
 
   sf::RectangleShape background;
   sf::Text text;

@@ -9,15 +9,13 @@ MenuButton::MenuButton(std::string str,
   :
   onClick{method}
 {
-  font.loadFromFile("data/fonts/EncodeSansWide-Black.ttf");
-
   background.setFillColor(sf::Color{0,15,175});
   background.setSize({w, h});
 
   background.setPosition(x - w / 2,
                          y - h / 2);
 
-  text.setFont(font);
+  text.setFont(font_normal);
   text.setString(str);
   text.setCharacterSize(80);
   text.setStyle(sf::Text::Bold);

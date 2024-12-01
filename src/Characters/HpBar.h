@@ -10,6 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <sstream>
 
+#include "../Fonts.h"
 #include "../UI/Textfield.h"
 
 class HpBar : public sf::Drawable {

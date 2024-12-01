@@ -7,6 +7,7 @@
 #define PROGRAM_H_
 
 #include <SFML/Graphics.hpp>
+#include "Fonts.h"
 
 #include "Menu/Menu.h"
 

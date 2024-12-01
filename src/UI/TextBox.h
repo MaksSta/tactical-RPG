@@ -7,6 +7,7 @@
 #define UI_TEXTBOX_H_
 
 #include "Textfield.h"
+#include "../Fonts.h"
 
 class TextBox : public sf::Drawable {
 public:
@@ -23,7 +24,9 @@ public:
    * @param size rozmiar tła
    * @param _alignment_horizontal sposób wyrównania tekstu w poziomie
    */
-  TextBox(sf::Vector2f pos,
+  TextBox(sf::Font& font_outside,
+          sf::Font& font_inside,
+          sf::Vector2f pos,
           sf::Vector2f size,
           Alignment _alignment_horizontal,
           std::string label = "",

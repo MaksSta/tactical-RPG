@@ -307,12 +307,27 @@ void Manager::updateIdleAnimations(std::vector<CharacterOnBoard*> characters,
 bool Manager::anyAnimationLocking()
 {
   // sprawdzenie czy jakaś z oczekujących animacji blokuje
-  for (auto & set : parallel_played_sequences) {
-    for (auto & anim : set) {
-      if (anim->isBlocking) {
+  for (auto & set : parallel_played_sequences)
+  {
+    for (auto & anim : set)
+    {
+      if (anim->isBlocking)
+      {
         return true;
       }
     }
+  }
+
+  return false;
+}
+
+bool Manager::anyAnimationLeft()
+{
+  // sprawdzenie czy jakaś z oczekujących animacji blokuje
+  for (auto & set : parallel_played_sequences)
+  {
+    if (!set.empty())
+      return true;
   }
 
   return false;

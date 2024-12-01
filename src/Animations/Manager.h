@@ -148,6 +148,8 @@ namespace Animations
 
     // zwraca informację czy zostały jakieś animacje w kolejce (blokują one tryb gry)
     bool anyAnimationLocking();
+
+    bool anyAnimationLeft();
   private:
      //  wszystkie animacje, umieszczone w równolegle wykonywanych ścieżkach
     std::vector<Sequence> parallel_played_sequences;

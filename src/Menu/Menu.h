@@ -5,6 +5,7 @@
 
 #include "MenuButton.h"
 #include "../GameEngine/Game.h"
+#include "../Fonts.h"
 
 class Menu {
 public:
@@ -26,8 +27,6 @@ private:
   const sf::Vector2u window_size;
 
   sf::Event event;
-
-  sf::Font font_menu;
 };
 
 #endif /* MENU_MENU_H_ */
