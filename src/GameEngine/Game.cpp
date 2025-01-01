@@ -69,7 +69,7 @@ Game::Game(sf::RenderWindow &_window,
   indicator_selected_character.setRotation(180);
 
   // przygotowanie napisu Defeat
-  text_defeat.setFont(font_rpg);
+  text_defeat.setFont(fonts->font_rpg);
   text_defeat.setString("Defeat");
   text_defeat.setCharacterSize(150);
   text_defeat.setStyle(sf::Text::Bold);
@@ -334,6 +334,8 @@ void Game::run()
           // wygenerowanie najlepszej decyzji jaką AI widzi w danej chwili
           if (ai_decision.empty())
           {
+            std::cout << "Pobieranie kolejnej decyzji komputera...\n";
+
             AI::Core ai(selectedCharacter, activeBoard);
             ai_decision = ai.calculateBestDecision();
           }
@@ -343,6 +345,7 @@ void Game::run()
 
           if (dynamic_cast<AI::Move*>(action))
           {
+            std::cout << "Pobrano ruch\n";
             moveCharacter(selectedCharacter, action->getRoad());
 
             lockGameMode();
@@ -351,6 +354,7 @@ void Game::run()
 
           if (dynamic_cast<AI::Attack*>(action))
           {
+            std::cout<<"Pobrano atak\n";
             acceptAttack(*(action->getAttackInfo().attack), action->getAttackInfo().target,
                          action->getAttackInfo().range.getDirectionToThisField(activeBoard.getFieldOccupedBy(action->getAttackInfo().target)));
 
@@ -360,6 +364,7 @@ void Game::run()
 
           if (dynamic_cast<AI::FinishTurn *>(action))
           {
+            std::cout<<"Pobrano koniec tury\n";
             finishTurn();
             break;
           }
@@ -584,8 +589,6 @@ void Game::checkMoveAndActionsAuto()
 
   // sprawdzenie czy są na najechanym polu są też akcje do wywołania
   checkActionsByHover();
-
-  // NOTE sprawdzić czy własnie tu znajduje się problem, że dla drugiego potencjalnego ataku skasuje drogę (miałem taki bug)
 
   // w przypadku gdy nie ma w tej chwili podglądu żadnej akcji wyczyść podgląd drogi i utwórz od nowa
   if (range_player.empty())
@@ -861,7 +864,6 @@ void Game::finishTurn()
     selectEnemyCharacter(currentCharacter);
 
 }
-
 
 CharacterOnBoard* Game::getEnemyOnHoveredField() const
 {

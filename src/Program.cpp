@@ -12,9 +12,13 @@ Program::Program(sf::Vector2i window_size)
 
 void Program::run()
 {
-  loadFonts();
+  fonts = new Fonts();
+
+  fonts->loadFonts();
 
   Menu menu(window,
             {1600, 900});
   menu.run();
+
+  delete fonts;
 }

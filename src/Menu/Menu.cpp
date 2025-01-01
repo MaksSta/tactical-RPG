@@ -13,7 +13,7 @@ void Menu::run()
   loadingScreenBackground.setPosition(0.0f, 0.0f);
   loadingScreenBackground.setFillColor(sf::Color{0,15,175});
 
-  sf::Text loadingScreenText("Loading game...", font_normal, 88);
+  sf::Text loadingScreenText("Loading game...", fonts->font_normal, 88);
   loadingScreenText.setOrigin(loadingScreenText.getLocalBounds().getPosition());
   loadingScreenText.setPosition(window_size.x / 2 - loadingScreenText.getGlobalBounds().width / 2,
                                 window_size.y / 2 - loadingScreenText.getGlobalBounds().height / 2);

@@ -10,6 +10,18 @@ Field* FieldSet::getLastElement()
   return field.back();
 }
 
+void FieldSet::reduce_to_n_elements(int N)
+{
+  std::vector<Field*> new_fields;
+
+  for (int n = 0; n < N; n++)
+  {
+    new_fields.push_back(field[n]);
+  }
+
+  field = new_fields;
+}
+
 bool FieldSet::empty()
 {
   return (field.empty());

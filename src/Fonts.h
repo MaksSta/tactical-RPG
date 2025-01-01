@@ -3,9 +3,13 @@
 
 #include <SFML/Graphics.hpp>
 
-extern sf::Font font_normal;
-extern sf::Font font_rpg;
+struct Fonts {
+  void loadFonts();
 
-void loadFonts();
+  sf::Font font_normal;
+  sf::Font font_rpg;
+};
+
+extern Fonts* fonts;
 
 #endif /* FONTS_H_ */

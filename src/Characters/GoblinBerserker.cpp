@@ -35,7 +35,7 @@ GoblinBerserker::GoblinBerserker(sf::Vector2i start_coords)
   const int frames_hurt = 3;
   const float fps_hurt = frames_hurt * 2.75;
 
-  loadAnimation(Activity::hurt, left, "data/GoblinBerserker/Left/Png/GoblinLeftHurt.png", frames_hurt, frames_hurt, w, h);
+  loadAnimation(Activity::hurt, left, "data/GoblinBerserker/Left/Png/GoblinLeftHurt.png", frames_hurt, fps_hurt, w, h);
   loadAnimation(Activity::hurt, right, "data/GoblinBerserker/Right/Png/GoblinRightHurt.png", frames_hurt, fps_hurt, w, h);
   loadAnimation(Activity::hurt, up, "data/GoblinBerserker/Up/Png/GoblinUpHurt.png", frames_hurt, fps_hurt, w, h);
   loadAnimation(Activity::hurt, down, "data/GoblinBerserker/Down/Png/GoblinDownHurt.png", frames_hurt, fps_hurt, w, h);

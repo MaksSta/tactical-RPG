@@ -4,7 +4,7 @@ HpBar::HpBar(sf::Vector2f pos, int _hp, int &_max_hp)
   :
   hp{_hp},
   max_hp{_max_hp},
-  hpText{font_normal}
+  hpText{fonts->font_normal}
 {
   hp_left_bar.setSize({50 * hp/static_cast<float>(max_hp), 12});
 

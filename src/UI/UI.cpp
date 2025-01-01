@@ -3,10 +3,10 @@
 UI::UI(sf::Vector2f _starts_at)
   :
   btnsStartPos{_starts_at + sf::Vector2f{20, 100}},
-  ability_desc{font_rpg, font_rpg, _starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, "Chosen ability"},
-  ability_dmg{font_rpg, font_normal, _starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, "Damage"},
-  textfieldSelectedCharacter{font_rpg, font_rpg, {880, 125}, {680, 80}, TextBox::Alignment::start, "Current character","[Click on any character right mouse button]"},
-  box_action_points{font_rpg, font_normal, {880, 325}, {120, 80}, TextBox::Alignment::start, "Actions points", "", sf::Color::Yellow, 34}
+  ability_desc{fonts->font_rpg, fonts->font_rpg, _starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, "Chosen ability"},
+  ability_dmg{fonts->font_rpg, fonts->font_normal, _starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, "Damage"},
+  textfieldSelectedCharacter{fonts->font_rpg, fonts->font_rpg, {880, 125}, {680, 80}, TextBox::Alignment::start, "Current character","[Click on any character right mouse button]"},
+  box_action_points{fonts->font_rpg, fonts->font_normal, {880, 325}, {120, 80}, TextBox::Alignment::start, "Actions points", "", sf::Color::Yellow, 34}
 {}
 
 void UI::addNewButton(sf::Vector2f pos,
@@ -24,7 +24,7 @@ void UI::addNewButton(sf::Vector2f pos,
   button.push_back(std::make_unique<Button>(buttonType, &ability, btnsStartPos + pos, data.img_file_path, data.desc));
 
   // tekst z ilością punktów akcji jaką pobiera umiejętność pod przyciskiem
-  text_action_cost.push_back(std::make_unique<Textfield>(font_rpg, btnsStartPos + pos + sf::Vector2f{29, 83},
+  text_action_cost.push_back(std::make_unique<Textfield>(fonts->font_rpg, btnsStartPos + pos + sf::Vector2f{29, 83},
                                                          std::to_string(ability.getAP()), 28, sf::Color::Yellow)
                              );
 }

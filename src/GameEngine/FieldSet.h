@@ -18,6 +18,9 @@ public:
   // zwraca ostatnio dodany element, czyli back() wektora
   Field* getLastElement();
 
+  // zmniejsza rozmiar obiektu, ucinając ostatnie pola
+  void reduce_to_n_elements(int N);
+
   bool empty();
   void clear();
 

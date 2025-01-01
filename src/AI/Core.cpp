@@ -49,12 +49,12 @@ Decision Core::calculateBestDecision()
 
     // priorytet 3: postać kieruje się ku środkowi planszy
     if (AP > 0 && !any_action_taken)
-      move_to_the_center();
+     move_to_the_center();
   }
 
-
   // akcja zakończenia tury jeżeli nie ma już nic do zrobienia
-  if (AP == 0 || !any_action_taken) {
+  if (AP == 0 || !any_action_taken)
+  {
     FinishTurn finishturn;
     decision.pushAction(finishturn);
   }
@@ -96,6 +96,7 @@ void Core::calculate_possible_moves()
   // wyeliminowanie ścieżek, które nie prowadzą przez pola planszy lub są zajęte
   for (auto & checked_offset : offsets_for_check)
   {
+
     sf::Vector2i total_offset{0,0};
     bool invalid_field_in_road{false};
     bool any_field_blocked{false};
@@ -105,6 +106,7 @@ void Core::calculate_possible_moves()
       total_offset += offset_step;
       Field* field_in_road = board->getField(board->getCoordsOf(board->getFieldOccupedBy(controlledCharacter))
                                              + total_offset);
+
 
       // sprawdzenie czy wszystkie pole po drodze są istniejącymi polami na planszy
       if (!field_in_road)
@@ -119,6 +121,7 @@ void Core::calculate_possible_moves()
         if (occupied_field == field_in_road)
         {
           any_field_blocked = true;
+
         }
       }
       if (any_field_blocked)
@@ -126,13 +129,16 @@ void Core::calculate_possible_moves()
     }
 
     if (!invalid_field_in_road && !any_field_blocked)
+    {
       legal_offsets.push_back(checked_offset);
+      // std::cout <<"===DODANY offset: " << total_offset.x << ", " << total_offset.y << " "<< std::endl;
+    }
   }
 }
 
 void Core::try_attack()
 {
-    // próba podjęcia akcji ataku
+  // próba podjęcia akcji ataku
   AttackInfo attackInfo = calculateBestAttack(AP);
   if (attackInfo.target != nullptr)
   {
@@ -181,7 +187,7 @@ void Core::try_move_and_attack()
       // celu jest zatwierdzona
       // TODO spośród wszystkich celów dostępnych w zasięgu, wybrać taki który
       // ma najmniej hp, ew. przekalkulować jeszcze ile wyjdzie na to AP
-      // (obecnie sprawdza z pierszego zasięgu z listy)
+      // (obecnie sprawdza z pierwszego zasięgu z listy)
       break;
     }
   }
@@ -189,63 +195,67 @@ void Core::try_move_and_attack()
 
 void Core::follow_closest_enemy()
 {
-  int best_dst = 63;
-  std::vector<Field*> best_road_to_enemy;
-  std::vector<sf::Vector2i> enemy_positions;
+  Road best_road;
+  int best_road_length = 63;
 
-  std::vector<CharacterOnBoard*> targets; // narazie niepotrzebne, bo liczy się sama odglełość, potem będzie używane przy innych czynnikach
+  std::vector<CharacterOnBoard*> targets;
 
-  for (auto &c : board->getAliveCharacters())
+  for (auto & c : board->getAliveCharacters())
   {
     if (c->getTeam() != controlledCharacter->getTeam())
     {
       targets.push_back(c);
-      enemy_positions.push_back(c->getLocalCoords());
     }
   }
 
-  // NOTE od tego miejsca kod powielony z move_to_the_center tylko podmienione nazwy 2 powyższych zmiennych
-  // sprawdzanie wszytkich kombinacji ruchu od najkrószej - szukanie drogi najbliżej centrum
-  for (auto & checked_offset : legal_offsets)
+  for (auto & target : targets)
   {
-    // kolejne mijane pola w drodze
-    std::vector<Field*> fields;
 
-    sf::Vector2i current_offset;
-    for (auto & offset_steps : checked_offset)
+    Field* fieldA = board->getFieldOccupedBy(controlledCharacter);
+    Field* fieldB = board->getFieldOccupedBy(target);
+    auto max_movement = AP;
+
+    // pobranie listy zablokowanych pól z pominięciem pola na którym stoi wybrana postać (by algorytm szukania drogi zadziałał)
+    auto blockedFields = board->getBlockedFields();
+    auto it_controled_character = std::find(blockedFields.begin(), blockedFields.end(),
+                                            board->getFieldOccupedBy(controlledCharacter));
+
+    auto it_target_character = std::find(blockedFields.begin(), blockedFields.end(),
+                                         board->getFieldOccupedBy(target));
+
+    blockedFields.erase(it_controled_character);
+    blockedFields.erase(it_target_character);
+
+    // utworzenie obiektu do znalezienia najkrótszej drogi podając informację o aktywnej części planszy
+    Pathfinder pathfinder(board->field, blockedFields);
+
+    Road road = pathfinder.astar_search(fieldA, fieldB, 63);
+
+    // uciecie ostatnich pól z road
+    road.reduce_to_n_elements(max_movement);
+
+    // pozbycie się ewentualnego pola końcowa z polem postaci
+    if (road.get().size() > 0 && road.getLastElement() == fieldB)
     {
-      current_offset += offset_steps;
-      auto field_after_step = board->getField(board->getCoordsOf(board->getFieldOccupedBy(controlledCharacter))
-                                              + current_offset);
-      fields.push_back(field_after_step);
+      road.reduce_to_n_elements(road.get().size() - 1);
     }
 
-    sf::Vector2i total_offset = current_offset;
-
-    auto pos = board->getCoordsOf(board->getFieldOccupedBy(controlledCharacter));
-
-    int current_best_dist = 63;
-    for (auto & cf : enemy_positions)
+    // wybranie drogi najbardziej zbliżającej do którejkolwiek z postaci
+    if (road.get().size() <  best_road_length)
     {
-      sf::Vector2i vec_to_center = (pos + total_offset) - cf;
-      int dist_to_center = abs(vec_to_center.x) + abs(vec_to_center.y);
-      if (dist_to_center < current_best_dist)
-        current_best_dist = dist_to_center;
+      best_road_length = road.get().size();
+      best_road = road;
     }
 
-    if (current_best_dist < best_dst)
-    {
-      best_dst = current_best_dist;
-      best_road_to_enemy = fields;
-    }
   }
-  // wybranie pierwszego spośród ruchów, który prowadził najbliżej centrum
-  Road road(best_road_to_enemy, board->getFieldOccupedBy(controlledCharacter));
 
-  Move test_move(road);
-  decision.pushAction(test_move);
-  AP -= best_road_to_enemy.size();
-  any_action_taken = true;
+  if (best_road.get().size() > 0)
+  {
+    Move best_move(best_road);
+    decision.pushAction(best_move);
+    AP -= best_road.get().size();
+    any_action_taken = true;
+  }
 }
 
 void Core::move_to_the_center()

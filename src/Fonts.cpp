@@ -1,9 +1,8 @@
 #include "Fonts.h"
 
-sf::Font font_normal;
-sf::Font font_rpg;
+Fonts* fonts;
 
-void loadFonts()
+void Fonts::loadFonts()
 {
   font_normal.loadFromFile("data/fonts/EncodeSansWide-Black.ttf");
   font_rpg.loadFromFile("data/fonts/BreatheFireIii-PKLOB.ttf");

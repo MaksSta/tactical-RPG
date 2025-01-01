@@ -2,6 +2,7 @@
 #define AI_CORE_H_
 
 #include "../GameEngine/ActiveBoard.h"
+#include "../GameEngine/Pathfinder.h"
 #include "Decision.h"
 
 namespace AI

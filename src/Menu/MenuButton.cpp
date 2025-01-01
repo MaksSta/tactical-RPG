@@ -15,7 +15,7 @@ MenuButton::MenuButton(std::string str,
   background.setPosition(x - w / 2,
                          y - h / 2);
 
-  text.setFont(font_normal);
+  text.setFont(fonts->font_normal);
   text.setString(str);
   text.setCharacterSize(80);
   text.setStyle(sf::Text::Bold);

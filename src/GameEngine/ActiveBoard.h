@@ -13,6 +13,10 @@
 #include "../Characters/CharacterOnBoard.h"
 #include "Range.h"
 
+namespace AI {
+  class Core;
+}
+
 class ActiveBoard {
 public:
   /**
@@ -48,6 +52,7 @@ public:
   std::vector<CharacterOnBoard*> getAliveCharacters() const;
 
   friend class Game;
+  friend class AI::Core;
 private:
   Field* field[8][8];
 

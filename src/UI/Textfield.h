@@ -15,7 +15,7 @@ public:
    * \param pos pozycja na ekranie
    * \param text tekst do wyświetlenia
    */
-  Textfield(sf::Font& font = font_normal,
+  Textfield(sf::Font& font = fonts->font_normal,
             sf::Vector2f pos = {0, 0},
             std::string text = "",
             unsigned int font_size = 24,
