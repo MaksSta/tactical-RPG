@@ -109,17 +109,7 @@ private:
   // wstępnie wybrany przycisk (do akcji wywoływanej domyślnie)
   Button* autoselectedBtn{nullptr};
 
-  // pole z nazwą zaznaczonej postaci
-  TextBox textfieldSelectedCharacter;
-
-  // pole tesktowe, które wyświetla ilość punktów akcji
-  TextBox box_action_points;
-
-  // pole tesktowe, które wyświetla opis umiejętności
-  TextBox ability_desc;
-
-  // pole tesktowe, które wyświetla obrażenia umiejętności
-  TextBox ability_dmg;
+  std::map<std::string, std::unique_ptr<TextBox>> textBoxes;
 
   // otoczka rysowana wokół zaznaczonego przycisku
   sf::RectangleShape selectedBtnBorder;

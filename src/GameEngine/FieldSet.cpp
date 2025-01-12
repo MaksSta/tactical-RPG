@@ -12,6 +12,10 @@ Field* FieldSet::getLastElement()
 
 void FieldSet::reduce_to_n_elements(int N)
 {
+  // redukcja do ilości elementów większej/równej obecnie - nic nie rób
+  if (N >= field.size())
+    return;
+
   std::vector<Field*> new_fields;
 
   for (int n = 0; n < N; n++)

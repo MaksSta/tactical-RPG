@@ -334,7 +334,7 @@ void Game::run()
           // wygenerowanie najlepszej decyzji jaką AI widzi w danej chwili
           if (ai_decision.empty())
           {
-            std::cout << "Pobieranie kolejnej decyzji komputera...\n";
+            // std::cout << "Pobieranie kolejnej decyzji komputera...\n";
 
             AI::Core ai(selectedCharacter, activeBoard);
             ai_decision = ai.calculateBestDecision();
@@ -345,7 +345,7 @@ void Game::run()
 
           if (dynamic_cast<AI::Move*>(action))
           {
-            std::cout << "Pobrano ruch\n";
+            // std::cout << "Pobrano ruch\n";
             moveCharacter(selectedCharacter, action->getRoad());
 
             lockGameMode();
@@ -354,7 +354,7 @@ void Game::run()
 
           if (dynamic_cast<AI::Attack*>(action))
           {
-            std::cout<<"Pobrano atak\n";
+            // std::cout<<"Pobrano atak\n";
             acceptAttack(*(action->getAttackInfo().attack), action->getAttackInfo().target,
                          action->getAttackInfo().range.getDirectionToThisField(activeBoard.getFieldOccupedBy(action->getAttackInfo().target)));
 
@@ -364,7 +364,7 @@ void Game::run()
 
           if (dynamic_cast<AI::FinishTurn *>(action))
           {
-            std::cout<<"Pobrano koniec tury\n";
+            // std::cout<<"Pobrano koniec tury\n";
             finishTurn();
             break;
           }
@@ -446,7 +446,7 @@ void Game::update(float delta)
 
       // czas ostatniej animacji na tej konkretnej postaci, żeby śmierć była od razu po
       auto time = anim_manager.calculateTimeToLastAnimationFinish(character);
-      std::cout << "DEATH --- czas do rozpoczęcia: " << time << "\n";
+      // std::cout << "DEATH --- czas do rozpoczęcia: " << time << "\n";
 
 
       Animations::Sequence & sequence_after_other_animations_finish =
@@ -494,12 +494,14 @@ void Game::update(float delta)
   // update kamery
   camera.update(delta);
 
-  if (selectedCharacter) {
+  if (selectedCharacter)
+  {
     // update wyświetlanych punktów akcji w okienku UI
     std::stringstream ss;
     ss << selectedCharacter->getAP() << "/" << selectedCharacter->getMaxAP();
+
     // wyświetlenie obrażeń zadawanych przez tą umiejętność
-    ui.box_action_points.setString(ss.str());
+    ui.textBoxes["action_points"]->setString(ss.str());
   }
 
   // napis PORAŻKA
@@ -523,7 +525,7 @@ void Game::selectPlayerCharacter(CharacterOnBoard* character)
   // zresetowanie ilości punktów akcji na maksymalną wartość
   selectedCharacter->setAP(selectedCharacter->getMaxAP());
 
-  ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
+  ui.textBoxes["selected_character_name"]->setString(selectedCharacter->getName());
 
   ui.cancelSimulatingHover();
   ui.destroyButtons();
@@ -564,7 +566,7 @@ void Game::selectEnemyCharacter(CharacterOnBoard *character)
   // zresetowanie ilości punktów akcji na maksymalną wartość
   selectedCharacter->setAP(selectedCharacter->getMaxAP());
 
-  ui.textfieldSelectedCharacter.setString(selectedCharacter->getName());
+  ui.textBoxes["selected_character_name"]->setString(selectedCharacter->getName());
 
   ui.cancelSimulatingHover();
   ui.destroyButtons();
@@ -784,7 +786,7 @@ void Game::acceptAttack(Abilities::Attack& attack,
 
   // dodanie animacji otrzymania obrażeń zaatakowanej postaci
   auto time = anim_manager.calculateTimeToLastAnimationFinish();
-  std::cout << "HURT --- czas do rozpoczęcia: " << time << " ms\n";
+  // std::cout << "HURT --- czas do rozpoczęcia: " << time << " ms\n";
 
   Animations::Sequence & sequence_after_other_animations_finish_1 =
     anim_manager.addNewSequenceParallelAfterTime(time);

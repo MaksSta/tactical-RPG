@@ -2,12 +2,14 @@
 
 UI::UI(sf::Vector2f _starts_at)
   :
-  btnsStartPos{_starts_at + sf::Vector2f{20, 100}},
-  ability_desc{fonts->font_rpg, fonts->font_rpg, _starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, "Chosen ability"},
-  ability_dmg{fonts->font_rpg, fonts->font_normal, _starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, "Damage"},
-  textfieldSelectedCharacter{fonts->font_rpg, fonts->font_rpg, {880, 125}, {680, 80}, TextBox::Alignment::start, "Current character","[Click on any character right mouse button]"},
-  box_action_points{fonts->font_rpg, fonts->font_normal, {880, 325}, {120, 80}, TextBox::Alignment::start, "Actions points", "", sf::Color::Yellow, 34}
-{}
+  btnsStartPos{_starts_at + sf::Vector2f{20, 100}}
+{
+  textBoxes["ability_desc"] = std::make_unique<TextBox>(fonts->font_rpg, fonts->font_rpg, _starts_at + sf::Vector2f{0, 0}, sf::Vector2f{300, 80}, TextBox::Alignment::start, "Chosen ability");
+  textBoxes["ability_dmg"] = std::make_unique<TextBox>(fonts->font_rpg, fonts->font_normal, _starts_at + sf::Vector2f{400, 0}, sf::Vector2f{120, 80}, TextBox::Alignment::start, "Damage");
+  textBoxes["selected_character_name"] = std::make_unique<TextBox>(fonts->font_rpg, fonts->font_rpg, sf::Vector2f{880, 125}, sf::Vector2f{680, 80}, TextBox::Alignment::start, "Current character");
+  textBoxes["action_points"] = std::make_unique<TextBox>(fonts->font_rpg, fonts->font_normal, sf::Vector2f{880, 325}, sf::Vector2f{120, 80}, TextBox::Alignment::start, "Actions points", "", sf::Color::Yellow, 34);
+
+}
 
 void UI::addNewButton(sf::Vector2f pos,
                       Button_data& data,
@@ -76,17 +78,17 @@ void UI::updateButtons(sf::Vector2f m_pos,
 
   if (anyButtonActive) {
     // wyświetlenie opisu wskazywanej myszką bądź wybranej umiejętności
-    ability_desc.setString(anyButtonActive->getDesc());
+    textBoxes["ability_desc"]->setString(anyButtonActive->getDesc());
 
     if (anyButtonActive->getAction() == Button::Action::attack) {
       std::stringstream ss;
       ss << anyButtonActive->getAbility()->get_min_dmg() << " - " << anyButtonActive->getAbility()->get_max_dmg();
       // wyświetlenie obrażeń zadawanych przez tą umiejętność
-      ability_dmg.setString(ss.str());
+      textBoxes["ability_dmg"]->setString(ss.str());
     }
   } else {
-    ability_desc.setString("");
-    ability_dmg.setString("");
+    textBoxes["ability_desc"]->setString("");
+    textBoxes["ability_dmg"]->setString("");
   }
 
   // ramka dookoła domyślnie uruchamianego przycisku
@@ -167,15 +169,16 @@ void UI::draw(sf::RenderTarget &target,
     target.draw(*t);
 
   // pole z nazwą zaznaczonej postaci
-  target.draw(textfieldSelectedCharacter);
+  target.draw(*textBoxes.at("selected_character_name"));
 
-  target.draw(box_action_points);
+  target.draw(*textBoxes.at("action_points"));
 
-  target.draw(ability_desc);
+  target.draw(*textBoxes.at("ability_desc"));
 
-  if (anyButtonActive) {
+  if (anyButtonActive)
+  {
     // pole z widełkami obrażeń
     if (anyButtonActive->getAction() == Button::Action::attack)
-      target.draw(ability_dmg);
+        target.draw(*textBoxes.at("ability_dmg"));
   }
 }
